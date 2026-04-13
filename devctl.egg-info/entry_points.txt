@@ -1,0 +1,2 @@
+[console_scripts]
+devctl = devctl.main:main

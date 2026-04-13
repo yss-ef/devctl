@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "devctl"
+version = "0.1.0"
+description = "CLI d'orchestration locale pour environnements de développement"
+requires-python = ">=3.9"
+dependencies = [
+    "typer>=0.9.0",
+    "requests>=2.31.0",
+    "jinja2>=3.1.2"
+]
+
+[project.scripts]
+devctl = "devctl.main:main"
