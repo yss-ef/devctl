@@ -1,17 +1,21 @@
 import typer
-# Importe le module init que tu viens de créer
+# Import des modules de commandes
 from devctl.commands import init
+from devctl.commands import run
 
-app = typer.Typer()
+# Création de l'application Typer principale
+app = typer.Typer(help="devctl : L'orchestrateur local pour tes projets Spring/Angular")
 
-# Ajoute le sous-menu init à l'application principale
+# Câblage des sous-menus
 app.add_typer(init.app, name="init", help="Initialise un nouveau projet avec sa base de code.")
+app.add_typer(run.app, name="run", help="Lance l'environnement de développement local en parallèle.")
 
 @app.callback()
 def callback():
     """
-    devctl : L'orchestrateur local pour tes projets Spring/Angular
+    devctl : L'orchestrateur local pour tes projets
     """
+    # Ce callback vide permet à Typer de comprendre qu'il gère un menu multi-commandes
     pass
 
 @app.command()
@@ -19,9 +23,12 @@ def ping():
     """
     Commande de test pour vérifier que le CLI répond.
     """
-    typer.secho("pong ! Le CLI devctl est opérationnel.", fg=typer.colors.GREEN, bold=True)
+    typer.secho("pong ! Le CLI devctl est parfaitement opérationnel.", fg=typer.colors.GREEN, bold=True)
 
 def main():
+    """
+    Point d'entrée appelé par le système d'exploitation (via pyproject.toml)
+    """
     app()
 
 if __name__ == "__main__":
