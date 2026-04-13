@@ -1,81 +1,75 @@
-# devctl
+# devctl — Local Development Orchestrator
 
-## Local Development Environment Orchestrator
+`devctl` is a command-line interface (CLI) designed to automate and orchestrate the local development lifecycle, specifically for **Spring Boot** and **Angular** architectures.
 
-`devctl` is a powerful Command Line Interface (CLI) tool designed to streamline the orchestration of local development environments, particularly for Spring and Angular projects. It simplifies the setup and management of your development stack, allowing you to quickly initialize new projects and run your environment in parallel.
+It doesn't just generate code; it manages dynamic database configuration via Docker, injects ready-to-use security layers, and orchestrates the simultaneous execution of your technology stack.
 
-## Features
+## 🚀 Key Features
 
-*   **Project Initialization (`init`)**: Quickly set up new projects with a predefined codebase structure.
-*   **Environment Orchestration (`run`)**: Launch and manage your local development environment components in parallel.
-*   **Health Check (`ping`)**: A simple command to verify that the `devctl` CLI is operational.
+*   **Fullstack Generation**: Initializes Spring Boot projects (via Spring Initializr API) and Angular projects (via Angular CLI) with pre-established configurations.
+*   **Automated Security**: Dynamically injects a complete **JWT** (JSON Web Token) security architecture into Spring projects (Filters, Services, SecurityConfig).
+*   **Intelligent Scaffolding**: Generates business resources (Entity, Repository, Service, Controller) from simple CLI commands with automatic mapping of Java types.
+*   **One-Click Orchestration**: Automatically detects components in your folder and simultaneously launches the database (Docker), backend (Maven), and frontend (Angular).
+*   **Clean Shutdown**: Upon stopping (Ctrl+C), the tool handles stopping processes and removing Docker containers/volumes to leave the environment clean.
 
-## Installation
+## 🛠️ Installation
 
-`devctl` requires Python 3.9 or higher.
+The tool is optimized for a **Fedora** environment (managing `mvnw` permissions) and requires Python 3.9+.
 
-1.  **Clone the repository**:
+```bash
+# Installation in editable mode (recommended for development)
+pip install -e .
+```
+
+## 📖 Command Guide
+
+### 1. Initialization (`devctl init`)
+Allows you to create the basic structure of your services.
+
+*   **Spring Boot**: Downloads a boilerplate including JPA, Security, Lombok, and the chosen DB driver.
     ```bash
-    git clone https://github.com/your-username/devctl.git
-    cd devctl
+    devctl init spring "my-api" --db postgres --port 5432
+    ```
+*   **Angular**: Uses the `ng` CLI to generate a project with SCSS and routing enabled.
+    ```bash
+    devctl init angular "my-front"
     ```
 
-2.  **Install using pip**:
-    It's recommended to install `devctl` in a virtual environment.
+### 2. Development & Scaffolding (`devctl add`)
+Adds functionalities to an existing project by analyzing the context.
 
+*   **Resource**: Generates the entire MVC stack for an entity.
     ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
-    pip install .
+    devctl add resource "Product" --fields "name:string,price:double,quantity:int"
     ```
+    *Supported types: string, int, double, float, boolean, date.*
 
-    This will install `devctl` and its dependencies, making the `devctl` command available in your terminal.
-
-## Usage
-
-### General Help
-
-To see the main help message:
+### 3. Orchestration (`devctl run`)
+Scans the current directory to identify projects and launches the complete environment.
 
 ```bash
-devctl --help
+devctl run
 ```
+**Orchestrated processes:**
+1.  **Docker**: `docker compose up -d` (Database).
+2.  **Backend**: `./mvnw spring-boot:run`.
+3.  **Frontend**: `npx ng serve`.
 
-### Ping Command
+### 4. Utility (`devctl ping`)
+Simply verifies that the CLI is installed and responsive.
 
-Verify the CLI is working:
+## 📂 Project Structure
 
-```bash
-devctl ping
-```
+*   `devctl/commands/`: Definition of Typer command groups (add, init, run).
+*   `devctl/generators/`: Logic for file creation and calls to external APIs/CLIs.
+*   `devctl/orchestrator/`: Tree scanning engine and system process management.
+*   `devctl/templates/`: Jinja2 files for dynamic generation of Java code and Docker configurations.
 
-Expected output:
-```
-pong ! Le CLI devctl est parfaitement opérationnel.
-```
+## 📋 System Prerequisites
 
-### Initialize a New Project
+*   **Python** >= 3.9
+*   **Docker** & **Docker Compose**
 
-To initialize a new project (e.g., a Spring or Angular project):
+---
 
-```bash
-devctl init --help
-# Follow the instructions for the 'init' command
-```
-
-### Run the Development Environment
-
-To launch your local development environment:
-
-```bash
-devctl run --help
-# Follow the instructions for the 'run' command
-```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details (if applicable).
+*Authored by Youssef Fellah.*
