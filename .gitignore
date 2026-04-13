@@ -14,7 +14,7 @@ dist/
 *.egg-info/
 
 # Dossiers de tests générés par l'outil (Très important)
-test-*/
+test/
 
 # Dossier pycharm
 .idea/
