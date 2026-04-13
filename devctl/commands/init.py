@@ -1,24 +1,36 @@
 import typer
 # Générateur Spring
 from devctl.generators.spring import download_spring_boilerplate
+from devctl.orchestrator.config_builder import generate_config
 
+# Génerateur Angular
+from devctl.generators.angular import generate_angular_boilerplate
 
 # L'application Typer locale pour le groupe de commandes "init"
 app = typer.Typer(help="Initialise un nouveau projet selon le framework choisi.")
 
 
 @app.command("spring")
-def init_spring(name: str):
+def init_spring(
+        name: str,
+        db: str = typer.Option("postgres", help="Type de base de données (postgres ou mysql)"),
+        port: int = typer.Option(None, help="Port local (optionnel)")
+):
     """
-    Initialise un nouveau projet backend Spring Boot.
+    Initialise un nouveau projet backend Spring Boot avec sa base de données.
     """
+    # Validation stricte des entrées
+    if db not in ["postgres", "mysql"]:
+        typer.secho(f"❌ Erreur : La base de données '{db}' n'est pas supportée.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
     typer.echo(f"🚀 Initialisation d'un projet Spring Boot : '{name}'...")
 
-    success = download_spring_boilerplate(name)
+    success_download = download_spring_boilerplate(name, db_type=db)
 
-    if success:
-        typer.secho("\n✨ Projet Spring prêt ! Prochaine étape : on configurera la DB.", fg=typer.colors.CYAN)
-
+    if success_download:
+        generate_config(name, db_type=db, custom_port=port)
+        typer.secho("\n✨ Projet Spring prêt !", fg=typer.colors.CYAN)
 
 @app.command("angular")
 def init_angular(name: str):
@@ -27,7 +39,12 @@ def init_angular(name: str):
     """
     # Pour l'instant, c'est juste un espace réservé (placeholder)
     typer.echo(f"🚀 Initialisation d'un projet Angular : '{name}'...")
-    typer.secho("⚠️ Le générateur Angular n'est pas encore implémenté.", fg=typer.colors.YELLOW)
+    success = generate_angular_boilerplate(name)
+
+    if success:
+        typer.secho("\n✨ Projet Angular prêt !", fg=typer.colors.CYAN)
+
+        
 
 
 @app.command("express")

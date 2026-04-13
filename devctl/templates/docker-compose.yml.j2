@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  {{ db_service_name }}:
+    {% if db_type == 'postgres' %}
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: {{ db_user }}
+      POSTGRES_PASSWORD: {{ db_password }}
+      POSTGRES_DB: {{ db_name }}
+    {% elif db_type == 'mysql' %}
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: {{ db_password }}
+      MYSQL_DATABASE: {{ db_name }}
+      MYSQL_USER: {{ db_user }}
+      MYSQL_PASSWORD: {{ db_password }}
+    {% endif %}
+    ports:
+      - "{{ db_port }}:{% if db_type == 'postgres' %}5432{% else %}3306{% endif %}"
+    volumes:
+      - {{ db_name }}_data:/var/lib/{% if db_type == 'postgres' %}postgresql{% else %}mysql{% endif %}/data
+
+volumes:
+  {{ db_name }}_data:
