@@ -1,0 +1,22 @@
+package {{ base_package }}.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "{{ table_name }}")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class {{ class_name }} {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+{% for field in fields %}
+    private {{ field.java_type }} {{ field.name }};
+{% endfor %}
+}

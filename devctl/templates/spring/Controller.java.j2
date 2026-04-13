@@ -1,0 +1,42 @@
+package {{ base_package }}.controller;
+
+import {{ base_package }}.entity.{{ entity_name }}Entity;
+import {{ base_package }}.service.{{ entity_name }}Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/{{ table_name }}")
+@CrossOrigin(origins = "*")
+public class {{ class_name }} {
+
+    private final {{ entity_name }}Service service;
+
+    public {{ class_name }}({{ entity_name }}Service service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public List<{{ entity_name }}Entity> getAll() {
+        return service.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<{{ entity_name }}Entity> getById(@PathVariable Long id) {
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public {{ entity_name }}Entity create(@RequestBody {{ entity_name }}Entity entity) {
+        return service.save(entity);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

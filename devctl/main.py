@@ -2,6 +2,7 @@ import typer
 # Import des modules de commandes
 from devctl.commands import init
 from devctl.commands import run
+from devctl.commands import add
 
 # Création de l'application Typer principale
 app = typer.Typer(help="devctl : L'orchestrateur local pour tes projets Spring/Angular")
@@ -9,6 +10,7 @@ app = typer.Typer(help="devctl : L'orchestrateur local pour tes projets Spring/A
 # Câblage des sous-menus
 app.add_typer(init.app, name="init", help="Initialise un nouveau projet avec sa base de code.")
 app.add_typer(run.app, name="run", help="Lance l'environnement de développement local en parallèle.")
+app.add_typer(add.app, name="add", help="Génère du code et des ressources métier.")
 
 @app.callback()
 def callback():

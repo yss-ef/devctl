@@ -1,0 +1,16 @@
+package {{ base_package }}.service;
+
+import {{ base_package }}.entity.{{ entity_name }}Entity;
+import java.util.List;
+import java.util.Optional;
+
+public interface {{ class_name }} {
+
+    List<{{ entity_name }}Entity> findAll();
+
+    Optional<{{ entity_name }}Entity> findById(Long id);
+
+    {{ entity_name }}Entity save({{ entity_name }}Entity entity);
+
+    void deleteById(Long id);
+}
