@@ -1,0 +1,20 @@
+# Environnements virtuels Python
+venv/
+env/
+.env
+
+# Cache et fichiers compilés Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Fichiers de build Typer / Setuptools
+build/
+dist/
+*.egg-info/
+
+# Dossiers de tests générés par l'outil (Très important)
+test-*/
+
+# Dossier pycharm
+.idea/
