@@ -3,9 +3,6 @@ import time
 import typer
 import sys
 
-# Détection de l'OS pour le routage des commandes
-IS_WINDOWS = sys.platform == "win32"
-
 
 def is_docker_running():
     """
@@ -20,7 +17,7 @@ def is_docker_running():
 
 def launch_dev_environment(env_state: dict):
     """
-    Lance les processus nécessaires en parallèle selon l'état détecté.
+    Lance les processus nécessaires en parallèle (Optimisé pour Linux/Fedora).
     """
     processes = []
 
@@ -34,19 +31,16 @@ def launch_dev_environment(env_state: dict):
 
             typer.secho(f"🐳 Démarrage de Docker depuis {env_state['docker_path']}...", fg=typer.colors.BLUE)
             subprocess.run(["docker", "compose", "up", "-d"], cwd=env_state["docker_path"], check=True)
-            time.sleep(5)  # Temporisation pour l'initialisation du moteur BDD
+            time.sleep(5)
 
-        # 2. Lancement du Backend Spring Boot
+            # 2. Lancement du Backend Spring Boot
         if env_state["has_spring"]:
             typer.secho(f"🍃 Démarrage de Spring Boot depuis {env_state['spring_path']}...", fg=typer.colors.GREEN)
 
-            # Routage dynamique de l'exécutable
-            maven_cmd = "mvnw.cmd" if IS_WINDOWS else "./mvnw"
-
+            # Exécution native Linux
             p_spring = subprocess.Popen(
-                [maven_cmd, "spring-boot:run"],
-                cwd=env_state["spring_path"],
-                shell=IS_WINDOWS
+                ["./mvnw", "spring-boot:run"],
+                cwd=env_state["spring_path"]
             )
             processes.append(("Spring Boot", p_spring))
 
@@ -54,10 +48,10 @@ def launch_dev_environment(env_state: dict):
         if env_state["has_angular"]:
             typer.secho(f"🅰️ Démarrage d'Angular depuis {env_state['angular_path']}...", fg=typer.colors.RED)
 
+            # Exécution native Linux
             p_angular = subprocess.Popen(
                 ["npx", "ng", "serve"],
-                cwd=env_state["angular_path"],
-                shell=IS_WINDOWS
+                cwd=env_state["angular_path"]
             )
             processes.append(("Angular", p_angular))
 
@@ -69,7 +63,6 @@ def launch_dev_environment(env_state: dict):
         typer.secho("\n✨ Environnement de développement actif ! Appuie sur Ctrl+C pour tout arrêter proprement.\n",
                     fg=typer.colors.CYAN, bold=True)
 
-        # Maintien en vie du thread principal
         while True:
             time.sleep(1)
 
@@ -77,13 +70,11 @@ def launch_dev_environment(env_state: dict):
         typer.secho("\n🛑 Arrêt demandé. Nettoyage complet en cours (Merci de patienter, ne pas refaire Ctrl+C)...",
                     fg=typer.colors.YELLOW, bold=True)
 
-        # 1. Arrêt des processus locaux enfants
         for name, p in processes:
             typer.echo(f"Fermeture de {name}...")
             p.terminate()
             p.wait()
 
-        # 2. Destruction de l'infrastructure Docker (down -v pour purger les volumes)
         if env_state["has_docker_compose"]:
             typer.echo("Destruction de la base de données et des volumes Docker...")
             try:
@@ -91,7 +82,7 @@ def launch_dev_environment(env_state: dict):
                     ["docker", "compose", "down", "-v"],
                     cwd=env_state["docker_path"],
                     check=True,
-                    stdout=subprocess.DEVNULL  # Silence la sortie console de Docker
+                    stdout=subprocess.DEVNULL
                 )
             except subprocess.CalledProcessError:
                 typer.secho("⚠️ Attention : Le nettoyage Docker ne s'est pas terminé correctement.",
