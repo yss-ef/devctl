@@ -1,9 +1,12 @@
 package {{ base_package }}.controller;
 
-import {{ base_package }}.entity.{{ entity_name }}Entity;
+import {{ base_package }}.dto.request.{{ entity_name }}Request;
+import {{ base_package }}.dto.response.{{ entity_name }}Response;
 import {{ base_package }}.service.{{ entity_name }}Service;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -18,20 +21,25 @@ public class {{ class_name }} {
     }
 
     @GetMapping
-    public List<{{ entity_name }}Entity> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<{{ entity_name }}Response>> getAll() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<{{ entity_name }}Entity> getById(@PathVariable Long id) {
+    public ResponseEntity<{{ entity_name }}Response> getById(@PathVariable Long id) {
         return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public {{ entity_name }}Entity create(@RequestBody {{ entity_name }}Entity entity) {
-        return service.save(entity);
+    public ResponseEntity<{{ entity_name }}Response> create(@RequestBody {{ entity_name }}Request request) {
+        return new ResponseEntity<>(service.save(request), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<{{ entity_name }}Response> update(@PathVariable Long id, @RequestBody {{ entity_name }}Request request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")

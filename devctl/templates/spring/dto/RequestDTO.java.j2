@@ -1,0 +1,20 @@
+package {{ base_package }}.dto.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * Data Transfer Object for creating or updating a {{ entity_name }}.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class {{ entity_name }}Request {
+
+{% for field in fields %}
+    private {{ field.java_type }} {{ field.name }};
+{% endfor %}
+}

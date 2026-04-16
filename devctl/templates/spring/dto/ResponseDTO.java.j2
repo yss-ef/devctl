@@ -1,0 +1,22 @@
+package {{ base_package }}.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * Data Transfer Object for sending {{ entity_name }} details in a response.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class {{ entity_name }}Response {
+
+    private Long id;
+
+{% for field in fields %}
+    private {{ field.java_type }} {{ field.name }};
+{% endfor %}
+}

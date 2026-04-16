@@ -1,16 +1,20 @@
 package {{ base_package }}.service;
 
-import {{ base_package }}.entity.{{ entity_name }}Entity;
+import {{ base_package }}.dto.request.{{ entity_name }}Request;
+import {{ base_package }}.dto.response.{{ entity_name }}Response;
 import java.util.List;
 import java.util.Optional;
 
 public interface {{ class_name }} {
 
-    List<{{ entity_name }}Entity> findAll();
+    List<{{ entity_name }}Response> findAll();
 
-    Optional<{{ entity_name }}Entity> findById(Long id);
+    Optional<{{ entity_name }}Response> findById(Long id);
 
-    {{ entity_name }}Entity save({{ entity_name }}Entity entity);
+    {{ entity_name }}Response save({{ entity_name }}Request request);
+
+    // Ajout de la méthode update pour exploiter le @MappingTarget de MapStruct
+    {{ entity_name }}Response update(Long id, {{ entity_name }}Request request);
 
     void deleteById(Long id);
 }
