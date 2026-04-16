@@ -1,0 +1,21 @@
+<div class="form-container">
+  <h2>{{ '{{' }} isEditMode ? 'Modifier' : 'Nouveau' {{ '}}' }} {{ entity_name }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    {% for field in fields %}
+    <div class="form-group">
+      <label for="{{ field.name }}">{{ field.name | capitalize }}</label>
+      <input
+        id="{{ field.name }}"
+        type="{% if field.ts_type == 'number' %}number{% else %}text{% endif %}"
+        formControlName="{{ field.name }}"
+      />
+    </div>
+    {% endfor %}
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="form.invalid">Enregistrer</button>
+      <a routerLink="/{{ resource_name_lower }}s" class="btn-cancel">Annuler</a>
+    </div>
+  </form>
+</div>

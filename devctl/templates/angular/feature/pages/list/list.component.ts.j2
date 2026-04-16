@@ -1,0 +1,34 @@
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { {{ entity_name }}Service } from '../../services/{{ resource_name_lower }}.service';
+import { {{ entity_name }}Response } from '../../models/{{ resource_name_lower }}-response.model';
+
+@Component({
+  selector: 'app-{{ resource_name_lower }}-list',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './{{ resource_name_lower }}-list.component.html',
+  styleUrls: ['./{{ resource_name_lower }}-list.component.scss']
+})
+export class {{ entity_name }}ListComponent implements OnInit {
+  private service = inject({{ entity_name }}Service);
+  items: {{ entity_name }}Response[] = [];
+
+  ngOnInit(): void {
+    this.loadItems();
+  }
+
+  loadItems(): void {
+    this.service.getAll().subscribe({
+      next: (data) => this.items = data,
+      error: (err) => console.error('Erreur lors du chargement', err)
+    });
+  }
+
+  delete(id: number): void {
+    if (confirm('Voulez-vous vraiment supprimer cet élément ?')) {
+      this.service.delete(id).subscribe(() => this.loadItems());
+    }
+  }
+}

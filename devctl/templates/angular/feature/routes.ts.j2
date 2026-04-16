@@ -1,0 +1,9 @@
+import { Routes } from '@angular/router';
+import { {{ entity_name }}ListComponent } from './pages/{{ resource_name_lower }}-list/{{ resource_name_lower }}-list.component';
+import { {{ entity_name }}FormComponent } from './pages/{{ resource_name_lower }}-form/{{ resource_name_lower }}-form.component';
+
+export const {{ uppercase_name }}_ROUTES: Routes = [
+  { path: '', component: {{ entity_name }}ListComponent },
+  { path: 'new', component: {{ entity_name }}FormComponent },
+  { path: 'edit/:id', component: {{ entity_name }}FormComponent }
+];

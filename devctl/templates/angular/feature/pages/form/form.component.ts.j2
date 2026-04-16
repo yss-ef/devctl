@@ -1,0 +1,63 @@
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { {{ entity_name }}Service } from '../../services/{{ resource_name_lower }}.service';
+import { {{ entity_name }}Request } from '../../models/{{ resource_name_lower }}-request.model';
+
+@Component({
+  selector: 'app-{{ resource_name_lower }}-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  templateUrl: './{{ resource_name_lower }}-form.component.html',
+  styleUrls: ['./{{ resource_name_lower }}-form.component.scss']
+})
+export class {{ entity_name }}FormComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private service = inject({{ entity_name }}Service);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  form!: FormGroup;
+  isEditMode = false;
+  currentId?: number;
+
+  ngOnInit(): void {
+    this.initForm();
+    this.checkEditMode();
+  }
+
+  private initForm(): void {
+    this.form = this.fb.group({
+      {% for field in fields %}
+      {{ field.name }}: ['', Validators.required],
+      {% endfor %}
+    });
+  }
+
+  private checkEditMode(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode = true;
+      this.currentId = +id;
+      this.service.getById(this.currentId).subscribe(data => {
+        this.form.patchValue(data);
+      });
+    }
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) return;
+
+    const request: {{ entity_name }}Request = this.form.value;
+    const action$ = this.isEditMode && this.currentId
+      ? this.service.update(this.currentId, request)
+      : this.service.create(request);
+
+    action$.subscribe({
+      // Redirige vers la liste après succès
+      next: () => this.router.navigate(['/{{ resource_name_lower }}s']),
+      error: (err) => console.error('Erreur de sauvegarde', err)
+    });
+  }
+}

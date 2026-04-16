@@ -1,0 +1,34 @@
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { {{ entity_name }}Request } from '../models/{{ resource_name_lower }}-request.model';
+import { {{ entity_name }}Response } from '../models/{{ resource_name_lower }}-response.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class {{ entity_name }}Service {
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/{{ table_name }}`; // URL Spring Boot
+
+  getAll(): Observable<{{ entity_name }}Response[]> {
+    return this.http.get<{{ entity_name }}Response[]>(this.apiUrl);
+  }
+
+  getById(id: number): Observable<{{ entity_name }}Response> {
+    return this.http.get<{{ entity_name }}Response>(`${this.apiUrl}/${id}`);
+  }
+
+  create(request: {{ entity_name }}Request): Observable<{{ entity_name }}Response> {
+    return this.http.post<{{ entity_name }}Response>(this.apiUrl, request);
+  }
+
+  update(id: number, request: {{ entity_name }}Request): Observable<{{ entity_name }}Response> {
+    return this.http.put<{{ entity_name }}Response>(`${this.apiUrl}/${id}`, request);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+}

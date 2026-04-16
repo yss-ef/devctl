@@ -59,7 +59,7 @@ def find_spring_base_package_and_path():
 
 def generate_spring_resource(resource_name: str, fields_str: str):
     """
-    Orchestre la création de l'architecture MVC.
+    Orchestre la création de l'architecture MVC + DTOs + Mapper.
     """
     base_package, base_path = find_spring_base_package_and_path()
 
@@ -69,25 +69,29 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
     entity_name = resource_name.capitalize()
 
-    # Configuration de la nomenclature que nous avons définie (ex: ProduitEntity)
-    components = {
-        "entity": "Entity",
-        "repository": "Repository",
-        "service": "Service",
-        "controller": "Controller"
-    }
+    # Nouvelle configuration détaillée pour gérer les sous-dossiers (DTOs, Mapper)
+    components = [
+        {"dir": "entity", "suffix": "Entity", "template": "Entity.java.j2"},
+        {"dir": "repository", "suffix": "Repository", "template": "Repository.java.j2"},
+        {"dir": "service", "suffix": "Service", "template": "Service.java.j2"},
+        {"dir": "controller", "suffix": "Controller", "template": "Controller.java.j2"},
+        {"dir": "dto/request", "suffix": "Request", "template": "dto/Request.java.j2"},
+        {"dir": "dto/response", "suffix": "Response", "template": "dto/Response.java.j2"},
+        {"dir": "mapper", "suffix": "Mapper", "template": "mapper/Mapper.java.j2"}
+    ]
 
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring")
     env = Environment(loader=FileSystemLoader(templates_dir))
 
-    typer.echo(f"⚙️ Génération de la ressource Spring '{entity_name}'...")
+    typer.echo(f"⚙️ Génération de la ressource Spring '{entity_name}' (avec MapStruct & DTOs)...")
 
-    for comp_type, suffix in components.items():
-        class_name = f"{entity_name}{suffix}"
+    for comp in components:
+        class_name = f"{entity_name}{comp['suffix']}"
         target_file_name = f"{class_name}.java"
 
-        # Création du sous-dossier s'il n'existe pas (ex: src/.../entity)
-        target_dir = os.path.join(base_path, comp_type)
+        # Création du sous-dossier s'il n'existe pas (ex: src/.../dto/request)
+        # os.path.normpath gère les slashes selon l'OS (Linux/Windows)
+        target_dir = os.path.join(base_path, os.path.normpath(comp["dir"]))
         os.makedirs(target_dir, exist_ok=True)
 
         # Les données envoyées au template Jinja2
@@ -99,15 +103,15 @@ def generate_spring_resource(resource_name: str, fields_str: str):
             "fields": parse_fields(fields_str)
         }
 
-        template = env.get_template(f"{comp_type.capitalize()}.java.j2")
+        template = env.get_template(comp["template"])
         content = template.render(context)
 
         with open(os.path.join(target_dir, target_file_name), "w", encoding="utf-8") as f:
             f.write(content)
 
-        typer.echo(f"  - Créé : {comp_type}/{target_file_name}")
+        typer.echo(f"  - Créé : {comp['dir']}/{target_file_name}")
 
-    typer.secho(f"✅ Architecture {entity_name} générée avec succès !", fg=typer.colors.GREEN)
+    typer.secho(f"✅ Architecture {entity_name} complète générée avec succès !", fg=typer.colors.GREEN)
 
 
 def generate_spring_security(root_path: str = "."):
