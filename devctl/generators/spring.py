@@ -58,14 +58,12 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         z = zipfile.ZipFile(io.BytesIO(response.content))
         z.extractall(os.getcwd())
 
-        # --- RÉPARATION DES PERMISSIONS UNIX (Le fix pour Fedora) ---
         mvnw_path = os.path.join(os.getcwd(), project_name, "mvnw")
         if os.path.exists(mvnw_path):
             # Récupère les droits actuels du fichier
             st = os.stat(mvnw_path)
             # Ajoute le droit d'exécution (stat.S_IEXEC) pour l'utilisateur courant
             os.chmod(mvnw_path, st.st_mode | stat.S_IEXEC)
-        # -------------------------------------------------------------
 
         os.chdir(project_name)
         generate_spring_security()
