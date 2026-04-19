@@ -21,7 +21,7 @@ def setup_angular_environments(project_path: str):
     env = Environment(loader=FileSystemLoader(templates_dir))
 
     files_to_generate = {
-        "proxy.conf.json.j2": os.path.join(project_path, "src", "proxy.conf.json"),  # À la racine de src/
+        "proxy.conf.json.j2": os.path.join(project_path, "src", "proxy.conf.json"),
         "environment.ts.j2": os.path.join(env_dir, "environment.ts"),
         "environment.development.ts.j2": os.path.join(env_dir, "environment.development.ts")
     }
