@@ -4,7 +4,7 @@ import typer
 
 
 def generate_config(project_name: str, db_type: str = "postgres", custom_port: int = None):
-    template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
+    template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates', 'spring')
     env = Environment(loader=FileSystemLoader(template_dir))
 
     # Résolution intelligente du port par défaut
