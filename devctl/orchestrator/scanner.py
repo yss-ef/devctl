@@ -12,6 +12,8 @@ def detect_environment(root_path: str = "."):
         "spring_path": None,
         "has_angular": False,
         "angular_path": None,
+        "has_vue": False,  
+        "vue_path": None,
         "project_root": os.path.abspath(root_path)
     }
 
@@ -31,5 +33,9 @@ def detect_environment(root_path: str = "."):
         if "angular.json" in filenames and not env_state["has_angular"]:
             env_state["has_angular"] = True
             env_state["angular_path"] = dirpath
+
+        if ("vite.config.ts" in filenames or "vite.config.js" in filenames) and not env_state["has_vue"]:
+            env_state["has_vue"] = True
+            env_state["vue_path"] = dirpath
 
     return env_state

@@ -2,6 +2,7 @@ import typer
 # Générateur Spring
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.orchestrator.config_builder import generate_config
+from devctl.generators.vue import generate_vue_boilerplate
 
 # Génerateur Angular
 from devctl.generators.angular import generate_angular_boilerplate
@@ -47,10 +48,13 @@ def init_angular(name: str):
         
 
 
-@app.command("express")
-def init_express(name: str):
+@app.command("vue")
+def init_vue(name: str):
     """
-    (Bientôt) Initialise un nouveau projet Node.js / Express.
+    Initialise un nouveau projet frontend Vue.js (Vite + TS).
     """
-    typer.echo(f"🚀 Initialisation d'un projet Express : '{name}'...")
-    typer.secho("⚠️ Le générateur Express n'est pas encore implémenté.", fg=typer.colors.YELLOW)
+    typer.echo(f"🚀 Initialisation d'un projet Vue.js : '{name}'...")
+    success = generate_vue_boilerplate(name)
+
+    if success:
+        typer.secho("\n✨ Projet Vue.js prêt !", fg=typer.colors.CYAN)

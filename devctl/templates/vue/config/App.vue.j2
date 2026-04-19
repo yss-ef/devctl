@@ -1,0 +1,35 @@
+<script setup lang="ts">
+// Le layout principal de l'application
+</script>
+
+<template>
+  <div id="app">
+    <header>
+      <nav>
+        <router-link to="/">Accueil</router-link>
+      </nav>
+    </header>
+
+    <main class="container">
+      <router-view />
+    </main>
+  </div>
+</template>
+
+<style scoped>
+header {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+nav {
+  display: flex;
+  gap: 1rem;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+</style>

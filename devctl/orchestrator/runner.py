@@ -22,6 +22,16 @@ def launch_dev_environment(env_state: dict):
     processes = []
 
     try:
+        # 4. Lancement du Frontend Vue.js
+        if env_state.get("has_vue"):
+            typer.secho(f"🟢 Démarrage de Vue.js depuis {env_state['vue_path']}...", fg=typer.colors.GREEN)
+
+            p_vue = subprocess.Popen(
+                ["npm", "run", "dev"],  # Commande standard de Vite
+                cwd=env_state["vue_path"]
+            )
+            processes.append(("Vue.js", p_vue))
+
         # 1. Lancement de la Base de données
         if env_state["has_docker_compose"]:
             if not is_docker_running():
@@ -56,7 +66,7 @@ def launch_dev_environment(env_state: dict):
             processes.append(("Angular", p_angular))
 
         if not processes and not env_state["has_docker_compose"]:
-            typer.secho("⚠️ Aucun projet Spring, Angular ou DB détecté dans cette arborescence.",
+            typer.secho("⚠️ Aucun projet Spring, Angular, Vue.js ou DB détecté dans cette arborescence.",
                         fg=typer.colors.YELLOW)
             return
 

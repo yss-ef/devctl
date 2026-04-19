@@ -20,8 +20,9 @@ def run_env(ctx: typer.Context):
     typer.echo(f"  - Base de données Docker : {'✅' if env_state['has_docker_compose'] else '❌'}")
     typer.echo(f"  - Backend Spring Boot  : {'✅' if env_state['has_spring'] else '❌'}")
     typer.echo(f"  - Frontend Angular     : {'✅' if env_state['has_angular'] else '❌'}")
+    typer.echo(f"  - Frontend Vue.js      : {'✅' if env_state['has_vue'] else '❌'}")
 
-    if not any([env_state['has_docker_compose'], env_state['has_spring'], env_state['has_angular']]):
+    if not any([env_state['has_docker_compose'], env_state['has_spring'], env_state['has_angular'], env_state.get('has_vue')]):
         typer.secho("\n❌ Aucun environnement de développement valide détecté ici.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
