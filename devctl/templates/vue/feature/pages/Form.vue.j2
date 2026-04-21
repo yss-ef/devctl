@@ -1,0 +1,73 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { {{ entity_name }}Service } from '../services/{{ resource_name_lower }}.service';
+import type { {{ entity_name }}Request } from '../models/{{ resource_name_lower }}-request.model';
+
+const route = useRoute();
+const router = useRouter();
+
+const isEditMode = ref(false);
+const currentId = ref<number | null>(null);
+
+const form = ref<{{ entity_name }}Request>({
+  {% for field in fields %}
+  {{ field.name }}: {% if field.ts_type == 'number' %}0{% elif field.ts_type == 'boolean' %}false{% else %}''{% endif %},
+  {% endfor %}
+});
+
+onMounted(async () => {
+  const id = route.params.id;
+  if (id) {
+    isEditMode.value = true;
+    currentId.value = Number(id);
+    try {
+      const data = await {{ entity_name }}Service.getById(currentId.value);
+      {% for field in fields %}
+      form.value.{{ field.name }} = data.{{ field.name }};
+      {% endfor %}
+    } catch (error) {
+      console.error('Erreur lors du chargement', error);
+    }
+  }
+});
+
+const submit = async () => {
+  try {
+    if (isEditMode.value && currentId.value) {
+      await {{ entity_name }}Service.update(currentId.value, form.value);
+    } else {
+      await {{ entity_name }}Service.create(form.value);
+    }
+    router.push('/{{ resource_name_lower }}s');
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde', error);
+  }
+};
+</script>
+
+<template>
+  <div style="max-width: 600px; margin: 0 auto;">
+    <h2>{{ '{{' }} isEditMode ? 'Modifier' : 'Nouveau' {{ '}}' }} {{ entity_name }}</h2>
+
+    <form @submit.prevent="submit" style="display: flex; flex-direction: column; gap: 1rem;">
+      {% for field in fields %}
+      <div style="display: flex; flex-direction: column;">
+        <label for="{{ field.name }}" style="margin-bottom: 0.5rem;">{{ field.name | capitalize }}</label>
+        <input
+          id="{{ field.name }}"
+          v-model="form.{{ field.name }}"
+          type="{% if field.ts_type == 'number' %}number{% elif field.ts_type == 'boolean' %}checkbox{% else %}text{% endif %}"
+          required
+          style="padding: 0.5rem;"
+        />
+      </div>
+      {% endfor %}
+
+      <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+        <button type="submit" style="padding: 0.5rem 1rem; background: #4CAF50; color: white; border: none; cursor: pointer;">Enregistrer</button>
+        <router-link to="/{{ resource_name_lower }}s" style="padding: 0.5rem 1rem; background: #ccc; color: black; text-decoration: none;">Annuler</router-link>
+      </div>
+    </form>
+  </div>
+</template>

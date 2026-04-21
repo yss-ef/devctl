@@ -1,8 +1,10 @@
 import typer
 import os
+
 from devctl.orchestrator.scanner import detect_environment
 from devctl.generators.scaffold_spring import generate_spring_resource
 from devctl.generators.scaffold_angular import generate_angular_resource
+from devctl.generators.scaffold_vue import generate_vue_resource
 
 app = typer.Typer(help="Ajoute des ressources au projet courant (Scaffolding).")
 
@@ -38,6 +40,14 @@ def resource(
             generate_angular_resource(name, fields, root_path=".")
         except Exception as e:
             typer.secho(f"❌ Erreur lors de la génération Angular : {e}", fg=typer.colors.RED)
+
+    if env_state.get("has_vue"):
+        project_detected = True
+        typer.secho("🟢 Projet Vue.js détecté. Lancement du générateur Vite...", fg=typer.colors.GREEN)
+        try:
+            generate_vue_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"❌ Erreur lors de la génération Vue : {e}", fg=typer.colors.RED)
 
     # Le message d'erreur ne s'affiche que s'il n'y a VRAIMENT aucun projet
     if not project_detected:

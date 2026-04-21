@@ -1,0 +1,43 @@
+import type { {{ entity_name }}Request } from '../models/{{ resource_name_lower }}-request.model';
+import type { {{ entity_name }}Response } from '../models/{{ resource_name_lower }}-response.model';
+
+const API_URL = '/api/{{ table_name }}';
+
+export const {{ entity_name }}Service = {
+  async getAll(): Promise<{{ entity_name }}Response[]> {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error('Erreur réseau');
+    return response.json();
+  },
+
+  async getById(id: number): Promise<{{ entity_name }}Response> {
+    const response = await fetch(`${API_URL}/${id}`);
+    if (!response.ok) throw new Error('Erreur réseau');
+    return response.json();
+  },
+
+  async create(data: {{ entity_name }}Request): Promise<{{ entity_name }}Response> {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Erreur réseau');
+    return response.json();
+  },
+
+  async update(id: number, data: {{ entity_name }}Request): Promise<{{ entity_name }}Response> {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Erreur réseau');
+    return response.json();
+  },
+
+  async delete(id: number): Promise<void> {
+    const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    if (!response.ok) throw new Error('Erreur réseau');
+  }
+};

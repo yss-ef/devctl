@@ -1,0 +1,9 @@
+import type { RouteRecordRaw } from 'vue-router';
+import {{ entity_name }}List from './pages/{{ entity_name }}List.vue';
+import {{ entity_name }}Form from './pages/{{ entity_name }}Form.vue';
+
+export const {{ uppercase_name }}_ROUTES: RouteRecordRaw[] = [
+  { path: '', component: {{ entity_name }}List },
+  { path: 'new', component: {{ entity_name }}Form },
+  { path: 'edit/:id', component: {{ entity_name }}Form }
+];

@@ -1,0 +1,61 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { {{ entity_name }}Service } from '../services/{{ resource_name_lower }}.service';
+import type { {{ entity_name }}Response } from '../models/{{ resource_name_lower }}-response.model';
+
+const items = ref<{{ entity_name }}Response[]>([]);
+
+const loadItems = async () => {
+  try {
+    items.value = await {{ entity_name }}Service.getAll();
+  } catch (error) {
+    console.error('Erreur lors du chargement', error);
+  }
+};
+
+const deleteItem = async (id: number) => {
+  if (confirm('Voulez-vous vraiment supprimer cet élément ?')) {
+    try {
+      await {{ entity_name }}Service.delete(id);
+      await loadItems();
+    } catch (error) {
+      console.error('Erreur lors de la suppression', error);
+    }
+  }
+};
+
+onMounted(loadItems);
+</script>
+
+<template>
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2>Liste des {{ entity_name }}s</h2>
+      <router-link to="new" style="padding: 0.5rem 1rem; background: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">Nouveau</router-link>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr style="border-bottom: 2px solid #ddd;">
+          <th style="padding: 8px;">ID</th>
+          {% for field in fields %}
+          <th style="padding: 8px;">{{ field.name | capitalize }}</th>
+          {% endfor %}
+          <th style="padding: 8px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in items" :key="item.id" style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px;">{{ '{{' }} item.id {{ '}}' }}</td>
+          {% for field in fields %}
+          <td style="padding: 8px;">{{ '{{' }} item.{{ field.name }} {{ '}}' }}</td>
+          {% endfor %}
+          <td style="padding: 8px;">
+            <router-link :to="`edit/${item.id}`" style="margin-right: 10px; color: #2196F3;">Modifier</router-link>
+            <button @click="deleteItem(item.id)" style="color: #f44336; background: none; border: none; cursor: pointer;">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
