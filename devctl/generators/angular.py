@@ -2,8 +2,7 @@ import os
 import json
 import subprocess
 import typer
-from jinja2 import Environment, FileSystemLoader, TemplateError
-from devctl.errors import GeneratorError, DevCtlUserError
+from jinja2 import Environment, FileSystemLoader
 
 
 def setup_angular_environments(project_path: str):
@@ -33,8 +32,8 @@ def setup_angular_environments(project_path: str):
             content = template.render()
             with open(target_path, "w", encoding="utf-8") as f:
                 f.write(content)
-        except (TemplateError, OSError) as e:
-            raise GeneratorError(f"Failed to generate template {tpl_name} at {target_path}: {e}")
+        except Exception as e:
+            typer.secho(f"⚠️  Erreur lors de la génération de {tpl_name}: {e}", fg=typer.colors.YELLOW)
 
     # 3. Modification de angular.json pour activer le proxy
     angular_json_path = os.path.join(project_path, "angular.json")
@@ -59,8 +58,8 @@ def setup_angular_environments(project_path: str):
                 json.dump(angular_config, f, indent=2)
 
             typer.echo("  - angular.json mis à jour avec le proxyConfig.")
-        except (json.JSONDecodeError, KeyError, OSError) as e:
-            raise GeneratorError(f"Failed to update angular.json automatically: {e}")
+        except Exception as e:
+            typer.secho(f"⚠️  Impossible de modifier angular.json automatiquement : {e}", fg=typer.colors.YELLOW)
 
 
 def generate_angular_boilerplate(project_name: str) -> bool:
@@ -74,9 +73,11 @@ def generate_angular_boilerplate(project_name: str) -> bool:
     try:
         subprocess.run(["ng", "version"], capture_output=True, check=True)
     except FileNotFoundError:
-        raise DevCtlUserError("The Angular CLI ('ng') was not found on your system. Please install it first.")
+        typer.secho("❌ Erreur : Le CLI Angular ('ng') est introuvable sur ton système.", fg=typer.colors.RED)
+        return False
     except subprocess.CalledProcessError:
-        raise DevCtlUserError("The Angular CLI is installed but not responding correctly.")
+        typer.secho("❌ Erreur : Le CLI Angular est installé mais ne répond pas.", fg=typer.colors.RED)
+        return False
 
     try:
         command = [
