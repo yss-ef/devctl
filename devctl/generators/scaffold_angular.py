@@ -1,8 +1,9 @@
 import os
 
 import typer
-from devctl.orchestrator.scanner import detect_environment
 from jinja2 import Environment, FileSystemLoader
+
+from devctl.orchestrator.scanner import detect_environment
 
 # Dictionnaire de traduction CLI -> TypeScript
 TS_TYPE_MAP = {
@@ -12,7 +13,7 @@ TS_TYPE_MAP = {
     "double": "number",
     "float": "number",
     "boolean": "boolean",
-    "date": "string"  # En JSON, une date transite sous forme de string ISO
+    "date": "string",  # En JSON, une date transite sous forme de string ISO
 }
 
 
@@ -51,34 +52,64 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     components = [
         # Models
         {
-            "dir": "models", "suffix": "-request.model", "ext": ".ts",
-            "template": "models/request.model.ts.j2"
+            "dir": "models",
+            "suffix": "-request.model",
+            "ext": ".ts",
+            "template": "models/request.model.ts.j2",
         },
         {
-            "dir": "models", "suffix": "-response.model", "ext": ".ts",
-            "template": "models/response.model.ts.j2"
+            "dir": "models",
+            "suffix": "-response.model",
+            "ext": ".ts",
+            "template": "models/response.model.ts.j2",
         },
         # Service
         {
-            "dir": "services", "suffix": ".service", "ext": ".ts",
-            "template": "services/service.ts.j2"
+            "dir": "services",
+            "suffix": ".service",
+            "ext": ".ts",
+            "template": "services/service.ts.j2",
         },
         # Routes (à la racine de la feature)
         {"dir": "", "suffix": ".routes", "ext": ".ts", "template": "routes.ts.j2"},
         # List Component
-        {"dir": f"pages/{resource_lower}-list", "suffix": "-list.component", "ext": ".ts",
-         "template": "pages/list/list.component.ts.j2"},
-        {"dir": f"pages/{resource_lower}-list", "suffix": "-list.component", "ext": ".html",
-         "template": "pages/list/list.component.html.j2"},
-        {"dir": f"pages/{resource_lower}-list", "suffix": "-list.component", "ext": ".scss",
-         "template": "pages/list/list.component.scss.j2"},
+        {
+            "dir": f"pages/{resource_lower}-list",
+            "suffix": "-list.component",
+            "ext": ".ts",
+            "template": "pages/list/list.component.ts.j2",
+        },
+        {
+            "dir": f"pages/{resource_lower}-list",
+            "suffix": "-list.component",
+            "ext": ".html",
+            "template": "pages/list/list.component.html.j2",
+        },
+        {
+            "dir": f"pages/{resource_lower}-list",
+            "suffix": "-list.component",
+            "ext": ".scss",
+            "template": "pages/list/list.component.scss.j2",
+        },
         # Form Component
-        {"dir": f"pages/{resource_lower}-form", "suffix": "-form.component", "ext": ".ts",
-         "template": "pages/form/form.component.ts.j2"},
-        {"dir": f"pages/{resource_lower}-form", "suffix": "-form.component", "ext": ".html",
-         "template": "pages/form/form.component.html.j2"},
-        {"dir": f"pages/{resource_lower}-form", "suffix": "-form.component", "ext": ".scss",
-         "template": "pages/form/form.component.scss.j2"},
+        {
+            "dir": f"pages/{resource_lower}-form",
+            "suffix": "-form.component",
+            "ext": ".ts",
+            "template": "pages/form/form.component.ts.j2",
+        },
+        {
+            "dir": f"pages/{resource_lower}-form",
+            "suffix": "-form.component",
+            "ext": ".html",
+            "template": "pages/form/form.component.html.j2",
+        },
+        {
+            "dir": f"pages/{resource_lower}-form",
+            "suffix": "-form.component",
+            "ext": ".scss",
+            "template": "pages/form/form.component.scss.j2",
+        },
     ]
 
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "angular", "feature")
@@ -92,7 +123,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
         "resource_name_lower": resource_lower,
         "table_name": f"{resource_lower}s",
         "uppercase_name": resource_name.upper(),
-        "fields": parse_ts_fields(fields_str)
+        "fields": parse_ts_fields(fields_str),
     }
 
     for comp in components:
@@ -109,13 +140,13 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             with open(os.path.join(target_dir, target_file_name), "w", encoding="utf-8") as f:
                 f.write(content)
 
-            display_dir = comp['dir'] if comp['dir'] else "racine feature"
+            display_dir = comp["dir"] if comp["dir"] else "racine feature"
             typer.echo(f"  - Créé : {display_dir}/{target_file_name}")
 
         except Exception as e:
             # Astuce : si tu n'as pas créé de template .scss.j2, ça crée un fichier vide
             # automatiquement
-            if comp['ext'] == '.scss':
+            if comp["ext"] == ".scss":
                 with open(os.path.join(target_dir, target_file_name), "w") as f:
                     f.write("")
                 typer.echo(f"  - Créé (vide) : {comp['dir']}/{target_file_name}")
@@ -123,6 +154,5 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
                 typer.secho(f"⚠️ Erreur sur {comp['template']} : {e}", fg=typer.colors.YELLOW)
 
     typer.secho(
-        f"✅ Feature {entity_name} générée avec succès côté Angular !",
-        fg=typer.colors.GREEN
+        f"✅ Feature {entity_name} générée avec succès côté Angular !", fg=typer.colors.GREEN
     )

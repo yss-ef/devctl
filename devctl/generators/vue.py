@@ -38,7 +38,7 @@ def setup_vue_router(project_path: str):
             ["npm", "install", "vue-router@4"],
             cwd=project_path,
             check=True,
-            stdout=subprocess.DEVNULL
+            stdout=subprocess.DEVNULL,
         )
 
         # 2. Création du dossier router
@@ -53,7 +53,7 @@ def setup_vue_router(project_path: str):
         files_to_generate = {
             "router.ts.j2": os.path.join(router_dir, "index.ts"),
             "main.ts.j2": os.path.join(src_dir, "main.ts"),
-            "App.vue.j2": os.path.join(src_dir, "App.vue")
+            "App.vue.j2": os.path.join(src_dir, "App.vue"),
         }
 
         for tpl_name, target_path in files_to_generate.items():
@@ -77,8 +77,7 @@ def generate_vue_boilerplate(project_name: str) -> bool:
     try:
         typer.echo("📦 Scaffolding du projet Vite...")
         subprocess.run(
-            ["npm", "create", "vite@latest", safe_name, "--", "--template", "vue-ts"],
-            check=True
+            ["npm", "create", "vite@latest", safe_name, "--", "--template", "vue-ts"], check=True
         )
 
         project_full_path = os.path.join(os.getcwd(), safe_name)
@@ -96,7 +95,6 @@ def generate_vue_boilerplate(project_name: str) -> bool:
 
     except subprocess.CalledProcessError as e:
         typer.secho(
-            f"❌ Le processus Vue/Vite a échoué avec le code : {e.returncode}",
-            fg=typer.colors.RED
+            f"❌ Le processus Vue/Vite a échoué avec le code : {e.returncode}", fg=typer.colors.RED
         )
         return False

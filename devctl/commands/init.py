@@ -14,9 +14,9 @@ app = typer.Typer(help="Initialise un nouveau projet selon le framework choisi."
 
 @app.command("spring")
 def init_spring(
-        name: str,
-        db: str = typer.Option("postgres", help="Type de base de données (postgres ou mysql)"),
-        port: int = typer.Option(None, help="Port local (optionnel)")
+    name: str,
+    db: str = typer.Option("postgres", help="Type de base de données (postgres ou mysql)"),
+    port: int = typer.Option(None, help="Port local (optionnel)"),
 ):
     """
     Initialise un nouveau projet backend Spring Boot avec sa base de données.
@@ -24,8 +24,7 @@ def init_spring(
     # Validation stricte des entrées
     if db not in ["postgres", "mysql"]:
         typer.secho(
-            f"❌ Erreur : La base de données '{db}' n'est pas supportée.",
-            fg=typer.colors.RED
+            f"❌ Erreur : La base de données '{db}' n'est pas supportée.", fg=typer.colors.RED
         )
         raise typer.Exit(code=1)
 
@@ -36,6 +35,7 @@ def init_spring(
     if success_download:
         generate_config(name, db_type=db, custom_port=port)
         typer.secho("\n✨ Projet Spring prêt !", fg=typer.colors.CYAN)
+
 
 @app.command("angular")
 def init_angular(name: str):
@@ -48,8 +48,6 @@ def init_angular(name: str):
 
     if success:
         typer.secho("\n✨ Projet Angular prêt !", fg=typer.colors.CYAN)
-
-
 
 
 @app.command("vue")

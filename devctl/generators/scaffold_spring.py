@@ -11,7 +11,7 @@ JAVA_TYPE_MAP = {
     "double": "Double",
     "float": "Float",
     "boolean": "Boolean",
-    "date": "LocalDate"
+    "date": "LocalDate",
 }
 
 
@@ -31,10 +31,7 @@ def parse_fields(fields_str: str):
             continue
         name, field_type = raw.split(":", 1)
         java_type = JAVA_TYPE_MAP.get(field_type.lower().strip(), "String")
-        parsed_fields.append({
-            "name": name.strip(),
-            "java_type": java_type
-        })
+        parsed_fields.append({"name": name.strip(), "java_type": java_type})
     return parsed_fields
 
 
@@ -52,7 +49,7 @@ def find_spring_base_package_and_path():
         for file in files:
             if file.endswith("Application.java"):
                 rel_path = os.path.relpath(root, java_src_dir)
-                base_package = rel_path.replace(os.sep, '.')
+                base_package = rel_path.replace(os.sep, ".")
                 return base_package, root
 
     return None, None
@@ -67,7 +64,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
     if not base_package:
         typer.secho(
             "❌ Erreur : Impossible de trouver un projet Spring Boot valide ici.",
-            fg=typer.colors.RED
+            fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)
 
@@ -81,7 +78,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
         {"dir": "controller", "suffix": "Controller", "template": "Controller.java.j2"},
         {"dir": "dto/request", "suffix": "Request", "template": "dto/Request.java.j2"},
         {"dir": "dto/response", "suffix": "Response", "template": "dto/Response.java.j2"},
-        {"dir": "mapper", "suffix": "Mapper", "template": "mapper/Mapper.java.j2"}
+        {"dir": "mapper", "suffix": "Mapper", "template": "mapper/Mapper.java.j2"},
     ]
 
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring")
@@ -104,7 +101,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
             "class_name": class_name,
             "entity_name": entity_name,
             "table_name": f"{resource_name.lower()}s",
-            "fields": parse_fields(fields_str)
+            "fields": parse_fields(fields_str),
         }
 
         template = env.get_template(comp["template"])
@@ -116,8 +113,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
         typer.echo(f"  - Créé : {comp['dir']}/{target_file_name}")
 
     typer.secho(
-        f"✅ Architecture {entity_name} complète générée avec succès !",
-        fg=typer.colors.GREEN
+        f"✅ Architecture {entity_name} complète générée avec succès !", fg=typer.colors.GREEN
     )
 
 
@@ -131,7 +127,7 @@ def generate_spring_security(_root_path: str = "."):
     if not base_package:
         typer.secho(
             "❌ Erreur : Impossible de localiser le package Java pour la sécurité.",
-            fg=typer.colors.RED
+            fg=typer.colors.RED,
         )
         return
 
@@ -147,7 +143,7 @@ def generate_spring_security(_root_path: str = "."):
         "JwtService.java",
         "JwtAuthenticationFilter.java",
         "SecurityConfig.java",
-        "ApplicationConfig.java"
+        "ApplicationConfig.java",
     ]
 
     typer.echo(f"🛡️  Injection de la sécurité JWT dans {base_package}.config...")

@@ -5,6 +5,7 @@ import zipfile
 
 import requests
 import typer
+
 from devctl.generators.scaffold_spring import generate_spring_security
 
 
@@ -28,7 +29,7 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         "security",
         "devtools",
         "thymeleaf",
-        db_dependency  # postgresql ou mysql
+        db_dependency,  # postgresql ou mysql
     ]
     dependencies = ",".join(official_deps)
 
@@ -44,7 +45,7 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         "packageName": f"com.devctl.{safe_package_name}",
         "packaging": "jar",
         "javaVersion": "17",
-        "dependencies": dependencies
+        "dependencies": dependencies,
     }
 
     url = "https://start.spring.io/starter.zip"
@@ -72,11 +73,10 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
 
         typer.secho(
             f"✅ Backend généré avec succès dans le dossier ./{project_name} !",
-            fg=typer.colors.GREEN
+            fg=typer.colors.GREEN,
         )
         return True
 
     except requests.exceptions.RequestException as e:
         typer.secho(f"❌ Erreur réseau lors du contact de l'API : {e}", fg=typer.colors.RED)
         return False
-

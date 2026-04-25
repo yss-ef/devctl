@@ -15,7 +15,7 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
-        "project_root": os.path.abspath(root_path)
+        "project_root": os.path.abspath(root_path),
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):

@@ -24,7 +24,7 @@ def setup_angular_environments(project_path: str):
     files_to_generate = {
         "proxy.conf.json.j2": os.path.join(project_path, "src", "proxy.conf.json"),
         "environment.ts.j2": os.path.join(env_dir, "environment.ts"),
-        "environment.development.ts.j2": os.path.join(env_dir, "environment.development.ts")
+        "environment.development.ts.j2": os.path.join(env_dir, "environment.development.ts"),
     }
 
     for tpl_name, target_path in files_to_generate.items():
@@ -35,8 +35,7 @@ def setup_angular_environments(project_path: str):
                 f.write(content)
         except Exception as e:
             typer.secho(
-                f"⚠️  Erreur lors de la génération de {tpl_name}: {e}",
-                fg=typer.colors.YELLOW
+                f"⚠️  Erreur lors de la génération de {tpl_name}: {e}", fg=typer.colors.YELLOW
             )
 
     # 3. Modification de angular.json pour activer le proxy
@@ -65,7 +64,7 @@ def setup_angular_environments(project_path: str):
         except Exception as e:
             typer.secho(
                 f"⚠️  Impossible de modifier angular.json automatiquement : {e}",
-                fg=typer.colors.YELLOW
+                fg=typer.colors.YELLOW,
             )
 
 
@@ -82,23 +81,17 @@ def generate_angular_boilerplate(project_name: str) -> bool:
     except FileNotFoundError:
         typer.secho(
             "❌ Erreur : Le CLI Angular ('ng') est introuvable sur ton système.",
-            fg=typer.colors.RED
+            fg=typer.colors.RED,
         )
         return False
     except subprocess.CalledProcessError:
         typer.secho(
-            "❌ Erreur : Le CLI Angular est installé mais ne répond pas.",
-            fg=typer.colors.RED
+            "❌ Erreur : Le CLI Angular est installé mais ne répond pas.", fg=typer.colors.RED
         )
         return False
 
     try:
-        command = [
-            "ng", "new", safe_name,
-            "--routing=true",
-            "--style=scss",
-            "--skip-git=true"
-        ]
+        command = ["ng", "new", safe_name, "--routing=true", "--style=scss", "--skip-git=true"]
 
         typer.echo("📦 Téléchargement des packages npm... (Cela peut prendre 1 à 2 minutes)")
         subprocess.run(command, check=True)
@@ -109,14 +102,12 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         # -------------------------------------------------------------
 
         typer.secho(
-            f"✅ Frontend '{safe_name}' généré et configuré avec succès !",
-            fg=typer.colors.GREEN
+            f"✅ Frontend '{safe_name}' généré et configuré avec succès !", fg=typer.colors.GREEN
         )
         return True
 
     except subprocess.CalledProcessError as e:
         typer.secho(
-            f"❌ Le processus Angular a échoué avec le code : {e.returncode}",
-            fg=typer.colors.RED
+            f"❌ Le processus Angular a échoué avec le code : {e.returncode}", fg=typer.colors.RED
         )
         return False
