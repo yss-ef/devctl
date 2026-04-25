@@ -1,11 +1,12 @@
+import io
 import os
 import stat
-import requests
 import zipfile
-import io
-import typer
 
+import requests
+import typer
 from devctl.generators.scaffold_spring import generate_spring_security
+
 
 def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
     """
@@ -69,7 +70,10 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         generate_spring_security()
         os.chdir("..")
 
-        typer.secho(f"✅ Backend généré avec succès dans le dossier ./{project_name} !", fg=typer.colors.GREEN)
+        typer.secho(
+            f"✅ Backend généré avec succès dans le dossier ./{project_name} !",
+            fg=typer.colors.GREEN
+        )
         return True
 
     except requests.exceptions.RequestException as e:

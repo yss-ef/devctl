@@ -1,6 +1,6 @@
 import typer
-from devctl.orchestrator.scanner import detect_environment
 from devctl.orchestrator.runner import launch_dev_environment
+from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Commandes d'exécution et de développement local.")
 
@@ -22,8 +22,18 @@ def run_env(ctx: typer.Context):
     typer.echo(f"  - Frontend Angular     : {'✅' if env_state['has_angular'] else '❌'}")
     typer.echo(f"  - Frontend Vue.js      : {'✅' if env_state['has_vue'] else '❌'}")
 
-    if not any([env_state['has_docker_compose'], env_state['has_spring'], env_state['has_angular'], env_state.get('has_vue')]):
-        typer.secho("\n❌ Aucun environnement de développement valide détecté ici.", fg=typer.colors.RED)
+    has_env = any([
+        env_state['has_docker_compose'],
+        env_state['has_spring'],
+        env_state['has_angular'],
+        env_state.get('has_vue')
+    ])
+
+    if not has_env:
+        typer.secho(
+            "\n❌ Aucun environnement de développement valide détecté ici.",
+            fg=typer.colors.RED
+        )
         raise typer.Exit(code=1)
 
     # Transfert à la couche d'orchestration système

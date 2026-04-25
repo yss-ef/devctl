@@ -1,6 +1,7 @@
 import os
-from jinja2 import Environment, FileSystemLoader
+
 import typer
+from jinja2 import Environment, FileSystemLoader
 
 
 def generate_config(project_name: str, db_type: str = "postgres", custom_port: int = None):
@@ -30,13 +31,18 @@ def generate_config(project_name: str, db_type: str = "postgres", custom_port: i
         with open(os.path.join(project_path, 'docker-compose.yml'), 'w') as f:
             f.write(docker_template.render(context))
 
-        props_path = os.path.join(project_path, 'src', 'main', 'resources', 'application.properties')
+        props_path = os.path.join(
+            project_path, 'src', 'main', 'resources', 'application.properties'
+        )
         if os.path.exists(props_path):
             props_template = env.get_template('application.properties.j2')
             with open(props_path, 'w') as f:
                 f.write(props_template.render(context))
 
-        typer.secho(f"⚙️ Configuration dynamique ({db_type} sur le port {db_port}) générée.", fg=typer.colors.GREEN)
+        typer.secho(
+            f"⚙️ Configuration dynamique ({db_type} sur le port {db_port}) générée.",
+            fg=typer.colors.GREEN
+        )
         return True
     except Exception as e:
         typer.secho(f"❌ Erreur de configuration : {e}", fg=typer.colors.RED)

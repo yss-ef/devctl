@@ -1,7 +1,8 @@
 import os
+
 import typer
-from jinja2 import Environment, FileSystemLoader
 from devctl.orchestrator.scanner import detect_environment
+from jinja2 import Environment, FileSystemLoader
 
 # Dictionnaire de traduction CLI -> TypeScript
 TS_TYPE_MAP = {
@@ -21,7 +22,8 @@ def parse_ts_fields(fields_str: str):
         return []
     parsed = []
     for raw in [f.strip() for f in fields_str.split(",") if f.strip()]:
-        if ":" not in raw: continue
+        if ":" not in raw:
+            continue
         name, field_type = raw.split(":", 1)
         ts_type = TS_TYPE_MAP.get(field_type.lower().strip(), "string")
         parsed.append({"name": name.strip(), "ts_type": ts_type})
@@ -48,10 +50,19 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     # Configuration des composants à générer
     components = [
         # Models
-        {"dir": "models", "suffix": "-request.model", "ext": ".ts", "template": "models/request.model.ts.j2"},
-        {"dir": "models", "suffix": "-response.model", "ext": ".ts", "template": "models/response.model.ts.j2"},
+        {
+            "dir": "models", "suffix": "-request.model", "ext": ".ts",
+            "template": "models/request.model.ts.j2"
+        },
+        {
+            "dir": "models", "suffix": "-response.model", "ext": ".ts",
+            "template": "models/response.model.ts.j2"
+        },
         # Service
-        {"dir": "services", "suffix": ".service", "ext": ".ts", "template": "services/service.ts.j2"},
+        {
+            "dir": "services", "suffix": ".service", "ext": ".ts",
+            "template": "services/service.ts.j2"
+        },
         # Routes (à la racine de la feature)
         {"dir": "", "suffix": ".routes", "ext": ".ts", "template": "routes.ts.j2"},
         # List Component
@@ -102,7 +113,8 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             typer.echo(f"  - Créé : {display_dir}/{target_file_name}")
 
         except Exception as e:
-            # Astuce : si tu n'as pas créé de template .scss.j2, ça crée un fichier vide automatiquement
+            # Astuce : si tu n'as pas créé de template .scss.j2, ça crée un fichier vide
+            # automatiquement
             if comp['ext'] == '.scss':
                 with open(os.path.join(target_dir, target_file_name), "w") as f:
                     f.write("")
@@ -110,4 +122,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             else:
                 typer.secho(f"⚠️ Erreur sur {comp['template']} : {e}", fg=typer.colors.YELLOW)
 
-    typer.secho(f"✅ Feature {entity_name} générée avec succès côté Angular !", fg=typer.colors.GREEN)
+    typer.secho(
+        f"✅ Feature {entity_name} générée avec succès côté Angular !",
+        fg=typer.colors.GREEN
+    )

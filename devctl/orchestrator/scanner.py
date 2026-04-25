@@ -1,5 +1,6 @@
 import os
 
+
 def detect_environment(root_path: str = "."):
     """
     Scanne le répertoire et ses sous-dossiers pour identifier les composants.
@@ -12,12 +13,12 @@ def detect_environment(root_path: str = "."):
         "spring_path": None,
         "has_angular": False,
         "angular_path": None,
-        "has_vue": False,  
+        "has_vue": False,
         "vue_path": None,
         "project_root": os.path.abspath(root_path)
     }
 
-    for dirpath, dirnames, filenames in os.walk(root_path):
+    for dirpath, _dirnames, filenames in os.walk(root_path):
         # Optimisation : on ignore les dossiers lourds pour un scan instantané
         if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular"]):
             continue
@@ -34,7 +35,8 @@ def detect_environment(root_path: str = "."):
             env_state["has_angular"] = True
             env_state["angular_path"] = dirpath
 
-        if ("vite.config.ts" in filenames or "vite.config.js" in filenames) and not env_state["has_vue"]:
+        vue_files = ["vite.config.ts", "vite.config.js"]
+        if any(f in filenames for f in vue_files) and not env_state["has_vue"]:
             env_state["has_vue"] = True
             env_state["vue_path"] = dirpath
 

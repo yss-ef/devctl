@@ -1,5 +1,6 @@
 import os
 import subprocess
+
 import typer
 from jinja2 import Environment, FileSystemLoader
 
@@ -33,7 +34,12 @@ def setup_vue_router(project_path: str):
 
     try:
         # 1. Installation du package npm
-        subprocess.run(["npm", "install", "vue-router@4"], cwd=project_path, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(
+            ["npm", "install", "vue-router@4"],
+            cwd=project_path,
+            check=True,
+            stdout=subprocess.DEVNULL
+        )
 
         # 2. Création du dossier router
         src_dir = os.path.join(project_path, "src")
@@ -89,5 +95,8 @@ def generate_vue_boilerplate(project_name: str) -> bool:
         return True
 
     except subprocess.CalledProcessError as e:
-        typer.secho(f"❌ Le processus Vue/Vite a échoué avec le code : {e.returncode}", fg=typer.colors.RED)
+        typer.secho(
+            f"❌ Le processus Vue/Vite a échoué avec le code : {e.returncode}",
+            fg=typer.colors.RED
+        )
         return False

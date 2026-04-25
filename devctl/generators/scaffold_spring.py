@@ -1,4 +1,5 @@
 import os
+
 import typer
 from jinja2 import Environment, FileSystemLoader
 
@@ -47,7 +48,7 @@ def find_spring_base_package_and_path():
     if not os.path.exists(java_src_dir):
         return None, None
 
-    for root, dirs, files in os.walk(java_src_dir):
+    for root, _dirs, files in os.walk(java_src_dir):
         for file in files:
             if file.endswith("Application.java"):
                 rel_path = os.path.relpath(root, java_src_dir)
@@ -64,7 +65,10 @@ def generate_spring_resource(resource_name: str, fields_str: str):
     base_package, base_path = find_spring_base_package_and_path()
 
     if not base_package:
-        typer.secho("❌ Erreur : Impossible de trouver un projet Spring Boot valide ici.", fg=typer.colors.RED)
+        typer.secho(
+            "❌ Erreur : Impossible de trouver un projet Spring Boot valide ici.",
+            fg=typer.colors.RED
+        )
         raise typer.Exit(code=1)
 
     entity_name = resource_name.capitalize()
@@ -111,10 +115,13 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
         typer.echo(f"  - Créé : {comp['dir']}/{target_file_name}")
 
-    typer.secho(f"✅ Architecture {entity_name} complète générée avec succès !", fg=typer.colors.GREEN)
+    typer.secho(
+        f"✅ Architecture {entity_name} complète générée avec succès !",
+        fg=typer.colors.GREEN
+    )
 
 
-def generate_spring_security(root_path: str = "."):
+def generate_spring_security(_root_path: str = "."):
     """
     Génère la base de sécurité JWT de manière dynamique.
     """
@@ -122,7 +129,10 @@ def generate_spring_security(root_path: str = "."):
     base_package, base_path = find_spring_base_package_and_path()
 
     if not base_package:
-        typer.secho("❌ Erreur : Impossible de localiser le package Java pour la sécurité.", fg=typer.colors.RED)
+        typer.secho(
+            "❌ Erreur : Impossible de localiser le package Java pour la sécurité.",
+            fg=typer.colors.RED
+        )
         return
 
     # Création du dossier config au bon endroit
