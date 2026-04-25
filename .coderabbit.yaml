@@ -1,0 +1,13 @@
+# CodeRabbit Configuration
+reviews:
+  profile: "professional"
+  request_reviews_from_completions: true
+  path_filters:
+    - "!templates/**" # Ignore template files
+    - "**/*.py"       # Focus on Python logic
+instructions: >
+  You are reviewing 'devctl', a CLI tool for scaffolding Spring and Angular projects.
+  Focus on:
+  - Robustness of the environment detection logic in scanner.py.
+  - Correctness of the CLI commands and Typer usage.
+  - Security of file operations and API calls.

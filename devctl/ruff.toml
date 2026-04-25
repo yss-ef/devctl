@@ -1,0 +1,12 @@
+# Ruff configuration
+line-length = 100
+target-version = "py310"
+
+[lint]
+# Enable Pyflakes (F), Pycodestyle (E, W), Isort (I), and Typer-specific checks if any
+select = ["E", "F", "W", "I", "B", "C4", "ARG"]
+ignore = []
+
+[format]
+quote-style = "double"
+indent-style = "space"
