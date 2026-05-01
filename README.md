@@ -1,42 +1,40 @@
 # devctl — Local Development Orchestrator
- 
-`devctl` is a powerful command-line interface (CLI) designed to automate and orchestrate the local development lifecycle, specifically tailored for **Spring Boot**, **Angular**, and **Vue.js** architectures.
 
-## 🌟 Why devctl?
+`devctl` is a command-line interface (CLI) designed to automate and orchestrate the local development lifecycle, specifically tailored for Spring Boot, Angular, and Vue.js architectures.
 
-Setting up a modern full-stack environment often involves repetitive and error-prone tasks:
-*   Configuring Docker databases and connection strings.
-*   Setting up boilerplate security (JWT, Filters, Config).
-*   Manually creating CRUD layers (Entity, Repository, Service, Controller).
-*   Managing multiple terminal windows to run the database, backend, and frontend simultaneously.
-*   Ensuring the environment is cleaned up after development.
+## Purpose
 
-**devctl** solves these problems by providing a single point of control. It automates the "boring parts" so you can focus on writing business logic.
+Modern full-stack development involves repetitive configuration and environment management tasks that are prone to human error. `devctl` provides a unified point of control to automate these processes, allowing developers to focus on implementation rather than infrastructure.
 
-## 🏗️ How it works
+Key challenges addressed:
+*   Standardized database configuration via Docker.
+*   Automated security boilerplate generation (JWT, Filters, Configuration).
+*   Surgical CRUD layer generation (Entity, Repository, Service, Controller).
+*   Concurrent process management for multi-tier applications.
+*   Automated environment cleanup.
 
-`devctl` is built with a modular architecture using **Python 3**:
+## Architecture and Integration
 
-*   **CLI Engine**: Uses [Typer](https://typer.tiangolo.com/) for a modern, type-hinted command-line experience.
-*   **Templating**: Leverages [Jinja2](https://palletsprojects.com/p/jinja/) to dynamically generate Java code, TypeScript, and configuration files.
-*   **Spring Integration**: Communicates with the [Spring Initializr API](https://start.spring.io/) to download tailored project structures.
-*   **Frontend Generation**: Orchestrates `@angular/cli` and `Vite` to bootstrap modern frontend projects.
-*   **Smart Orchestration**: Uses a recursive scanning engine to detect projects in your directory and manages them as parallel system processes.
-*   **Docker Management**: Automatically handles `docker-compose` lifecycles, including volume cleanup.
+The tool is built on a modular Python 3 architecture leveraging industry-standard libraries:
 
-## 📋 System Prerequisites
+*   **CLI Engine**: Typer-based interface for type-safe command execution.
+*   **Templating**: Jinja2 for dynamic generation of Java, TypeScript, and configuration assets.
+*   **Spring Integration**: Integration with the Spring Initializr API for tailored project bootstrapping.
+*   **Frontend Orchestration**: Native support for @angular/cli and Vite.
+*   **Orchestration Engine**: Recursive scanning for project detection and parallel process management.
+*   **Container Management**: Lifecycle management for Docker Compose, including volume persistence control.
 
-Before installing, ensure you have the following tools available:
+## System Requirements
 
-*   **Python** >= 3.9
-*   **Docker** & **Docker Compose**
-*   **Java 17+** (for Spring Boot)
-*   **Node.js** & **npm** (for Angular/Vue.js)
-*   **Angular CLI** (`npm install -g @angular/cli`) - *Required for Angular projects*
+The following dependencies must be available in the system path:
 
-## 🛠️ Installation Guide
+*   **Python**: >= 3.9
+*   **Docker & Docker Compose**
+*   **Java**: 17+ (for Spring Boot modules)
+*   **Node.js & npm**: (for Angular/Vue.js modules)
+*   **Angular CLI**: Required for Angular project initialization.
 
-Follow these steps to set up `devctl` locally:
+## Installation
 
 1.  **Clone the repository**:
     ```bash
@@ -44,15 +42,14 @@ Follow these steps to set up `devctl` locally:
     cd devctl
     ```
 
-2.  **Create a virtual environment (Recommended)**:
+2.  **Configure a virtual environment**:
     ```bash
     python -m venv .venv
-    source .venv/bin/bin/activate  # On Linux/macOS
-    # .venv\Scripts\activate      # On Windows
+    source .venv/bin/activate  # Linux/macOS
+    # .venv\Scripts\activate   # Windows
     ```
 
-3.  **Install in editable mode**:
-    This allows you to use the `devctl` command globally while reflecting any code changes immediately.
+3.  **Install the package**:
     ```bash
     pip install -e .
     ```
@@ -62,59 +59,47 @@ Follow these steps to set up `devctl` locally:
     devctl ping
     ```
 
-## 📖 Command Reference
+## Command Reference
 
-### 1. Project Initialization (`devctl init`)
+### Project Initialization
 
-Initialize a new project from scratch with pre-configured defaults.
+Bootstrap new projects with pre-configured defaults and security standards.
 
-*   **Spring Boot**: Downloads a project with Security (JWT), JPA, and chosen DB.
+*   **Spring Boot**:
     ```bash
-    devctl init spring "my-api" --db [postgres|mysql] --port 5432
+    devctl init spring "api-service" --db [postgres|mysql] --port 5432
     ```
-*   **Angular**: Bootstraps an Angular project with Routing, SCSS, and Proxy configuration.
+*   **Angular**:
     ```bash
-    devctl init angular "my-front"
+    devctl init angular "web-client"
     ```
-*   **Vue.js**: Bootstraps a Vue 3 + TypeScript project via Vite with `vue-router` and proxy.
+*   **Vue.js**:
     ```bash
-    devctl init vue "my-vue-front"
+    devctl init vue "vue-client"
     ```
 
-### 2. Scaffolding (`devctl add`)
+### Resource Scaffolding
 
-Add business resources to your existing projects. This command scans the current directory and injects code into both detected Backend and Frontend projects.
+Inject business resources into existing project structures. The command automatically detects active modules and updates both backend and frontend layers.
 
-*   **Resource Generation**: Generates Entity, Repository, Service, Controller (Spring) and Models, Services, Components (Angular).
-    ```bash
-    devctl add resource "Product" --fields "name:string,price:double,quantity:int"
-    ```
-    *Supported types: string, int, double, float, boolean, date.*
+```bash
+devctl add resource "Product" --fields "name:string,price:double,quantity:int"
+```
+*Supported types: string, int, double, float, boolean, date.*
 
-### 3. One-Click Run (`devctl run`)
+### Orchestration
 
-The heart of `devctl`. It scans your current folder tree, identifies all components, and launches them.
+Scan the current directory tree and launch all detected components (Database, Backend, Frontend) in parallel.
 
 ```bash
 devctl run
 ```
 
-**What happens behind the scenes:**
-1.  **Docker**: Runs `docker compose up -d` for the database.
-2.  **Backend**: Runs `./mvnw spring-boot:run` for Spring projects.
-3.  **Frontend**: Runs `npx ng serve` (Angular) or `npm run dev` (Vue.js).
-4.  **Cleanup**: When you press **Ctrl+C**, `devctl` stops all processes and runs `docker compose down -v` to leave your system clean.
+Upon termination (Ctrl+C), `devctl` gracefully stops all processes and performs a clean teardown of Docker resources.
 
-### 4. Utility (`devctl ping`)
-
-A simple health check to ensure the CLI is properly installed and responsive.
-```bash
-devctl ping
-```
-
----
-*Authored by Youssef Fellah.*
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+Authored by Youssef Fellah.
