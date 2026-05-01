@@ -13,8 +13,5 @@ build/
 dist/
 *.egg-info/
 
-# Dossiers de tests générés par l'outil (Très important)
-test/
-
 # Dossier pycharm
 .idea/
