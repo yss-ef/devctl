@@ -10,61 +10,60 @@ from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
 # L'application Typer locale pour le groupe de commandes "init"
-app = typer.Typer(help="Initialise un nouveau projet selon le framework choisi.")
+app = typer.Typer(help="Initializes a new project based on the chosen framework.")
 
 
 @app.command("spring")
 def init_spring(
     name: str,
-    db: str = typer.Option("postgres", help="Type de base de données (postgres ou mysql)"),
-    port: int = typer.Option(None, help="Port local (optionnel)"),
+    db: str = typer.Option("postgres", help="Database type (postgres or mysql)"),
+    port: int = typer.Option(None, help="Local port (optional)"),
 ):
     """
-    Initialise un nouveau projet backend Spring Boot avec sa base de données.
+    Initializes a new Spring Boot backend project with its database.
     """
     check_tool("java", "initializing a Spring Boot project")
     
     # Validation stricte des entrées
     if db not in ["postgres", "mysql"]:
         typer.secho(
-            f"❌ Erreur : La base de données '{db}' n'est pas supportée.", fg=typer.colors.RED
+            f"❌ Error: Database '{db}' is not supported.", fg=typer.colors.RED
         )
         raise typer.Exit(code=1)
 
-    typer.echo(f"🚀 Initialisation d'un projet Spring Boot : '{name}'...")
+    typer.secho(f"🚀 Initializing Spring Boot project: '{name}'...", fg=typer.colors.CYAN)
 
     success_download = download_spring_boilerplate(name, db_type=db)
 
     if success_download:
         generate_config(name, db_type=db, custom_port=port)
-        typer.secho("\n✨ Projet Spring prêt !", fg=typer.colors.CYAN)
+        typer.secho("\n✨ Spring project ready!", fg=typer.colors.GREEN)
 
 
 @app.command("angular")
 def init_angular(name: str):
     """
-    (Bientôt) Initialise un nouveau projet frontend Angular.
+    Initializes a new Angular frontend project.
     """
     check_tool("npm", "initializing an Angular project")
     check_tool("ng", "initializing an Angular project")
 
-    # Pour l'instant, c'est juste un espace réservé (placeholder)
-    typer.echo(f"🚀 Initialisation d'un projet Angular : '{name}'...")
+    typer.secho(f"🚀 Initializing Angular project: '{name}'...", fg=typer.colors.CYAN)
     success = generate_angular_boilerplate(name)
 
     if success:
-        typer.secho("\n✨ Projet Angular prêt !", fg=typer.colors.CYAN)
+        typer.secho("\n✨ Angular project ready!", fg=typer.colors.GREEN)
 
 
 @app.command("vue")
 def init_vue(name: str):
     """
-    Initialise un nouveau projet frontend Vue.js (Vite + TS).
+    Initializes a new Vue.js frontend project (Vite + TS).
     """
     check_tool("npm", "initializing a Vue.js project")
     
-    typer.echo(f"🚀 Initialisation d'un projet Vue.js : '{name}'...")
+    typer.secho(f"🚀 Initializing Vue.js project: '{name}'...", fg=typer.colors.CYAN)
     success = generate_vue_boilerplate(name)
 
     if success:
-        typer.secho("\n✨ Projet Vue.js prêt !", fg=typer.colors.CYAN)
+        typer.secho("\n✨ Vue.js project ready!", fg=typer.colors.GREEN)

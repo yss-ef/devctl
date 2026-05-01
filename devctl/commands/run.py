@@ -4,18 +4,18 @@ from devctl.orchestrator.runner import launch_dev_environment
 from devctl.orchestrator.scanner import detect_environment
 from devctl.utils.dependencies import check_tool
 
-app = typer.Typer(help="Commandes d'exécution et de développement local.")
+app = typer.Typer(help="Local execution and development commands.")
 
 
 @app.callback(invoke_without_command=True)
 def run_env(ctx: typer.Context):
     """
-    Scanne l'arborescence courante et lance automatiquement Spring, Angular et la Base de données.
+    Scans the current tree and automatically launches Spring, Angular, and the Database.
     """
     if ctx.invoked_subcommand is not None:
         return
 
-    typer.echo("🔍 Analyse de l'arborescence courante...")
+    typer.secho("🔍 Analyzing the current directory tree...", fg=typer.colors.CYAN)
     env_state = detect_environment(".")
     
     # Check dependencies based on detection
@@ -29,10 +29,10 @@ def run_env(ctx: typer.Context):
         check_tool("npm", "running the frontend project")
 
     # Résumé visuel de la détection pour l'utilisateur
-    typer.echo(f"  - Base de données Docker : {'✅' if env_state['has_docker_compose'] else '❌'}")
-    typer.echo(f"  - Backend Spring Boot  : {'✅' if env_state['has_spring'] else '❌'}")
-    typer.echo(f"  - Frontend Angular     : {'✅' if env_state['has_angular'] else '❌'}")
-    typer.echo(f"  - Frontend Vue.js      : {'✅' if env_state['has_vue'] else '❌'}")
+    typer.echo(f"  - Docker Database  : {'✅' if env_state['has_docker_compose'] else '❌'}")
+    typer.echo(f"  - Spring Boot Backend : {'✅' if env_state['has_spring'] else '❌'}")
+    typer.echo(f"  - Angular Frontend    : {'✅' if env_state['has_angular'] else '❌'}")
+    typer.echo(f"  - Vue.js Frontend     : {'✅' if env_state['has_vue'] else '❌'}")
 
     has_env = any(
         [
@@ -45,7 +45,7 @@ def run_env(ctx: typer.Context):
 
     if not has_env:
         typer.secho(
-            "\n❌ Aucun environnement de développement valide détecté ici.", fg=typer.colors.RED
+            "\n❌ No valid development environment detected here.", fg=typer.colors.RED
         )
         raise typer.Exit(code=1)
 

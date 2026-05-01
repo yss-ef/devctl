@@ -4,20 +4,20 @@ import typer
 from devctl.commands import add, init, run
 
 # Création de l'application Typer principale
-app = typer.Typer(help="devctl : L'orchestrateur local pour tes projets Spring/Angular")
+app = typer.Typer(help="devctl: Local orchestrator for your Spring/Angular projects")
 
 # Câblage des sous-menus
-app.add_typer(init.app, name="init", help="Initialise un nouveau projet avec sa base de code.")
+app.add_typer(init.app, name="init", help="Initialize a new project with its codebase.")
 app.add_typer(
-    run.app, name="run", help="Lance l'environnement de développement local en parallèle."
+    run.app, name="run", help="Launch the local development environment in parallel."
 )
-app.add_typer(add.app, name="add", help="Génère du code et des ressources métier.")
+app.add_typer(add.app, name="add", help="Generate code and business resources.")
 
 
 @app.callback()
 def callback():
     """
-    devctl : L'orchestrateur local pour tes projets
+    devctl: Local orchestrator for your projects
     """
     # Ce callback vide permet à Typer de comprendre qu'il gère un menu multi-commandes
     pass
@@ -26,10 +26,10 @@ def callback():
 @app.command()
 def ping():
     """
-    Commande de test pour vérifier que le CLI répond.
+    Health check command to verify the CLI is responding.
     """
     typer.secho(
-        "pong ! Le CLI devctl est parfaitement opérationnel.", fg=typer.colors.GREEN, bold=True
+        "pong! The devctl CLI is perfectly operational.", fg=typer.colors.GREEN, bold=True
     )
 
 

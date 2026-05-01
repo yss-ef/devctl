@@ -11,10 +11,10 @@ from devctl.generators.scaffold_spring import generate_spring_security
 
 def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
     """
-    Télécharge et extrait un projet Spring Boot via l'API start.spring.io.
-    Rend automatiquement le wrapper Maven exécutable sous Unix.
+    Downloads and extracts a Spring Boot project via the start.spring.io API.
+    Automatically makes the Maven wrapper executable on Unix.
     """
-    typer.echo(f"🔄 Génération du backend Spring Boot '{project_name}' (Driver: {db_type})...")
+    typer.secho(f"🔄 Generating Spring Boot backend '{project_name}' (Driver: {db_type})...", fg=typer.colors.CYAN)
 
     # Règle Java : un nom de package ne peut pas contenir de tirets
     safe_package_name = project_name.replace("-", "").replace("_", "").lower()
@@ -54,7 +54,7 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         response = requests.get(url, params=params)
 
         if response.status_code != 200:
-            typer.secho(f"❌ Refus de l'API : {response.text}", fg=typer.colors.RED)
+            typer.secho(f"❌ API Rejected: {response.text}", fg=typer.colors.RED)
             return False
 
         z = zipfile.ZipFile(io.BytesIO(response.content))
@@ -72,11 +72,11 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         os.chdir("..")
 
         typer.secho(
-            f"✅ Backend généré avec succès dans le dossier ./{project_name} !",
+            f"✅ Backend successfully generated in folder ./{project_name}!",
             fg=typer.colors.GREEN,
         )
         return True
 
     except requests.exceptions.RequestException as e:
-        typer.secho(f"❌ Erreur réseau lors du contact de l'API : {e}", fg=typer.colors.RED)
+        typer.secho(f"❌ Network error contacting API: {e}", fg=typer.colors.RED)
         return False

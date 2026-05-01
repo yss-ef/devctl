@@ -8,9 +8,9 @@ from jinja2 import Environment, FileSystemLoader
 
 def setup_angular_environments(project_path: str):
     """
-    Génère les environnements et le proxy pour un projet Angular.
+    Generates environments and proxy for an Angular project.
     """
-    typer.echo("⚙️  Configuration du Proxy et des Environnements...")
+    typer.secho("⚙️  Configuring Proxy and Environments...", fg=typer.colors.CYAN)
 
     # 1. Chemins cibles
     src_dir = os.path.join(project_path, "src")
@@ -70,9 +70,9 @@ def setup_angular_environments(project_path: str):
 
 def generate_angular_boilerplate(project_name: str) -> bool:
     """
-    Génère un projet Angular via le CLI natif (@angular/cli) et le configure.
+    Generates an Angular project via the native CLI (@angular/cli) and configures it.
     """
-    typer.echo(f"🔄 Génération du frontend Angular '{project_name}'...")
+    typer.secho(f"🔄 Generating Angular frontend '{project_name}'...", fg=typer.colors.CYAN)
 
     safe_name = project_name.lower().replace("_", "-")
 
@@ -80,20 +80,20 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         subprocess.run(["ng", "version"], capture_output=True, check=True)
     except FileNotFoundError:
         typer.secho(
-            "❌ Erreur : Le CLI Angular ('ng') est introuvable sur ton système.",
+            "❌ Error: Angular CLI ('ng') not found on your system.",
             fg=typer.colors.RED,
         )
         return False
     except subprocess.CalledProcessError:
         typer.secho(
-            "❌ Erreur : Le CLI Angular est installé mais ne répond pas.", fg=typer.colors.RED
+            "❌ Error: Angular CLI is installed but not responding.", fg=typer.colors.RED
         )
         return False
 
     try:
         command = ["ng", "new", safe_name, "--routing=true", "--style=scss", "--skip-git=true"]
 
-        typer.echo("📦 Téléchargement des packages npm... (Cela peut prendre 1 à 2 minutes)")
+        typer.secho("📦 Downloading npm packages... (This may take 1-2 minutes)", fg=typer.colors.CYAN)
         subprocess.run(command, check=True)
 
         # --- NOUVEAU : Appel de la configuration post-installation ---
@@ -102,12 +102,12 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         # -------------------------------------------------------------
 
         typer.secho(
-            f"✅ Frontend '{safe_name}' généré et configuré avec succès !", fg=typer.colors.GREEN
+            f"✅ Frontend '{safe_name}' successfully generated and configured!", fg=typer.colors.GREEN
         )
         return True
 
     except subprocess.CalledProcessError as e:
         typer.secho(
-            f"❌ Le processus Angular a échoué avec le code : {e.returncode}", fg=typer.colors.RED
+            f"❌ Angular process failed with code: {e.returncode}", fg=typer.colors.RED
         )
         return False

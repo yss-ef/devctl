@@ -11,7 +11,7 @@ def test_init_spring_unsupported_db():
     with patch("devctl.commands.init.check_tool"):
         result = runner.invoke(app, ["init", "spring", "my-api", "--db", "sqlite"])
         assert result.exit_code == 1
-        assert "n'est pas supportée" in result.stdout
+        assert "is not supported" in result.stdout
 
 def test_run_no_environment():
     """Ensure run command fails when no project is detected."""
@@ -24,7 +24,7 @@ def test_run_no_environment():
         }
         result = runner.invoke(app, ["run"])
         assert result.exit_code == 1
-        assert "Aucun environnement de développement valide" in result.stdout
+        assert "No valid development environment detected" in result.stdout
 
 def test_add_resource_no_project():
     """Ensure add resource fails when not in a project."""
@@ -35,4 +35,4 @@ def test_add_resource_no_project():
         }
         result = runner.invoke(app, ["add", "resource", "User"])
         assert result.exit_code == 1
-        assert "Impossible de déterminer le type de projet" in result.stdout
+        assert "Unable to determine project type" in result.stdout

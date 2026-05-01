@@ -63,7 +63,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
     if not base_package:
         typer.secho(
-            "❌ Erreur : Impossible de trouver un projet Spring Boot valide ici.",
+            "❌ Error: Unable to find a valid Spring Boot project here.",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)
@@ -84,7 +84,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring")
     env = Environment(loader=FileSystemLoader(templates_dir))
 
-    typer.echo(f"⚙️ Génération de la ressource Spring '{entity_name}' (avec MapStruct & DTOs)...")
+    typer.secho(f"⚙️  Generating Spring resource '{entity_name}' (with MapStruct & DTOs)...", fg=typer.colors.CYAN)
 
     for comp in components:
         class_name = f"{entity_name}{comp['suffix']}"
@@ -110,23 +110,23 @@ def generate_spring_resource(resource_name: str, fields_str: str):
         with open(os.path.join(target_dir, target_file_name), "w", encoding="utf-8") as f:
             f.write(content)
 
-        typer.echo(f"  - Créé : {comp['dir']}/{target_file_name}")
+        typer.echo(f"  - Created: {comp['dir']}/{target_file_name}")
 
     typer.secho(
-        f"✅ Architecture {entity_name} complète générée avec succès !", fg=typer.colors.GREEN
+        f"✅ {entity_name} architecture successfully generated!", fg=typer.colors.GREEN
     )
 
 
 def generate_spring_security(_root_path: str = "."):
     """
-    Génère la base de sécurité JWT de manière dynamique.
+    Dynamically generates the JWT security base.
     """
     # Réutilisation de ta fonction de détection dynamique
     base_package, base_path = find_spring_base_package_and_path()
 
     if not base_package:
         typer.secho(
-            "❌ Erreur : Impossible de localiser le package Java pour la sécurité.",
+            "❌ Error: Unable to locate Java package for security.",
             fg=typer.colors.RED,
         )
         return
@@ -146,7 +146,7 @@ def generate_spring_security(_root_path: str = "."):
         "ApplicationConfig.java",
     ]
 
-    typer.echo(f"🛡️  Injection de la sécurité JWT dans {base_package}.config...")
+    typer.secho(f"🛡️  Injecting JWT security into {base_package}.config...", fg=typer.colors.CYAN)
 
     for filename in security_files:
         template = env.get_template(f"{filename}.j2")
@@ -154,6 +154,6 @@ def generate_spring_security(_root_path: str = "."):
 
         with open(os.path.join(target_dir, filename), "w", encoding="utf-8") as f:
             f.write(content)
-        typer.echo(f"  - Créé : config/{filename}")
+        typer.echo(f"  - Created: config/{filename}")
 
-    typer.secho("✅ Sécurité initialisée avec succès !", fg=typer.colors.GREEN)
+    typer.secho("✅ Security initialized successfully!", fg=typer.colors.GREEN)

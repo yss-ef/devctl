@@ -38,7 +38,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     env_state = detect_environment(root_path)
 
     if not env_state["has_angular"]:
-        typer.secho("❌ Erreur : Aucun projet Angular détecté ici.", fg=typer.colors.RED)
+        typer.secho("❌ Error: No Angular project detected here.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     angular_root = env_state["angular_path"]
@@ -115,7 +115,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "angular", "feature")
     env = Environment(loader=FileSystemLoader(templates_dir))
 
-    typer.echo(f"⚙️ Génération de la feature Angular '{entity_name}'...")
+    typer.secho(f"⚙️  Generating Angular feature '{entity_name}'...", fg=typer.colors.CYAN)
 
     # Données pour les templates
     context = {
@@ -140,8 +140,8 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             with open(os.path.join(target_dir, target_file_name), "w", encoding="utf-8") as f:
                 f.write(content)
 
-            display_dir = comp["dir"] if comp["dir"] else "racine feature"
-            typer.echo(f"  - Créé : {display_dir}/{target_file_name}")
+            display_dir = comp["dir"] if comp["dir"] else "feature root"
+            typer.echo(f"  - Created: {display_dir}/{target_file_name}")
 
         except Exception as e:
             # Astuce : si tu n'as pas créé de template .scss.j2, ça crée un fichier vide
@@ -149,10 +149,10 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             if comp["ext"] == ".scss":
                 with open(os.path.join(target_dir, target_file_name), "w") as f:
                     f.write("")
-                typer.echo(f"  - Créé (vide) : {comp['dir']}/{target_file_name}")
+                typer.echo(f"  - Created (empty): {comp['dir']}/{target_file_name}")
             else:
-                typer.secho(f"⚠️ Erreur sur {comp['template']} : {e}", fg=typer.colors.YELLOW)
+                typer.secho(f"⚠️  Error on {comp['template']}: {e}", fg=typer.colors.YELLOW)
 
     typer.secho(
-        f"✅ Feature {entity_name} générée avec succès côté Angular !", fg=typer.colors.GREEN
+        f"✅ {entity_name} feature successfully generated!", fg=typer.colors.GREEN
     )
