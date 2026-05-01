@@ -7,9 +7,9 @@ from jinja2 import Environment, FileSystemLoader
 
 def setup_vue_proxy(project_path: str):
     """
-    Remplace le fichier vite.config.ts généré par défaut par notre version incluant le proxy.
+    Replaces the default vite.config.ts with our version including the proxy.
     """
-    typer.echo("⚙️  Configuration du Proxy Vite pour Spring Boot...")
+    typer.secho("⚙️  Configuring Vite Proxy for Spring Boot...", fg=typer.colors.CYAN)
 
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "vue", "config")
     env = Environment(loader=FileSystemLoader(templates_dir))
@@ -21,16 +21,16 @@ def setup_vue_proxy(project_path: str):
         content = template.render()
         with open(target_path, "w", encoding="utf-8") as f:
             f.write(content)
-        typer.echo("  - vite.config.ts mis à jour avec le proxy /api.")
+        typer.echo("  - vite.config.ts updated with /api proxy.")
     except Exception as e:
-        typer.secho(f"⚠️  Erreur lors de la configuration du proxy : {e}", fg=typer.colors.YELLOW)
+        typer.secho(f"⚠️  Error configuring proxy: {e}", fg=typer.colors.YELLOW)
 
 
 def setup_vue_router(project_path: str):
     """
-    Installe vue-router et configure l'architecture de base (main.ts, router, App.vue).
+    Installs vue-router and configures the base architecture (main.ts, router, App.vue).
     """
-    typer.echo("🛣️  Installation et configuration de vue-router...")
+    typer.secho("🛣️  Installing and configuring vue-router...", fg=typer.colors.CYAN)
 
     try:
         # 1. Installation du package npm
@@ -62,39 +62,39 @@ def setup_vue_router(project_path: str):
             with open(target_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
-        typer.echo("  - Architecture de navigation prête.")
+        typer.echo("  - Navigation architecture ready.")
     except Exception as e:
-        typer.secho(f"⚠️  Erreur lors de la configuration du routeur : {e}", fg=typer.colors.YELLOW)
+        typer.secho(f"⚠️  Error configuring router: {e}", fg=typer.colors.YELLOW)
 
 
 def generate_vue_boilerplate(project_name: str) -> bool:
     """
-    Génère un projet Vue 3 + TypeScript via Vite.
+    Generates a Vue 3 + TypeScript project via Vite.
     """
-    typer.echo(f"🔄 Génération du frontend Vue.js '{project_name}' via Vite...")
+    typer.secho(f"🔄 Generating Vue.js frontend '{project_name}' via Vite...", fg=typer.colors.CYAN)
     safe_name = project_name.lower().replace("_", "-")
 
     try:
-        typer.echo("📦 Scaffolding du projet Vite...")
+        typer.secho("📦 Scaffolding Vite project...", fg=typer.colors.CYAN)
         subprocess.run(
             ["npm", "create", "vite@latest", safe_name, "--", "--template", "vue-ts"], check=True
         )
 
         project_full_path = os.path.join(os.getcwd(), safe_name)
 
-        typer.echo("⏳ Installation des dépendances npm...")
+        typer.secho("⏳ Installing npm dependencies...", fg=typer.colors.CYAN)
         subprocess.run(["npm", "install"], cwd=project_full_path, check=True)
 
         # --- APPEL DE NOS DEUX CONFIGURATEURS ---
         setup_vue_proxy(project_full_path)
-        setup_vue_router(project_full_path)  # NOUVEAU
+        setup_vue_router(project_full_path)
         # ----------------------------------------
 
-        typer.secho(f"✅ Frontend Vue.js '{safe_name}' généré avec succès !", fg=typer.colors.GREEN)
+        typer.secho(
+            f"✅ Vue.js frontend '{safe_name}' successfully generated!", fg=typer.colors.GREEN
+        )
         return True
 
     except subprocess.CalledProcessError as e:
-        typer.secho(
-            f"❌ Le processus Vue/Vite a échoué avec le code : {e.returncode}", fg=typer.colors.RED
-        )
+        typer.secho(f"❌ Vue/Vite process failed with code: {e.returncode}", fg=typer.colors.RED)
         return False

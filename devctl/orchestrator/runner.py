@@ -26,7 +26,7 @@ def launch_dev_environment(env_state: dict):
         # 4. Lancement du Frontend Vue.js
         if env_state.get("has_vue"):
             typer.secho(
-                f"🟢 Démarrage de Vue.js depuis {env_state['vue_path']}...", fg=typer.colors.GREEN
+                f"🟢 Starting Vue.js from {env_state['vue_path']}...", fg=typer.colors.GREEN
             )
 
             p_vue = subprocess.Popen(
@@ -38,12 +38,12 @@ def launch_dev_environment(env_state: dict):
         # 1. Lancement de la Base de données
         if env_state["has_docker_compose"]:
             if not is_docker_running():
-                typer.secho("❌ Erreur : Le service Docker n'est pas démarré.", fg=typer.colors.RED)
-                typer.echo("💡 Astuce : sudo systemctl start docker")
+                typer.secho("❌ Error: Docker service is not running.", fg=typer.colors.RED)
+                typer.echo("💡 Hint: sudo systemctl start docker")
                 sys.exit(1)
 
             typer.secho(
-                f"🐳 Démarrage de Docker depuis {env_state['docker_path']}...", fg=typer.colors.BLUE
+                f"🐳 Starting Docker from {env_state['docker_path']}...", fg=typer.colors.CYAN
             )
             subprocess.run(
                 ["docker", "compose", "up", "-d"], cwd=env_state["docker_path"], check=True
@@ -53,7 +53,7 @@ def launch_dev_environment(env_state: dict):
             # 2. Lancement du Backend Spring Boot
         if env_state["has_spring"]:
             typer.secho(
-                f"🍃 Démarrage de Spring Boot depuis {env_state['spring_path']}...",
+                f"🍃 Starting Spring Boot from {env_state['spring_path']}...",
                 fg=typer.colors.GREEN,
             )
 
@@ -64,7 +64,7 @@ def launch_dev_environment(env_state: dict):
         # 3. Lancement du Frontend Angular
         if env_state["has_angular"]:
             typer.secho(
-                f"🅰️ Démarrage d'Angular depuis {env_state['angular_path']}...", fg=typer.colors.RED
+                f"🅰️ Starting Angular from {env_state['angular_path']}...", fg=typer.colors.CYAN
             )
 
             # Exécution native Linux
@@ -73,15 +73,14 @@ def launch_dev_environment(env_state: dict):
 
         if not processes and not env_state["has_docker_compose"]:
             typer.secho(
-                "⚠️ Aucun projet Spring, Angular, Vue.js ou DB détecté dans cette arborescence.",
+                "⚠️ No Spring, Angular, Vue.js or DB project detected in this tree.",
                 fg=typer.colors.YELLOW,
             )
             return
 
         typer.secho(
-            "\n✨ Environnement de développement actif ! Appuie sur Ctrl+C "
-            "pour tout arrêter proprement.\n",
-            fg=typer.colors.CYAN,
+            "\n✨ Development environment active! Press Ctrl+C to stop everything gracefully.\n",
+            fg=typer.colors.GREEN,
             bold=True,
         )
 
@@ -90,19 +89,19 @@ def launch_dev_environment(env_state: dict):
 
     except KeyboardInterrupt:
         typer.secho(
-            "\n🛑 Arrêt demandé. Nettoyage complet en cours (Merci de patienter, "
-            "ne pas refaire Ctrl+C)...",
+            "\n🛑 Shutdown requested. Performing full cleanup (Please wait, "
+            "do not press Ctrl+C again)...",
             fg=typer.colors.YELLOW,
             bold=True,
         )
 
         for name, p in processes:
-            typer.echo(f"Fermeture de {name}...")
+            typer.echo(f"Closing {name}...")
             p.terminate()
             p.wait()
 
         if env_state["has_docker_compose"]:
-            typer.echo("Destruction de la base de données et des volumes Docker...")
+            typer.echo("Destroying database and Docker volumes...")
             try:
                 subprocess.run(
                     ["docker", "compose", "down", "-v"],
@@ -112,14 +111,12 @@ def launch_dev_environment(env_state: dict):
                 )
             except subprocess.CalledProcessError:
                 typer.secho(
-                    "⚠️ Attention : Le nettoyage Docker ne s'est pas terminé correctement.",
+                    "⚠️ Warning: Docker cleanup did not complete correctly.",
                     fg=typer.colors.RED,
                 )
 
-        typer.secho(
-            "✅ Nettoyage terminé. Environnement parfaitement propre.", fg=typer.colors.GREEN
-        )
+        typer.secho("✅ Cleanup finished. Environment is perfectly clean.", fg=typer.colors.GREEN)
         sys.exit(0)
 
     except Exception as e:
-        typer.secho(f"❌ Une erreur système est survenue : {e}", fg=typer.colors.RED)
+        typer.secho(f"❌ A system error occurred: {e}", fg=typer.colors.RED)

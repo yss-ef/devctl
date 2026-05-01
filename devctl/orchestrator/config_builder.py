@@ -40,10 +40,10 @@ def generate_config(project_name: str, db_type: str = "postgres", custom_port: i
                 f.write(props_template.render(context))
 
         typer.secho(
-            f"⚙️ Configuration dynamique ({db_type} sur le port {db_port}) générée.",
+            f"⚙️  Dynamic configuration ({db_type} on port {db_port}) generated.",
             fg=typer.colors.GREEN,
         )
         return True
     except Exception as e:
-        typer.secho(f"❌ Erreur de configuration : {e}", fg=typer.colors.RED)
+        typer.secho(f"❌ Configuration error: {e}", fg=typer.colors.RED)
         return False
