@@ -90,11 +90,11 @@ def generate_vue_boilerplate(project_name: str) -> bool:
         setup_vue_router(project_full_path)
         # ----------------------------------------
 
-        typer.secho(f"✅ Vue.js frontend '{safe_name}' successfully generated!", fg=typer.colors.GREEN)
+        typer.secho(
+            f"✅ Vue.js frontend '{safe_name}' successfully generated!", fg=typer.colors.GREEN
+        )
         return True
 
     except subprocess.CalledProcessError as e:
-        typer.secho(
-            f"❌ Vue/Vite process failed with code: {e.returncode}", fg=typer.colors.RED
-        )
+        typer.secho(f"❌ Vue/Vite process failed with code: {e.returncode}", fg=typer.colors.RED)
         return False

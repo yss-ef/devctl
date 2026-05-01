@@ -153,6 +153,4 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             else:
                 typer.secho(f"⚠️  Error on {comp['template']}: {e}", fg=typer.colors.YELLOW)
 
-    typer.secho(
-        f"✅ {entity_name} feature successfully generated!", fg=typer.colors.GREEN
-    )
+    typer.secho(f"✅ {entity_name} feature successfully generated!", fg=typer.colors.GREEN)

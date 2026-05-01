@@ -84,7 +84,10 @@ def generate_spring_resource(resource_name: str, fields_str: str):
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring")
     env = Environment(loader=FileSystemLoader(templates_dir))
 
-    typer.secho(f"⚙️  Generating Spring resource '{entity_name}' (with MapStruct & DTOs)...", fg=typer.colors.CYAN)
+    typer.secho(
+        f"⚙️  Generating Spring resource '{entity_name}' (with MapStruct & DTOs)...",
+        fg=typer.colors.CYAN,
+    )
 
     for comp in components:
         class_name = f"{entity_name}{comp['suffix']}"
@@ -112,9 +115,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
         typer.echo(f"  - Created: {comp['dir']}/{target_file_name}")
 
-    typer.secho(
-        f"✅ {entity_name} architecture successfully generated!", fg=typer.colors.GREEN
-    )
+    typer.secho(f"✅ {entity_name} architecture successfully generated!", fg=typer.colors.GREEN)
 
 
 def generate_spring_security(_root_path: str = "."):

@@ -79,8 +79,7 @@ def launch_dev_environment(env_state: dict):
             return
 
         typer.secho(
-            "\n✨ Development environment active! Press Ctrl+C "
-            "to stop everything gracefully.\n",
+            "\n✨ Development environment active! Press Ctrl+C to stop everything gracefully.\n",
             fg=typer.colors.GREEN,
             bold=True,
         )
@@ -116,9 +115,7 @@ def launch_dev_environment(env_state: dict):
                     fg=typer.colors.RED,
                 )
 
-        typer.secho(
-            "✅ Cleanup finished. Environment is perfectly clean.", fg=typer.colors.GREEN
-        )
+        typer.secho("✅ Cleanup finished. Environment is perfectly clean.", fg=typer.colors.GREEN)
         sys.exit(0)
 
     except Exception as e:

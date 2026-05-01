@@ -14,7 +14,10 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
     Downloads and extracts a Spring Boot project via the start.spring.io API.
     Automatically makes the Maven wrapper executable on Unix.
     """
-    typer.secho(f"🔄 Generating Spring Boot backend '{project_name}' (Driver: {db_type})...", fg=typer.colors.CYAN)
+    typer.secho(
+        f"🔄 Generating Spring Boot backend '{project_name}' (Driver: {db_type})...",
+        fg=typer.colors.CYAN,
+    )
 
     # Règle Java : un nom de package ne peut pas contenir de tirets
     safe_package_name = project_name.replace("-", "").replace("_", "").lower()

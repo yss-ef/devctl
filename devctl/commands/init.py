@@ -23,12 +23,10 @@ def init_spring(
     Initializes a new Spring Boot backend project with its database.
     """
     check_tool("java", "initializing a Spring Boot project")
-    
+
     # Validation stricte des entrées
     if db not in ["postgres", "mysql"]:
-        typer.secho(
-            f"❌ Error: Database '{db}' is not supported.", fg=typer.colors.RED
-        )
+        typer.secho(f"❌ Error: Database '{db}' is not supported.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     typer.secho(f"🚀 Initializing Spring Boot project: '{name}'...", fg=typer.colors.CYAN)
@@ -61,7 +59,7 @@ def init_vue(name: str):
     Initializes a new Vue.js frontend project (Vite + TS).
     """
     check_tool("npm", "initializing a Vue.js project")
-    
+
     typer.secho(f"🚀 Initializing Vue.js project: '{name}'...", fg=typer.colors.CYAN)
     success = generate_vue_boilerplate(name)
 

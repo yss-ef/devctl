@@ -17,14 +17,14 @@ def run_env(ctx: typer.Context):
 
     typer.secho("🔍 Analyzing the current directory tree...", fg=typer.colors.CYAN)
     env_state = detect_environment(".")
-    
+
     # Check dependencies based on detection
     if env_state["has_docker_compose"]:
         check_tool("docker", "running the database environment")
-        
+
     if env_state["has_spring"]:
         check_tool("java", "running the Spring Boot backend")
-        
+
     if env_state["has_angular"] or env_state.get("has_vue"):
         check_tool("npm", "running the frontend project")
 
@@ -44,9 +44,7 @@ def run_env(ctx: typer.Context):
     )
 
     if not has_env:
-        typer.secho(
-            "\n❌ No valid development environment detected here.", fg=typer.colors.RED
-        )
+        typer.secho("\n❌ No valid development environment detected here.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     # Transfert à la couche d'orchestration système

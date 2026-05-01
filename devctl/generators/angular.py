@@ -85,15 +85,15 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         )
         return False
     except subprocess.CalledProcessError:
-        typer.secho(
-            "❌ Error: Angular CLI is installed but not responding.", fg=typer.colors.RED
-        )
+        typer.secho("❌ Error: Angular CLI is installed but not responding.", fg=typer.colors.RED)
         return False
 
     try:
         command = ["ng", "new", safe_name, "--routing=true", "--style=scss", "--skip-git=true"]
 
-        typer.secho("📦 Downloading npm packages... (This may take 1-2 minutes)", fg=typer.colors.CYAN)
+        typer.secho(
+            "📦 Downloading npm packages... (This may take 1-2 minutes)", fg=typer.colors.CYAN
+        )
         subprocess.run(command, check=True)
 
         # --- NOUVEAU : Appel de la configuration post-installation ---
@@ -102,12 +102,11 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         # -------------------------------------------------------------
 
         typer.secho(
-            f"✅ Frontend '{safe_name}' successfully generated and configured!", fg=typer.colors.GREEN
+            f"✅ Frontend '{safe_name}' successfully generated and configured!",
+            fg=typer.colors.GREEN,
         )
         return True
 
     except subprocess.CalledProcessError as e:
-        typer.secho(
-            f"❌ Angular process failed with code: {e.returncode}", fg=typer.colors.RED
-        )
+        typer.secho(f"❌ Angular process failed with code: {e.returncode}", fg=typer.colors.RED)
         return False
