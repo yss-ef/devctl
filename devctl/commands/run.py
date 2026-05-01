@@ -2,6 +2,7 @@ import typer
 
 from devctl.orchestrator.runner import launch_dev_environment
 from devctl.orchestrator.scanner import detect_environment
+from devctl.utils.dependencies import check_tool
 
 app = typer.Typer(help="Commandes d'exécution et de développement local.")
 
@@ -16,6 +17,16 @@ def run_env(ctx: typer.Context):
 
     typer.echo("🔍 Analyse de l'arborescence courante...")
     env_state = detect_environment(".")
+    
+    # Check dependencies based on detection
+    if env_state["has_docker_compose"]:
+        check_tool("docker", "running the database environment")
+        
+    if env_state["has_spring"]:
+        check_tool("java", "running the Spring Boot backend")
+        
+    if env_state["has_angular"] or env_state.get("has_vue"):
+        check_tool("npm", "running the frontend project")
 
     # Résumé visuel de la détection pour l'utilisateur
     typer.echo(f"  - Base de données Docker : {'✅' if env_state['has_docker_compose'] else '❌'}")

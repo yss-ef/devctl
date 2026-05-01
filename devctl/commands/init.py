@@ -7,6 +7,7 @@ from devctl.generators.angular import generate_angular_boilerplate
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
 from devctl.orchestrator.config_builder import generate_config
+from devctl.utils.dependencies import check_tool
 
 # L'application Typer locale pour le groupe de commandes "init"
 app = typer.Typer(help="Initialise un nouveau projet selon le framework choisi.")
@@ -21,6 +22,8 @@ def init_spring(
     """
     Initialise un nouveau projet backend Spring Boot avec sa base de données.
     """
+    check_tool("java", "initializing a Spring Boot project")
+    
     # Validation stricte des entrées
     if db not in ["postgres", "mysql"]:
         typer.secho(
@@ -42,6 +45,9 @@ def init_angular(name: str):
     """
     (Bientôt) Initialise un nouveau projet frontend Angular.
     """
+    check_tool("npm", "initializing an Angular project")
+    check_tool("ng", "initializing an Angular project")
+
     # Pour l'instant, c'est juste un espace réservé (placeholder)
     typer.echo(f"🚀 Initialisation d'un projet Angular : '{name}'...")
     success = generate_angular_boilerplate(name)
@@ -55,6 +61,8 @@ def init_vue(name: str):
     """
     Initialise un nouveau projet frontend Vue.js (Vite + TS).
     """
+    check_tool("npm", "initializing a Vue.js project")
+    
     typer.echo(f"🚀 Initialisation d'un projet Vue.js : '{name}'...")
     success = generate_vue_boilerplate(name)
 

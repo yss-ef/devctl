@@ -1,0 +1,16 @@
+services:
+  sample-api-db:
+    
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sample_api_db
+    
+    ports:
+      - "5432:5432"
+    volumes:
+      - sample_api_db_data:/var/lib/postgresql/data
+
+volumes:
+  sample_api_db_data:
