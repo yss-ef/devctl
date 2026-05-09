@@ -15,3 +15,7 @@ This directory contains examples of projects generated using `devctl`. These sam
 
 ## How to use
 These folders are for demonstration purposes. To generate your own projects, use the `devctl init` command as described in the main [README](../README.md).
+
+---
+*Authored by Youssef Fellah.*
+*Personal Project.*

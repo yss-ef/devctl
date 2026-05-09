@@ -102,4 +102,5 @@ Upon termination (Ctrl+C), `devctl` gracefully stops all processes and performs 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-Authored by Youssef Fellah.
+*Authored by Youssef Fellah.*
+*Personal Project.*
