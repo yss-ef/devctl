@@ -1,0 +1,62 @@
+package {{ base_package }}.service.impl;
+
+import {{ base_package }}.dto.request.{{ entity_name }}Request;
+import {{ base_package }}.dto.response.{{ entity_name }}Response;
+import {{ base_package }}.entity.{{ entity_name }}Entity;
+import {{ base_package }}.mapper.{{ entity_name }}Mapper;
+import {{ base_package }}.repository.{{ entity_name }}Repository;
+import {{ base_package }}.service.{{ entity_name }}Service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class {{ class_name }} implements {{ entity_name }}Service {
+
+    private final {{ entity_name }}Repository repository;
+    private final {{ entity_name }}Mapper mapper;
+
+    @Override
+    public List<{{ entity_name }}Response> findAll() {
+        return repository.findAll().stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<{{ entity_name }}Response> findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional
+    public {{ entity_name }}Response save({{ entity_name }}Request request) {
+        {{ entity_name }}Entity entity = mapper.toEntity(request);
+        {{ entity_name }}Entity savedEntity = repository.save(entity);
+        return mapper.toResponse(savedEntity);
+    }
+
+    @Override
+    @Transactional
+    public {{ entity_name }}Response update(Long id, {{ entity_name }}Request request) {
+        return repository.findById(id)
+                .map(existingEntity -> {
+                    mapper.updateEntityFromRequest(request, existingEntity);
+                    {{ entity_name }}Entity updatedEntity = repository.save(existingEntity);
+                    return mapper.toResponse(updatedEntity);
+                })
+                .orElseThrow(() -> new RuntimeException("{{ entity_name }} not found with id: " + id));
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
+}

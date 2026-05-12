@@ -75,6 +75,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
         {"dir": "entity", "suffix": "Entity", "template": "Entity.java.j2"},
         {"dir": "repository", "suffix": "Repository", "template": "Repository.java.j2"},
         {"dir": "service", "suffix": "Service", "template": "Service.java.j2"},
+        {"dir": "service/impl", "suffix": "ServiceImpl", "template": "ServiceImpl.java.j2"},
         {"dir": "controller", "suffix": "Controller", "template": "Controller.java.j2"},
         {"dir": "dto/request", "suffix": "Request", "template": "dto/Request.java.j2"},
         {"dir": "dto/response", "suffix": "Response", "template": "dto/Response.java.j2"},

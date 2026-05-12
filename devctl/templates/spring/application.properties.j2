@@ -3,6 +3,7 @@ spring.application.name={{ project_name }}
 spring.datasource.username={{ db_user }}
 spring.datasource.password={{ db_password }}
 spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
 
 {% if db_type == 'postgres' %}
 spring.datasource.url=jdbc:postgresql://localhost:{{ db_port }}/{{ db_name }}

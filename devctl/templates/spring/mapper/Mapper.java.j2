@@ -1,6 +1,6 @@
 package {{ base_package }}.mapper;
 
-import {{ base_package }}.entity.{{ class_name }};
+import {{ base_package }}.entity.{{ entity_name }}Entity;
 import {{ base_package }}.dto.request.{{ entity_name }}Request;
 import {{ base_package }}.dto.response.{{ entity_name }}Response;
 import org.mapstruct.Mapper;
@@ -14,17 +14,17 @@ import org.mapstruct.ReportingPolicy;
 public interface {{ entity_name }}Mapper {
 
     /**
-     * Converts a {{ class_name }} entity to a {{ entity_name }}Response DTO.
+     * Converts a {{ entity_name }}Entity entity to a {{ entity_name }}Response DTO.
      */
-    {{ entity_name }}Response toResponse({{ class_name }} entity);
+    {{ entity_name }}Response toResponse({{ entity_name }}Entity entity);
 
     /**
-     * Converts a {{ entity_name }}Request DTO to a {{ class_name }} entity.
+     * Converts a {{ entity_name }}Request DTO to a {{ entity_name }}Entity entity.
      */
-    {{ class_name }} toEntity({{ entity_name }}Request request);
+    {{ entity_name }}Entity toEntity({{ entity_name }}Request request);
 
     /**
-     * Updates an existing {{ class_name }} entity from a {{ entity_name }}Request DTO.
+     * Updates an existing {{ entity_name }}Entity entity from a {{ entity_name }}Request DTO.
      */
-    void updateEntityFromRequest({{ entity_name }}Request request, @MappingTarget {{ class_name }} entity);
+    void updateEntityFromRequest({{ entity_name }}Request request, @MappingTarget {{ entity_name }}Entity entity);
 }
