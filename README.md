@@ -97,6 +97,28 @@ devctl run
 
 Upon termination (Ctrl+C), `devctl` gracefully stops all processes and performs a clean teardown of Docker resources.
 
+### Production Docker Scaffolding
+
+Generate production-oriented Docker assets for all detected Spring Boot, Angular, and Vue/Vite services without building or running containers.
+
+```bash
+devctl dockerize
+devctl dockerize ./my-workspace --dry-run
+devctl dockerize --force
+devctl dockerize --db postgres
+devctl dockerize --no-compose
+```
+
+Generated assets include multi-stage Dockerfiles, `.dockerignore` files, frontend Nginx configs, Docker-specific frontend API config, `.env.example`, and a Compose stack. Existing files are skipped by default; use `--force` to replace generated targets. If `docker-compose.yml` already exists, `devctl` writes `docker-compose.devctl.yml` instead of overwriting it.
+
+The generated Compose file requires sensitive values such as `DB_PASSWORD` and `JWT_SECRET` from environment variables. Copy `.env.example` to `.env`, fill the blank secret values, then run:
+
+```bash
+docker compose up --build
+```
+
+Use `--db auto|postgres|mysql|none` to control database service generation. In `auto` mode, `devctl` infers Postgres or MySQL from Spring project files when it can do so confidently.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
