@@ -1,8 +1,7 @@
-import os
 import xml.etree.ElementTree as ET
-import shutil
-import pytest
+
 from devctl.generators.spring import patch_pom_xml
+
 
 def test_patch_pom_xml(tmp_path):
     """Verify that patch_pom_xml correctly injects JJWT and MapStruct dependencies."""
@@ -10,7 +9,7 @@ def test_patch_pom_xml(tmp_path):
     project_dir = tmp_path / "test-project"
     project_dir.mkdir()
     pom_path = project_dir / "pom.xml"
-    
+
     initial_pom = """<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -39,7 +38,7 @@ def test_patch_pom_xml(tmp_path):
     # Check dependencies
     deps = root.findall(".//m:dependency", ns)
     artifacts = [d.find("m:artifactId", ns).text for d in deps]
-    
+
     assert "jjwt-api" in artifacts
     assert "jjwt-impl" in artifacts
     assert "jjwt-jackson" in artifacts

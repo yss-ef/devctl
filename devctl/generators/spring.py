@@ -1,8 +1,8 @@
 import io
 import os
 import stat
-import zipfile
 import xml.etree.ElementTree as ET
+import zipfile
 
 import requests
 import typer
@@ -73,7 +73,7 @@ def patch_pom_xml(project_path: str):
         ap_paths = parent_element.find("m:annotationProcessorPaths", ns_map)
         if ap_paths is None:
             ap_paths = ET.SubElement(parent_element, "{%s}annotationProcessorPaths" % ns)
-        
+
         for gid, aid, ver in processors:
             # Check if this processor already exists in this block
             exists = False
@@ -89,7 +89,7 @@ def patch_pom_xml(project_path: str):
                         ET.SubElement(path, "{%s}version" % ns).text = ver
                     exists = True
                     break
-            
+
             if not exists:
                 path = ET.SubElement(ap_paths, "{%s}path" % ns)
                 ET.SubElement(path, "{%s}groupId" % ns).text = gid
@@ -111,7 +111,7 @@ def patch_pom_xml(project_path: str):
         plugins = build.find("m:plugins", ns_map)
         if plugins is None:
             plugins = ET.SubElement(build, "{%s}plugins" % ns)
-        
+
         compiler_plugin = ET.SubElement(plugins, "{%s}plugin" % ns)
         ET.SubElement(compiler_plugin, "{%s}groupId" % ns).text = "org.apache.maven.plugins"
         ET.SubElement(compiler_plugin, "{%s}artifactId" % ns).text = "maven-compiler-plugin"
