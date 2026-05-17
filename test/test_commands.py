@@ -46,13 +46,6 @@ def test_dockerize_no_project(tmp_path):
     assert "No Spring Boot, Angular, or Vue/Vite project detected" in result.stdout
 
 
-def test_dockerize_invalid_db(tmp_path):
-    """Ensure dockerize validates the database mode."""
-    result = runner.invoke(app, ["dockerize", str(tmp_path), "--db", "sqlite"])
-    assert result.exit_code == 1
-    assert "Invalid --db value" in result.stdout
-
-
 def test_dockerize_dry_run(tmp_path):
     """Ensure dockerize dry-run reports planned files without writing them."""
     (tmp_path / "pom.xml").write_text(
@@ -74,16 +67,17 @@ def test_dockerize_dry_run(tmp_path):
     assert not (tmp_path / "Dockerfile").exists()
 
 
-def test_dockerize_no_compose(tmp_path):
-    """Ensure --no-compose generates service files only."""
+def test_dockerize_generates_dockerfile_only(tmp_path):
+    """Ensure dockerize generates only a Dockerfile for a frontend project."""
     (tmp_path / "vite.config.ts").write_text("export default {}", encoding="utf-8")
     (tmp_path / "package.json").write_text(
         '{"name": "web", "scripts": {"build": "vite build"}}',
         encoding="utf-8",
     )
 
-    result = runner.invoke(app, ["dockerize", str(tmp_path), "--no-compose"])
+    result = runner.invoke(app, ["dockerize", str(tmp_path)])
 
     assert result.exit_code == 0
     assert (tmp_path / "Dockerfile").exists()
     assert not (tmp_path / "docker-compose.yml").exists()
+    assert not (tmp_path / ".dockerignore").exists()

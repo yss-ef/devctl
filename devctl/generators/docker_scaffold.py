@@ -1,4 +1,4 @@
-"""Production Docker scaffolding for detected devctl projects."""
+"""Dockerfile scaffolding for supported devctl projects."""
 
 from __future__ import annotations
 
@@ -11,8 +11,6 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from jinja2 import Environment, FileSystemLoader
-
-SUPPORTED_DB_MODES = {"auto", "postgres", "mysql", "none"}
 
 IGNORED_DIRECTORIES = {
     ".angular",
@@ -31,12 +29,12 @@ IGNORED_DIRECTORIES = {
 
 
 class DockerScaffoldError(Exception):
-    """Raised when Docker scaffolding cannot be completed."""
+    """Raised when Dockerfile scaffolding cannot be completed."""
 
 
 @dataclass(frozen=True)
 class DockerProject:
-    """A Dockerizable project discovered in a repository tree."""
+    """A project that can receive a generated Dockerfile."""
 
     kind: str
     path: Path
@@ -46,7 +44,6 @@ class DockerProject:
     java_version: Optional[str] = None
     node_version: Optional[str] = None
     angular_output_name: Optional[str] = None
-    inferred_db: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -59,14 +56,11 @@ class FileOperation:
 
 @dataclass(frozen=True)
 class DockerScaffoldResult:
-    """Summary returned after Docker scaffolding."""
+    """Summary returned after Dockerfile scaffolding."""
 
     root_path: Path
     services: list[DockerProject]
     operations: list[FileOperation]
-    warnings: list[str]
-    compose_path: Optional[Path]
-    db_type: Optional[str]
 
     @property
     def created_count(self) -> int:
@@ -82,14 +76,14 @@ class DockerScaffoldResult:
 
 
 def sanitize_service_name(raw_name: str, fallback: str = "service") -> str:
-    """Return a Docker Compose compatible, lowercase service name."""
+    """Return a lowercase Docker-friendly service name."""
     service_name = re.sub(r"[^a-z0-9-]+", "-", raw_name.lower()).strip("-")
     service_name = re.sub(r"-{2,}", "-", service_name)
     return service_name or fallback
 
 
 def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]:
-    """Discover all supported Dockerizable projects under ``root_path``."""
+    """Discover all Spring Boot, Angular, and Vue/Vite projects under ``root_path``."""
     root = Path(root_path).resolve()
     if not root.exists():
         raise DockerScaffoldError(f"Path does not exist: {root}")
@@ -134,39 +128,10 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                 angular_output_name=(
                     _angular_output_name(project_path) if kind == "angular" else None
                 ),
-                inferred_db=infer_database_type(project_path) if kind == "spring" else None,
             )
         )
 
     return projects
-
-
-def infer_database_type(project_path: Union[str, Path]) -> Optional[str]:
-    """Infer a Spring project's database type from common project files."""
-    path = Path(project_path)
-    searchable_files = [
-        path / "pom.xml",
-        path / "src" / "main" / "resources" / "application.properties",
-        path / "docker-compose.yml",
-        path / "docker-compose.yaml",
-    ]
-    content = "\n".join(
-        file_path.read_text(encoding="utf-8", errors="ignore").lower()
-        for file_path in searchable_files
-        if file_path.exists()
-    )
-
-    has_postgres = any(
-        token in content
-        for token in ["postgresql", "postgres:", "image: postgres", "jdbc:postgresql"]
-    )
-    has_mysql = any(token in content for token in ["mysql", "jdbc:mysql", "mysql-connector"])
-
-    if has_postgres and not has_mysql:
-        return "postgres"
-    if has_mysql and not has_postgres:
-        return "mysql"
-    return None
 
 
 def scaffold_docker_assets(
@@ -174,167 +139,31 @@ def scaffold_docker_assets(
     *,
     force: bool = False,
     dry_run: bool = False,
-    include_compose: bool = True,
-    db_mode: str = "auto",
 ) -> DockerScaffoldResult:
-    """Generate production Docker assets for all supported projects in a tree."""
-    if db_mode not in SUPPORTED_DB_MODES:
-        supported = ", ".join(sorted(SUPPORTED_DB_MODES))
-        raise DockerScaffoldError(
-            f"Invalid database mode '{db_mode}'. Expected one of: {supported}"
-        )
-
+    """Generate Dockerfiles for all supported projects in a tree."""
     root = Path(root_path).resolve()
     projects = discover_docker_projects(root)
     if not projects:
         raise DockerScaffoldError("No Spring Boot, Angular, or Vue/Vite project detected.")
 
     env = _template_environment()
-    operations: list[FileOperation] = []
-    warnings: list[str] = []
-
-    spring_projects = [project for project in projects if project.kind == "spring"]
-    frontend_projects = [project for project in projects if project.kind in {"angular", "vue"}]
-    api_upstream = spring_projects[0].service_name if len(spring_projects) == 1 else None
-
-    if len(spring_projects) > 1 and frontend_projects:
-        warnings.append(
-            "Multiple Spring services detected; frontend Nginx /api proxy was not generated."
-        )
-
-    for project in projects:
-        operations.extend(
-            _project_file_operations(
-                env,
-                project,
-                api_upstream=api_upstream,
-                force=force,
-                dry_run=dry_run,
-            )
-        )
-
-    selected_db = _selected_database_type(spring_projects, db_mode)
-    if spring_projects and db_mode == "auto" and selected_db is None:
-        warnings.append(
-            "Database type could not be inferred confidently; "
-            "compose will not include a DB service."
-        )
-
-    compose_path: Optional[Path] = None
-    if include_compose:
-        compose_path = _compose_output_path(root)
-        compose_content = env.get_template("compose/docker-compose.yml.j2").render(
-            db=_database_context(selected_db),
-            services=_compose_services(projects, selected_db, api_upstream),
-            has_spring=bool(spring_projects),
-        )
-        operations.append(_write_file(compose_path, compose_content, force=force, dry_run=dry_run))
-
-        env_content = env.get_template("compose/env.example.j2").render(
-            db_type=selected_db,
-            has_spring=bool(spring_projects),
-            services=_env_services(projects),
-        )
-        operations.append(
-            _write_file(root / ".env.example", env_content, force=force, dry_run=dry_run)
-        )
-
-    return DockerScaffoldResult(
-        root_path=root,
-        services=projects,
-        operations=operations,
-        warnings=warnings,
-        compose_path=compose_path,
-        db_type=selected_db,
-    )
-
-
-def _project_file_operations(
-    env: Environment,
-    project: DockerProject,
-    *,
-    api_upstream: Optional[str],
-    force: bool,
-    dry_run: bool,
-) -> list[FileOperation]:
-    if project.kind == "spring":
-        return [
-            _write_file(
-                project.path / "Dockerfile",
-                env.get_template("spring/Dockerfile.j2").render(project=project),
-                force=force,
-                dry_run=dry_run,
-            ),
-            _write_file(
-                project.path / ".dockerignore",
-                env.get_template("spring/dockerignore.j2").render(),
-                force=force,
-                dry_run=dry_run,
-            ),
-        ]
-
-    if project.kind == "angular":
-        return [
-            _write_frontend_dockerfile(env, project, force=force, dry_run=dry_run),
-            _write_frontend_dockerignore(env, project, force=force, dry_run=dry_run),
-            _write_nginx_config(env, project, api_upstream, force=force, dry_run=dry_run),
-            _write_file(
-                project.path / "src" / "environments" / "environment.docker.ts",
-                env.get_template("frontend/angular.environment.docker.ts.j2").render(),
-                force=force,
-                dry_run=dry_run,
-            ),
-        ]
-
-    return [
-        _write_frontend_dockerfile(env, project, force=force, dry_run=dry_run),
-        _write_frontend_dockerignore(env, project, force=force, dry_run=dry_run),
-        _write_nginx_config(env, project, api_upstream, force=force, dry_run=dry_run),
+    operations = [
         _write_file(
-            project.path / ".env.docker",
-            env.get_template("frontend/vue.env.docker.j2").render(),
+            project.path / "Dockerfile",
+            _dockerfile_content(env, project),
             force=force,
             dry_run=dry_run,
-        ),
+        )
+        for project in projects
     ]
 
-
-def _write_frontend_dockerfile(
-    env: Environment, project: DockerProject, *, force: bool, dry_run: bool
-) -> FileOperation:
-    return _write_file(
-        project.path / "Dockerfile",
-        env.get_template("frontend/Dockerfile.j2").render(project=project),
-        force=force,
-        dry_run=dry_run,
-    )
+    return DockerScaffoldResult(root_path=root, services=projects, operations=operations)
 
 
-def _write_frontend_dockerignore(
-    env: Environment, project: DockerProject, *, force: bool, dry_run: bool
-) -> FileOperation:
-    return _write_file(
-        project.path / ".dockerignore",
-        env.get_template("frontend/dockerignore.j2").render(),
-        force=force,
-        dry_run=dry_run,
-    )
-
-
-def _write_nginx_config(
-    env: Environment,
-    project: DockerProject,
-    api_upstream: Optional[str],
-    *,
-    force: bool,
-    dry_run: bool,
-) -> FileOperation:
-    return _write_file(
-        project.path / "nginx.conf",
-        env.get_template("frontend/nginx.conf.j2").render(api_upstream=api_upstream),
-        force=force,
-        dry_run=dry_run,
-    )
+def _dockerfile_content(env: Environment, project: DockerProject) -> str:
+    if project.kind == "spring":
+        return env.get_template("spring/Dockerfile.j2").render(project=project)
+    return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 
 def _write_file(path: Path, content: str, *, force: bool, dry_run: bool) -> FileOperation:
@@ -500,155 +329,6 @@ def _angular_major(package_json: dict[str, Any]) -> int:
             if match:
                 return int(match.group(1))
     return 20
-
-
-def _selected_database_type(projects: list[DockerProject], db_mode: str) -> Optional[str]:
-    if db_mode == "none" or not projects:
-        return None
-    if db_mode in {"postgres", "mysql"}:
-        return db_mode
-
-    inferred = {project.inferred_db for project in projects if project.inferred_db}
-    if len(inferred) == 1:
-        return inferred.pop()
-    return None
-
-
-def _compose_output_path(root: Path) -> Path:
-    default_path = root / "docker-compose.yml"
-    if default_path.exists():
-        return root / "docker-compose.devctl.yml"
-    return default_path
-
-
-def _database_context(db_type: Optional[str]) -> Optional[dict[str, str]]:
-    if db_type is None:
-        return None
-
-    if db_type == "postgres":
-        return {
-            "type": "postgres",
-            "image": "postgres:16-alpine",
-            "container_port": "5432",
-            "volume_path": "/var/lib/postgresql/data",
-            "healthcheck": "pg_isready -U $${DB_USER:-app} -d $${DB_NAME:-app}",
-        }
-
-    return {
-        "type": "mysql",
-        "image": "mysql:8.4",
-        "container_port": "3306",
-        "volume_path": "/var/lib/mysql",
-        "healthcheck": "mysqladmin ping -h localhost --silent",
-    }
-
-
-def _compose_services(
-    projects: list[DockerProject], db_type: Optional[str], api_upstream: Optional[str]
-) -> list[dict[str, Any]]:
-    services = []
-    spring_index = 0
-    frontend_index = 0
-
-    for project in projects:
-        env_prefix = _environment_prefix(project.service_name)
-
-        if project.kind == "spring":
-            spring_index += 1
-            internal_port = 8080
-            host_port = 8080 + spring_index - 1
-            service = {
-                "kind": project.kind,
-                "name": project.service_name,
-                "context": project.relative_context,
-                "internal_port": internal_port,
-                "port_mapping": f"${{{env_prefix}_PORT:-{host_port}}}:{internal_port}",
-                "java_opts_env": f"${{{env_prefix}_JAVA_OPTS:-}}",
-                "depends_on_database": db_type is not None,
-                "environment": _spring_environment(db_type),
-            }
-        else:
-            frontend_index += 1
-            internal_port = 80
-            spring_count = len([item for item in projects if item.kind == "spring"])
-            host_port = 8080 + spring_count + frontend_index - 1
-            service = {
-                "kind": project.kind,
-                "name": project.service_name,
-                "context": project.relative_context,
-                "internal_port": internal_port,
-                "port_mapping": f"${{{env_prefix}_PORT:-{host_port}}}:{internal_port}",
-                "depends_on_api": api_upstream,
-            }
-
-        services.append(service)
-
-    return services
-
-
-def _spring_environment(db_type: Optional[str]) -> dict[str, str]:
-    environment = {
-        "SERVER_PORT": "8080",
-        "APPLICATION_SECURITY_JWT_SECRET_KEY": "${JWT_SECRET:?Set JWT_SECRET in .env}",
-    }
-
-    if db_type == "postgres":
-        environment.update(
-            {
-                "SPRING_DATASOURCE_URL": "jdbc:postgresql://database:5432/${DB_NAME:-app}",
-                "SPRING_DATASOURCE_USERNAME": "${DB_USER:-app}",
-                "SPRING_DATASOURCE_PASSWORD": "${DB_PASSWORD:?Set DB_PASSWORD in .env}",
-            }
-        )
-    elif db_type == "mysql":
-        environment.update(
-            {
-                "SPRING_DATASOURCE_URL": "jdbc:mysql://database:3306/${DB_NAME:-app}",
-                "SPRING_DATASOURCE_USERNAME": "${DB_USER:-app}",
-                "SPRING_DATASOURCE_PASSWORD": "${DB_PASSWORD:?Set DB_PASSWORD in .env}",
-            }
-        )
-
-    return environment
-
-
-def _env_services(projects: list[DockerProject]) -> list[dict[str, str]]:
-    services = []
-    spring_index = 0
-    frontend_index = 0
-    spring_count = len([project for project in projects if project.kind == "spring"])
-
-    for project in projects:
-        env_prefix = _environment_prefix(project.service_name)
-        if project.kind == "spring":
-            spring_index += 1
-            default_port = str(8080 + spring_index - 1)
-            services.append(
-                {
-                    "name": project.service_name,
-                    "port_env": f"{env_prefix}_PORT",
-                    "default_port": default_port,
-                    "java_opts_env": f"{env_prefix}_JAVA_OPTS",
-                    "kind": project.kind,
-                }
-            )
-        else:
-            frontend_index += 1
-            services.append(
-                {
-                    "name": project.service_name,
-                    "port_env": f"{env_prefix}_PORT",
-                    "default_port": str(8080 + spring_count + frontend_index - 1),
-                    "java_opts_env": "",
-                    "kind": project.kind,
-                }
-            )
-
-    return services
-
-
-def _environment_prefix(service_name: str) -> str:
-    return re.sub(r"[^A-Z0-9]+", "_", service_name.upper()).strip("_") or "SERVICE"
 
 
 def _local_name(tag: str) -> str:
