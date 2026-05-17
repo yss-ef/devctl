@@ -3,7 +3,6 @@ from pathlib import Path
 import typer
 
 from devctl.generators.docker_scaffold import (
-    SUPPORTED_DB_MODES,
     DockerScaffoldError,
     scaffold_docker_assets,
 )
@@ -22,44 +21,21 @@ DRY_RUN_OPTION = typer.Option(
     "--dry-run",
     help="Show what would be generated without writing files.",
 )
-NO_COMPOSE_OPTION = typer.Option(
-    False,
-    "--no-compose",
-    help="Generate per-project Docker assets without a Compose stack.",
-)
-DB_OPTION = typer.Option(
-    "auto",
-    "--db",
-    help="Database service mode: auto, postgres, mysql, or none.",
-)
 
 
 def dockerize(
     path: Path = PATH_ARGUMENT,
     force: bool = FORCE_OPTION,
     dry_run: bool = DRY_RUN_OPTION,
-    no_compose: bool = NO_COMPOSE_OPTION,
-    db: str = DB_OPTION,
 ):
     """
-    Scaffold production Docker assets for Spring Boot, Angular, and Vue/Vite projects.
+    Scaffold Dockerfiles for Spring Boot, Angular, and Vue/Vite projects.
     """
-    db_mode = db.lower()
-    if db_mode not in SUPPORTED_DB_MODES:
-        supported = ", ".join(sorted(SUPPORTED_DB_MODES))
-        typer.secho(
-            f"❌ Invalid --db value '{db}'. Expected one of: {supported}.",
-            fg=typer.colors.RED,
-        )
-        raise typer.Exit(code=1)
-
     try:
         result = scaffold_docker_assets(
             path,
             force=force,
             dry_run=dry_run,
-            include_compose=not no_compose,
-            db_mode=db_mode,
         )
     except DockerScaffoldError as exc:
         typer.secho(f"❌ {exc}", fg=typer.colors.RED)
@@ -76,14 +52,6 @@ def dockerize(
     for operation in result.operations:
         relative_path = operation.path.relative_to(result.root_path)
         typer.echo(f"  - {operation.action}: {relative_path}")
-
-    if result.compose_path is not None:
-        typer.echo(f"\nCompose file: {result.compose_path.relative_to(result.root_path)}")
-    if result.db_type is not None:
-        typer.echo(f"Database service: {result.db_type}")
-
-    for warning in result.warnings:
-        typer.secho(f"⚠️  {warning}", fg=typer.colors.YELLOW)
 
     typer.secho(
         f"\nSummary: {result.created_count} created, "
