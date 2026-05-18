@@ -1,5 +1,5 @@
-from pathlib import Path
 from typer.testing import CliRunner
+
 from devctl.main import app
 
 runner = CliRunner()
@@ -15,7 +15,9 @@ def test_deploy_full_stack(tmp_path):
     # Setup Spring project
     backend = tmp_path / "backend"
     backend.mkdir()
-    (backend / "pom.xml").write_text("<project><artifactId>api</artifactId></project>", encoding="utf-8")
+    (backend / "pom.xml").write_text(
+        "<project><artifactId>api</artifactId></project>", encoding="utf-8"
+    )
     props = backend / "src" / "main" / "resources"
     props.mkdir(parents=True)
     (props / "application.properties").write_text(
@@ -24,18 +26,18 @@ def test_deploy_full_stack(tmp_path):
         "spring.datasource.password=pass",
         encoding="utf-8"
     )
-    
+
     # Setup Angular project
     frontend = tmp_path / "frontend"
     frontend.mkdir()
     (frontend / "angular.json").write_text('{"projects": {"web": {}}}', encoding="utf-8")
-    
+
     result = runner.invoke(app, ["deploy", str(tmp_path)])
-    
+
     assert result.exit_code == 0
     compose_file = tmp_path / "docker-compose.yml"
     assert compose_file.exists()
-    
+
     content = compose_file.read_text()
     assert "api:" in content
     assert "web:" in content
@@ -47,7 +49,9 @@ def test_deploy_with_existing_db_name(tmp_path):
     """Ensure deploy respects service name from existing docker-compose.yml."""
     backend = tmp_path / "backend"
     backend.mkdir()
-    (backend / "pom.xml").write_text("<project><artifactId>api</artifactId></project>", encoding="utf-8")
+    (backend / "pom.xml").write_text(
+        "<project><artifactId>api</artifactId></project>", encoding="utf-8"
+    )
     (backend / "docker-compose.yml").write_text(
         "services:\n"
         "  custom-db:\n"
@@ -56,9 +60,9 @@ def test_deploy_with_existing_db_name(tmp_path):
         "      POSTGRES_DB: mydb\n",
         encoding="utf-8"
     )
-    
+
     result = runner.invoke(app, ["deploy", str(tmp_path)])
-    
+
     assert result.exit_code == 0
     content = (tmp_path / "docker-compose.yml").read_text()
     assert "custom-db:" in content

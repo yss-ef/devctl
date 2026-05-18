@@ -1,12 +1,11 @@
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import typer
 from jinja2 import Environment, FileSystemLoader
 
 from devctl.generators.docker_scaffold import (
-    DockerProject,
     discover_docker_projects,
 )
 
@@ -96,17 +95,17 @@ def extract_db_from_compose(compose_path: Path) -> Optional[Dict[str, Any]]:
         user.group(1) if user else "admin",
         password.group(1) if password else "password",
     )
-    
+
     if original_service_name:
         db_dict["service_name"] = original_service_name
-        
+
     return db_dict
 
 
 def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str) -> Dict[str, Any]:
     is_postgres = db_type == "postgresql"
     internal_port = "5432" if is_postgres else "3306"
-    
+
     env = {}
     if is_postgres:
         env = {
@@ -148,7 +147,7 @@ def deploy(path: Path = PATH_ARGUMENT):
         projects = discover_docker_projects(path)
     except Exception as e:
         typer.secho(f"❌ Error scanning projects: {e}", fg=typer.colors.RED)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
     if not projects:
         typer.secho("❌ No supported projects (Spring, Angular, Vue) found.", fg=typer.colors.RED)
