@@ -1,3 +1,8 @@
+"""
+Project scanner and environment detector.
+Identifies Spring Boot, Angular, Vue.js, and Docker components in a directory tree.
+"""
+
 import os
 
 

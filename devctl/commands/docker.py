@@ -1,3 +1,8 @@
+"""
+CLI command group for Docker-related operations.
+Includes scaffolding Dockerfiles for detected services.
+"""
+
 from pathlib import Path
 
 import typer

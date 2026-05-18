@@ -1,3 +1,8 @@
+"""
+Angular resource scaffolding generator.
+Handles the creation of features including models, services, and components.
+"""
+
 import os
 
 import typer
@@ -5,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from devctl.orchestrator.scanner import detect_environment
 
-# Dictionnaire de traduction CLI -> TypeScript
+# Dictionary mapping CLI types to TypeScript types
 TS_TYPE_MAP = {
     "string": "string",
     "int": "number",
@@ -13,12 +18,12 @@ TS_TYPE_MAP = {
     "double": "number",
     "float": "number",
     "boolean": "boolean",
-    "date": "string",  # En JSON, une date transite sous forme de string ISO
+    "date": "string",  # In JSON, dates are typically transmitted as ISO strings
 }
 
 
 def parse_ts_fields(fields_str: str):
-    """Transforme les champs du terminal en types TypeScript."""
+    """Transforms terminal fields into TypeScript types."""
     if not fields_str:
         return []
     parsed = []
@@ -33,7 +38,7 @@ def parse_ts_fields(fields_str: str):
 
 def generate_angular_resource(resource_name: str, fields_str: str, root_path: str = "."):
     """
-    Orchestre la création de la feature Angular complète.
+    Orchestrates the creation of a complete Angular feature.
     """
     env_state = detect_environment(root_path)
 
@@ -45,10 +50,10 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     resource_lower = resource_name.lower()
     entity_name = resource_name.capitalize()
 
-    # Le dossier cible de la feature: src/app/features/produit
+    # Feature target directory: src/app/features/resource_name
     feature_dir = os.path.join(angular_root, "src", "app", "features", resource_lower)
 
-    # Configuration des composants à générer
+    # Components to generate
     components = [
         # Models
         {
@@ -70,7 +75,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             "ext": ".ts",
             "template": "services/service.ts.j2",
         },
-        # Routes (à la racine de la feature)
+        # Routes (at feature root)
         {"dir": "", "suffix": ".routes", "ext": ".ts", "template": "routes.ts.j2"},
         # List Component
         {
@@ -117,7 +122,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
 
     typer.secho(f"⚙️  Generating Angular feature '{entity_name}'...", fg=typer.colors.CYAN)
 
-    # Données pour les templates
+    # Template data
     context = {
         "entity_name": entity_name,
         "resource_name_lower": resource_lower,
@@ -127,7 +132,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     }
 
     for comp in components:
-        # Création du dossier cible
+        # Create target directory
         target_dir = os.path.join(feature_dir, os.path.normpath(comp["dir"]))
         os.makedirs(target_dir, exist_ok=True)
 
@@ -144,8 +149,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
             typer.echo(f"  - Created: {display_dir}/{target_file_name}")
 
         except Exception as e:
-            # Astuce : si tu n'as pas créé de template .scss.j2, ça crée un fichier vide
-            # automatiquement
+            # Tip: if no .scss.j2 template exists, create an empty file automatically
             if comp["ext"] == ".scss":
                 with open(os.path.join(target_dir, target_file_name), "w") as f:
                     f.write("")

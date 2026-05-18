@@ -1,3 +1,8 @@
+"""
+CLI command group for running the local development environment.
+Automatically detects and launches backend, frontend, and database services.
+"""
+
 import typer
 
 from devctl.orchestrator.runner import launch_dev_environment
@@ -28,7 +33,7 @@ def run_env(ctx: typer.Context):
     if env_state["has_angular"] or env_state.get("has_vue"):
         check_tool("npm", "running the frontend project")
 
-    # Résumé visuel de la détection pour l'utilisateur
+    # Visual summary of detection for the user
     typer.echo(f"  - Docker Database  : {'✅' if env_state['has_docker_compose'] else '❌'}")
     typer.echo(f"  - Spring Boot Backend : {'✅' if env_state['has_spring'] else '❌'}")
     typer.echo(f"  - Angular Frontend    : {'✅' if env_state['has_angular'] else '❌'}")
@@ -47,5 +52,5 @@ def run_env(ctx: typer.Context):
         typer.secho("\n❌ No valid development environment detected here.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    # Transfert à la couche d'orchestration système
+    # Transfer control to the system orchestration layer
     launch_dev_environment(env_state)

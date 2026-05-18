@@ -1,3 +1,8 @@
+"""
+Generators for Vue.js projects via Vite.
+Includes boilerplate generation, proxy setup, and router configuration.
+"""
+
 import os
 import subprocess
 
@@ -33,7 +38,7 @@ def setup_vue_router(project_path: str):
     typer.secho("🛣️  Installing and configuring vue-router...", fg=typer.colors.CYAN)
 
     try:
-        # 1. Installation du package npm
+        # 1. NPM package installation
         subprocess.run(
             ["npm", "install", "vue-router@4"],
             cwd=project_path,
@@ -41,12 +46,12 @@ def setup_vue_router(project_path: str):
             stdout=subprocess.DEVNULL,
         )
 
-        # 2. Création du dossier router
+        # 2. Router directory creation
         src_dir = os.path.join(project_path, "src")
         router_dir = os.path.join(src_dir, "router")
         os.makedirs(router_dir, exist_ok=True)
 
-        # 3. Rendu des templates Jinja2
+        # 3. Jinja2 template rendering
         templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "vue", "config")
         env = Environment(loader=FileSystemLoader(templates_dir))
 
@@ -85,7 +90,7 @@ def generate_vue_boilerplate(project_name: str) -> bool:
         typer.secho("⏳ Installing npm dependencies...", fg=typer.colors.CYAN)
         subprocess.run(["npm", "install"], cwd=project_full_path, check=True)
 
-        # --- APPEL DE NOS DEUX CONFIGURATEURS ---
+        # --- CALL OUR TWO CONFIGURATORS ---
         setup_vue_proxy(project_full_path)
         setup_vue_router(project_full_path)
         # ----------------------------------------

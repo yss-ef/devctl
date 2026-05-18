@@ -1,9 +1,14 @@
+"""
+Spring Boot resource scaffolding generator.
+Handles the creation of MVC components, DTOs, Mappers, and Security configuration.
+"""
+
 import os
 
 import typer
 from jinja2 import Environment, FileSystemLoader
 
-# Dictionnaire de traduction CLI -> Java
+# Dictionary mapping CLI types to Java types
 JAVA_TYPE_MAP = {
     "string": "String",
     "int": "Integer",
@@ -17,8 +22,8 @@ JAVA_TYPE_MAP = {
 
 def parse_fields(fields_str: str):
     """
-    Transforme la chaîne de caractères du terminal en données injectables.
-    Exemple: "nom:string, age:int" -> [{"name": "nom", "java_type": "String"}, ...]
+    Transforms terminal field strings into injectable data.
+    Example: "name:string, age:int" -> [{"name": "name", "java_type": "String"}, ...]
     """
     if not fields_str:
         return []
@@ -37,8 +42,8 @@ def parse_fields(fields_str: str):
 
 def find_spring_base_package_and_path():
     """
-    Cherche le dossier contenant la classe @SpringBootApplication.
-    C'est la méthode la plus fiable pour trouver le package de base sans parser le pom.xml.
+    Searches for the directory containing the @SpringBootApplication class.
+    This is the most reliable way to find the base package without parsing pom.xml.
     """
     java_src_dir = os.path.join(os.getcwd(), "src", "main", "java")
 
@@ -57,7 +62,7 @@ def find_spring_base_package_and_path():
 
 def generate_spring_resource(resource_name: str, fields_str: str):
     """
-    Orchestre la création de l'architecture MVC + DTOs + Mapper.
+    Orchestrates the creation of MVC + DTOs + Mapper architecture.
     """
     base_package, base_path = find_spring_base_package_and_path()
 
@@ -70,7 +75,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
     entity_name = resource_name.capitalize()
 
-    # Nouvelle configuration détaillée pour gérer les sous-dossiers (DTOs, Mapper)
+    # Detailed configuration for sub-folders (DTOs, Mappers)
     components = [
         {"dir": "entity", "suffix": "Entity", "template": "Entity.java.j2"},
         {"dir": "repository", "suffix": "Repository", "template": "Repository.java.j2"},
@@ -94,12 +99,12 @@ def generate_spring_resource(resource_name: str, fields_str: str):
         class_name = f"{entity_name}{comp['suffix']}"
         target_file_name = f"{class_name}.java"
 
-        # Création du sous-dossier s'il n'existe pas (ex: src/.../dto/request)
-        # os.path.normpath gère les slashes selon l'OS (Linux/Windows)
+        # Create sub-folder if it doesn't exist (e.g., src/.../dto/request)
+        # os.path.normpath handles OS-specific slashes
         target_dir = os.path.join(base_path, os.path.normpath(comp["dir"]))
         os.makedirs(target_dir, exist_ok=True)
 
-        # Les données envoyées au template Jinja2
+        # Data passed to the Jinja2 template
         context = {
             "base_package": base_package,
             "class_name": class_name,
@@ -123,7 +128,7 @@ def generate_spring_security(_root_path: str = "."):
     """
     Dynamically generates the JWT security base.
     """
-    # Réutilisation de ta fonction de détection dynamique
+    # Reuse the dynamic detection function
     base_package, base_path = find_spring_base_package_and_path()
 
     if not base_package:
@@ -133,7 +138,7 @@ def generate_spring_security(_root_path: str = "."):
         )
         return
 
-    # Création du dossier config au bon endroit
+    # Create config folder in the right place
     target_dir = os.path.join(base_path, "config")
     os.makedirs(target_dir, exist_ok=True)
 

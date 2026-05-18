@@ -1,3 +1,8 @@
+"""
+CLI command group for adding new resources to existing projects.
+Supports Spring Boot and Angular scaffolding.
+"""
+
 import os
 
 import typer
@@ -25,6 +30,7 @@ def resource(
     original_dir = os.getcwd()
     project_detected = False
 
+    # Check for Spring Boot project
     if env_state["has_spring"]:
         project_detected = True
         typer.secho(
@@ -38,6 +44,7 @@ def resource(
         finally:
             os.chdir(original_dir)
 
+    # Check for Angular project
     if env_state["has_angular"]:
         project_detected = True
         typer.secho(
