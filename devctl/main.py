@@ -12,9 +12,9 @@ app.add_typer(run.app, name="run", help="Launch the local development environmen
 app.add_typer(add.app, name="add", help="Generate code and business resources.")
 
 app.command("dockerize", help="Scaffold Dockerfiles for supported projects.")(docker.dockerize)
-app.command(
-    "deploy", help="Generate a global docker-compose.yml for the entire project."
-)(deploy.deploy)
+app.command("deploy", help="Generate a global docker-compose.yml for the entire project.")(
+    deploy.deploy
+)
 
 
 @app.callback()
@@ -39,7 +39,6 @@ def main():
     Entry point called by the operating system (via pyproject.toml)
     """
     app()
-
 
 
 if __name__ == "__main__":
