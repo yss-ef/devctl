@@ -7,7 +7,7 @@ import typer
 
 def is_docker_running():
     """
-    Vérifie si le daemon Docker est actif sur le système.
+    Checks if the Docker daemon is active on the system.
     """
     try:
         subprocess.run(["docker", "info"], capture_output=True, check=True)
@@ -18,24 +18,24 @@ def is_docker_running():
 
 def launch_dev_environment(env_state: dict):
     """
-    Lance les processus nécessaires en parallèle (Optimisé pour Linux/Fedora).
+    Launches the necessary processes in parallel (Optimized for Linux/Fedora).
     """
     processes = []
 
     try:
-        # 4. Lancement du Frontend Vue.js
+        # 4. Launch Vue.js Frontend
         if env_state.get("has_vue"):
             typer.secho(
                 f"🟢 Starting Vue.js from {env_state['vue_path']}...", fg=typer.colors.GREEN
             )
 
             p_vue = subprocess.Popen(
-                ["npm", "run", "dev"],  # Commande standard de Vite
+                ["npm", "run", "dev"],  # Standard Vite command
                 cwd=env_state["vue_path"],
             )
             processes.append(("Vue.js", p_vue))
 
-        # 1. Lancement de la Base de données
+        # 1. Launch Database
         if env_state["has_docker_compose"]:
             if not is_docker_running():
                 typer.secho("❌ Error: Docker service is not running.", fg=typer.colors.RED)
@@ -50,24 +50,24 @@ def launch_dev_environment(env_state: dict):
             )
             time.sleep(5)
 
-            # 2. Lancement du Backend Spring Boot
+            # 2. Launch Spring Boot Backend
         if env_state["has_spring"]:
             typer.secho(
                 f"🍃 Starting Spring Boot from {env_state['spring_path']}...",
                 fg=typer.colors.GREEN,
             )
 
-            # Exécution native Linux
+            # Native Linux execution
             p_spring = subprocess.Popen(["./mvnw", "spring-boot:run"], cwd=env_state["spring_path"])
             processes.append(("Spring Boot", p_spring))
 
-        # 3. Lancement du Frontend Angular
+        # 3. Launch Angular Frontend
         if env_state["has_angular"]:
             typer.secho(
                 f"🅰️ Starting Angular from {env_state['angular_path']}...", fg=typer.colors.CYAN
             )
 
-            # Exécution native Linux
+            # Native Linux execution
             p_angular = subprocess.Popen(["npx", "ng", "serve"], cwd=env_state["angular_path"])
             processes.append(("Angular", p_angular))
 
