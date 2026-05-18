@@ -1,0 +1,37 @@
+services:
+{% for service in services %}
+  {{ service.service_name }}:
+    build:
+      context: {{ service.relative_context }}
+      dockerfile: Dockerfile
+    {% if service.kind == 'spring' and service.db %}
+    depends_on:
+      - {{ service.db.service_name }}
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:{{ service.db.type }}://{{ service.db.service_name }}:{{ service.db.internal_port }}/{{ service.db.name }}
+      - SPRING_DATASOURCE_USERNAME={{ service.db.user }}
+      - SPRING_DATASOURCE_PASSWORD={{ service.db.password }}
+    {% endif %}
+    {% if service.kind == 'angular' or service.kind == 'vue' %}
+    ports:
+      - "80:80"
+    {% endif %}
+
+{% endfor %}
+{% for db in databases %}
+  {{ db.service_name }}:
+    image: {{ db.image }}
+    environment:
+      {% for key, value in db.env.items() %}
+      {{ key }}: {{ value }}
+      {% endfor %}
+    ports:
+      - "{{ db.port }}:{{ db.internal_port }}"
+    volumes:
+      - {{ db.volume_name }}:{{ db.volume_path }}
+
+{% endfor %}
+volumes:
+{% for db in databases %}
+  {{ db.volume_name }}:
+{% endfor %}
