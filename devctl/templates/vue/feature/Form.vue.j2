@@ -1,0 +1,162 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { {{ entity_name }}Service } from '../services/{{ entity_name }}Service'
+import type { {{ entity_name }}Request } from '../models/{{ entity_name }}Models'
+
+const router = useRouter()
+const route = useRoute()
+const isEdit = ref(false)
+const id = ref<number | null>(null)
+
+const form = ref<{{ entity_name }}Request>({
+  {% for field in fields -%}
+  {{ field.name }}: {% if field.ts_type == 'number' %}0{% elif field.ts_type == 'boolean' %}false{% else %}''{% endif %},
+  {% endfor -%}
+})
+
+const loading = ref(false)
+const error = ref('')
+
+onMounted(async () => {
+  const paramId = route.params.id
+  if (paramId) {
+    isEdit.value = true
+    id.value = parseInt(paramId as string)
+    loading.value = true
+    try {
+      const data = await {{ entity_name }}Service.getById(id.value)
+      form.value = {
+        {% for field in fields -%}
+        {{ field.name }}: data.{{ field.name }},
+        {% endfor -%}
+      }
+    } catch (err: any) {
+      error.value = err.message || 'Failed to load item.'
+    } finally {
+      loading.value = false
+    }
+  }
+})
+
+const save = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    if (isEdit.value && id.value !== null) {
+      await {{ entity_name }}Service.update(id.value, form.value)
+    } else {
+      await {{ entity_name }}Service.create(form.value)
+    }
+    router.push('/{{ resource_name_lower }}s')
+  } catch (err: any) {
+    error.value = err.message || 'Failed to save item.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const cancel = () => {
+  router.push('/{{ resource_name_lower }}s')
+}
+</script>
+
+<template>
+  <div class="form-container">
+    <h1>{{"{{"}} isEdit ? 'Edit' : 'Create' {{"}}"}} {{ entity_name }}</h1>
+
+    <div v-if="error" class="error-message">{{ error }}</div>
+
+    <form @submit.prevent="save" class="form">
+      {% for field in fields -%}
+      <div class="form-group">
+        <label for="{{ field.name }}">{{ field.name | capitalize }}</label>
+        {% if field.ts_type == 'boolean' -%}
+        <input type="checkbox" id="{{ field.name }}" v-model="form.{{ field.name }}" />
+        {%- elif field.ts_type == 'number' -%}
+        <input type="number" id="{{ field.name }}" v-model.number="form.{{ field.name }}" required />
+        {%- else -%}
+        <input type="text" id="{{ field.name }}" v-model="form.{{ field.name }}" required />
+        {%- endif %}
+      </div>
+      {% endfor -%}
+
+      <div class="form-actions">
+        <button type="button" @click="cancel" class="btn btn-secondary" :disabled="loading">Cancel</button>
+        <button type="submit" class="btn btn-primary" :disabled="loading">
+          {{"{{"}} loading ? 'Saving...' : 'Save' {{"}}"}}
+        </button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<style scoped>
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.form-group label {
+  font-weight: 500;
+  color: #374151;
+}
+.form-group input[type="text"],
+.form-group input[type="number"] {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+.form-group input[type="checkbox"] {
+  width: fit-content;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-primary {
+  background-color: #4f46e5;
+  color: white;
+}
+.btn-primary:disabled {
+  background-color: #a5b4fc;
+}
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+.btn-secondary:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+}
+.error-message {
+  padding: 1rem;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+</style>

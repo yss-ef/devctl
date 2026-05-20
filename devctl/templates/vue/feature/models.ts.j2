@@ -1,0 +1,12 @@
+export interface {{ entity_name }}Request {
+  {% for field in fields -%}
+  {{ field.name }}: {{ field.ts_type }};
+  {% endfor -%}
+}
+
+export interface {{ entity_name }}Response {
+  id: number;
+  {% for field in fields -%}
+  {{ field.name }}: {{ field.ts_type }};
+  {% endfor -%}
+}
