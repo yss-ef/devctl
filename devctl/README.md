@@ -2,7 +2,7 @@
 
 Welcome to the internal documentation of the **devctl** core engine. This directory contains the implementation of the CLI, orchestrator, and generators.
 
-## 🏗️ System Architecture
+## System Architecture
 
 `devctl` is designed as a modular CLI application. It follows a layered approach where the CLI commands delegate work to specialized orchestrators and generators.
 
@@ -22,7 +22,7 @@ graph TD
     Runner --> Docker[Docker Compose]
 ```
 
-## 📂 Class & Module Diagram
+## Class & Module Diagram
 
 While Python is often functional, `devctl` organizes its logic into logical modules that act as services.
 
@@ -61,7 +61,7 @@ classDiagram
     CLI --> AngularGenerator : delegates
 ```
 
-## 🔄 Sequence Diagram: `devctl run`
+## Sequence Diagram: `devctl run`
 
 The following diagram illustrates the lifecycle of the `run` command, which is the heart of the local orchestration.
 
@@ -98,7 +98,7 @@ sequenceDiagram
     Runner-->>User: Cleanup finished
 ```
 
-## 🔄 Sequence Diagram: `devctl add resource`
+## Sequence Diagram: `devctl add resource`
 
 The scaffolding command handles generating code across the entire stack.
 
@@ -126,7 +126,7 @@ sequenceDiagram
     end
 ```
 
-## 💡 Key Concepts & Code Explanations
+## Key Concepts & Code Explanations
 
 ### 1. Intelligent Environment Scanning (`orchestrator/scanner.py`)
 The `Scanner` uses `os.walk` to find signature files:
