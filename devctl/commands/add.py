@@ -59,9 +59,7 @@ def resource(
     # Check for Vue.js project
     if env_state.get("has_vue"):
         project_detected = True
-        typer.secho(
-            "🟢 Vue.js project detected. Launching Vue generator...", fg=typer.colors.GREEN
-        )
+        typer.secho("🟢 Vue.js project detected. Launching Vue generator...", fg=typer.colors.GREEN)
         try:
             generate_vue_resource(name, fields, root_path=".")
         except Exception as e:
@@ -75,4 +73,3 @@ def resource(
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)
-
