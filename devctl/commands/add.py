@@ -1,6 +1,6 @@
 """
 CLI command group for adding new resources to existing projects.
-Supports Spring Boot and Angular scaffolding.
+Supports Spring Boot, Angular, and Vue.js scaffolding.
 """
 
 import os
@@ -9,6 +9,7 @@ import typer
 
 from devctl.generators.scaffold_angular import generate_angular_resource
 from devctl.generators.scaffold_spring import generate_spring_resource
+from devctl.generators.scaffold_vue import generate_vue_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -55,11 +56,20 @@ def resource(
         except Exception as e:
             typer.secho(f"❌ Error during Angular generation: {e}", fg=typer.colors.RED)
 
+    # Check for Vue.js project
+    if env_state.get("has_vue"):
+        project_detected = True
+        typer.secho("🟢 Vue.js project detected. Launching Vue generator...", fg=typer.colors.GREEN)
+        try:
+            generate_vue_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"❌ Error during Vue generation: {e}", fg=typer.colors.RED)
+
     # Error message only if NO project detected
     if not project_detected:
         typer.secho(
             "❌ Unable to determine project type. "
-            "Please run from within a Spring or Angular project directory.",
+            "Please run from within a Spring, Angular, or Vue.js project directory.",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)

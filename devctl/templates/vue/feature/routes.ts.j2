@@ -1,0 +1,19 @@
+import type { RouteRecordRaw } from 'vue-router'
+
+export const {{ resource_name_lower }}Routes: RouteRecordRaw[] = [
+  {
+    path: '/{{ resource_name_lower }}s',
+    name: '{{ resource_name_lower }}-list',
+    component: () => import('./views/{{ entity_name }}List.vue')
+  },
+  {
+    path: '/{{ resource_name_lower }}s/new',
+    name: '{{ resource_name_lower }}-new',
+    component: () => import('./views/{{ entity_name }}Form.vue')
+  },
+  {
+    path: '/{{ resource_name_lower }}s/:id/edit',
+    name: '{{ resource_name_lower }}-edit',
+    component: () => import('./views/{{ entity_name }}Form.vue')
+  }
+]

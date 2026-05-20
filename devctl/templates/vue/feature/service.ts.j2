@@ -1,0 +1,44 @@
+import type { {{ entity_name }}Request, {{ entity_name }}Response } from '../models/{{ entity_name }}Models'
+
+export class {{ entity_name }}Service {
+  private static baseUrl = '/api/{{ resource_name_lower }}s'
+
+  static async getAll(): Promise<{{ entity_name }}Response[]> {
+    const res = await fetch(this.baseUrl)
+    if (!res.ok) throw new Error('Failed to fetch {{ resource_name_lower }}s')
+    return res.json()
+  }
+
+  static async getById(id: number): Promise<{{ entity_name }}Response> {
+    const res = await fetch(`${this.baseUrl}/${id}`)
+    if (!res.ok) throw new Error('Failed to fetch {{ resource_name_lower }}')
+    return res.json()
+  }
+
+  static async create(data: {{ entity_name }}Request): Promise<{{ entity_name }}Response> {
+    const res = await fetch(this.baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    if (!res.ok) throw new Error('Failed to create {{ resource_name_lower }}')
+    return res.json()
+  }
+
+  static async update(id: number, data: {{ entity_name }}Request): Promise<{{ entity_name }}Response> {
+    const res = await fetch(`${this.baseUrl}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    if (!res.ok) throw new Error('Failed to update {{ resource_name_lower }}')
+    return res.json()
+  }
+
+  static async delete(id: number): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/${id}`, {
+      method: 'DELETE'
+    })
+    if (!res.ok) throw new Error('Failed to delete {{ resource_name_lower }}')
+  }
+}
