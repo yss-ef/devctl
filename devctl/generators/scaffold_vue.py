@@ -6,7 +6,7 @@ Handles the creation of features including models, services, and views.
 import os
 
 import typer
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from devctl.generators.scaffold_angular import parse_ts_fields
 from devctl.orchestrator.scanner import detect_environment
@@ -69,7 +69,10 @@ def generate_vue_resource(resource_name: str, fields_str: str, root_path: str = 
     ]
 
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "vue", "feature")
-    env = Environment(loader=FileSystemLoader(templates_dir))
+    env = Environment(
+        loader=FileSystemLoader(templates_dir),
+        autoescape=select_autoescape(["html", "xml"]),
+    )
 
     typer.secho(f"⚙️  Generating Vue.js feature '{entity_name}'...", fg=typer.colors.CYAN)
 
