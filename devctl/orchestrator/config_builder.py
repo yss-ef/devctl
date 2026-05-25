@@ -8,7 +8,7 @@ def generate_config(project_name: str, db_type: str = "postgres", custom_port: i
     template_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring")
     env = Environment(loader=FileSystemLoader(template_dir))
 
-    # Résolution intelligente du port par défaut
+    # Intelligent default port resolution
     if custom_port is None:
         db_port = 5432 if db_type == "postgres" else 3306
     else:

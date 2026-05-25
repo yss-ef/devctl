@@ -33,7 +33,7 @@ def parse_ts_fields(fields_str: str):
 
 def generate_angular_resource(resource_name: str, fields_str: str, root_path: str = "."):
     """
-    Orchestre la création de la feature Angular complète.
+    Orchestrates the creation of the complete Angular feature.
     """
     env_state = detect_environment(root_path)
 
@@ -45,10 +45,10 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     resource_lower = resource_name.lower()
     entity_name = resource_name.capitalize()
 
-    # Le dossier cible de la feature: src/app/features/produit
+    # The target feature directory: src/app/features/produit
     feature_dir = os.path.join(angular_root, "src", "app", "features", resource_lower)
 
-    # Configuration des composants à générer
+    # Component configuration to generate
     components = [
         # Models
         {

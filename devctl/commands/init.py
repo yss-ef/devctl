@@ -1,15 +1,15 @@
 import typer
 
-# Génerateur Angular
+# Angular Generator
 from devctl.generators.angular import generate_angular_boilerplate
 
-# Générateur Spring
+# Spring Generator
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
-# L'application Typer locale pour le groupe de commandes "init"
+# Local Typer app for the "init" command group
 app = typer.Typer(help="Initializes a new project based on the chosen framework.")
 
 
@@ -24,7 +24,7 @@ def init_spring(
     """
     check_tool("java", "initializing a Spring Boot project")
 
-    # Validation stricte des entrées
+    # Strict input validation
     if db not in ["postgres", "mysql"]:
         typer.secho(f"❌ Error: Database '{db}' is not supported.", fg=typer.colors.RED)
         raise typer.Exit(code=1)

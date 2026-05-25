@@ -3,8 +3,8 @@ import os
 
 def detect_environment(root_path: str = "."):
     """
-    Scanne le répertoire et ses sous-dossiers pour identifier les composants.
-    Retourne l'état et les chemins absolus de chaque composant.
+    Scans the directory and its subfolders to identify components.
+    Returns the state and absolute paths of each component.
     """
     env_state = {
         "has_docker_compose": False,
@@ -19,7 +19,7 @@ def detect_environment(root_path: str = "."):
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):
-        # Optimisation : on ignore les dossiers lourds pour un scan instantané
+        # Optimization: ignore heavy folders for instant scan
         if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular"]):
             continue
 
