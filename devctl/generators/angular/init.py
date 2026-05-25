@@ -8,7 +8,7 @@ import os
 import subprocess
 
 import typer
-from jinja2 import Environment, FileSystemLoader
+from devctl.utils.templates import get_jinja_env
 
 
 def setup_angular_environments(project_path: str):
@@ -23,8 +23,7 @@ def setup_angular_environments(project_path: str):
     os.makedirs(env_dir, exist_ok=True)
 
     # 2. Template rendering via Jinja2
-    templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "angular", "config")
-    env = Environment(loader=FileSystemLoader(templates_dir))
+    env = get_jinja_env("angular/config")
 
     files_to_generate = {
         "proxy.conf.json.j2": os.path.join(project_path, "src", "proxy.conf.json"),

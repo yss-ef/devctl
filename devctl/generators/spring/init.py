@@ -12,7 +12,7 @@ import zipfile
 import requests
 import typer
 
-from devctl.generators.scaffold_spring import generate_spring_security
+from devctl.generators.spring.scaffold import generate_spring_security
 
 
 def patch_pom_xml(project_path: str):

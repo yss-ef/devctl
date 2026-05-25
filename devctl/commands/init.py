@@ -5,12 +5,13 @@ Supports Spring Boot, Angular, and Vue.js.
 
 import typer
 
-# Angular generator
-from devctl.generators.angular import generate_angular_boilerplate
+# Angular Generator
+from devctl.generators.angular.init import generate_angular_boilerplate
 
-# Spring generator
-from devctl.generators.spring import download_spring_boilerplate
-from devctl.generators.vue import generate_vue_boilerplate
+# Spring Generator
+from devctl.generators.spring.init import download_spring_boilerplate
+from devctl.generators.vue.init import generate_vue_boilerplate
+
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 

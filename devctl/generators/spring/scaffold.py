@@ -6,7 +6,8 @@ Handles the creation of MVC components, DTOs, Mappers, and Security configuratio
 import os
 
 import typer
-from jinja2 import Environment, FileSystemLoader
+
+from devctl.utils.templates import get_jinja_env
 
 # Dictionary mapping CLI types to Java types
 JAVA_TYPE_MAP = {
@@ -87,8 +88,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
         {"dir": "mapper", "suffix": "Mapper", "template": "mapper/Mapper.java.j2"},
     ]
 
-    templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring")
-    env = Environment(loader=FileSystemLoader(templates_dir))
+    env = get_jinja_env("spring")
 
     typer.secho(
         f"⚙️  Generating Spring resource '{entity_name}' (with MapStruct & DTOs)...",
@@ -143,8 +143,7 @@ def generate_spring_security(_root_path: str = "."):
     os.makedirs(target_dir, exist_ok=True)
 
     # Setup Jinja2
-    templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring", "config")
-    env = Environment(loader=FileSystemLoader(templates_dir))
+    env = get_jinja_env("spring/config")
 
     security_files = [
         "JwtService.java",
