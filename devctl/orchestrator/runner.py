@@ -1,3 +1,8 @@
+"""
+Local development environment runner.
+Handles parallel process management for multi-tier applications.
+"""
+
 import subprocess
 import sys
 import time

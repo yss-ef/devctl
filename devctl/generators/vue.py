@@ -1,3 +1,8 @@
+"""
+Generators for Vue.js projects via Vite.
+Includes boilerplate generation, proxy setup, and router configuration.
+"""
+
 import os
 import subprocess
 

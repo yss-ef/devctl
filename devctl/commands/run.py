@@ -1,3 +1,8 @@
+"""
+CLI command group for running the local development environment.
+Automatically detects and launches backend, frontend, and database services.
+"""
+
 import typer
 
 from devctl.orchestrator.runner import launch_dev_environment

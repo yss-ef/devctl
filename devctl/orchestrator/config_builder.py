@@ -1,3 +1,8 @@
+"""
+Configuration builder for Spring Boot projects.
+Generates docker-compose.yml and application.properties with dynamic database settings.
+"""
+
 import os
 
 import typer
@@ -5,6 +10,9 @@ from jinja2 import Environment, FileSystemLoader
 
 
 def generate_config(project_name: str, db_type: str = "postgres", custom_port: int = None):
+    """
+    Generates the initial configuration (Docker and Spring properties) for a new project.
+    """
     template_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "spring")
     env = Environment(loader=FileSystemLoader(template_dir))
 

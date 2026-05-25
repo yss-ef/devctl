@@ -1,3 +1,8 @@
+"""
+Utility functions for checking system dependencies.
+Verifies if required tools like Docker, NPM, and Java are installed.
+"""
+
 import shutil
 
 import typer

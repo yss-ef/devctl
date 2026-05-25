@@ -1,0 +1,155 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { {{ entity_name }}Service } from '../services/{{ entity_name }}Service'
+import type { {{ entity_name }}Response } from '../models/{{ entity_name }}Models'
+
+const router = useRouter()
+const items = ref<{{ entity_name }}Response[]>([])
+const loading = ref(false)
+const error = ref('')
+
+const loadItems = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    items.value = await {{ entity_name }}Service.getAll()
+  } catch (err: any) {
+    error.value = err.message || 'An error occurred while loading data.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const deleteItem = async (id: number) => {
+  if (!confirm('Are you sure you want to delete this item?')) return
+  try {
+    await {{ entity_name }}Service.delete(id)
+    await loadItems()
+  } catch (err: any) {
+    alert(err.message || 'Failed to delete item.')
+  }
+}
+
+const editItem = (id: number) => {
+  router.push(`/{{ resource_name_lower }}s/${id}/edit`)
+}
+
+const createNew = () => {
+  router.push('/{{ resource_name_lower }}s/new')
+}
+
+onMounted(() => {
+  loadItems()
+})
+</script>
+
+<template>
+  <div class="list-container">
+    <div class="list-header">
+      <h1>List of {{ entity_name }}s</h1>
+      <button @click="createNew" class="btn btn-primary">Create New</button>
+    </div>
+
+    <div v-if="loading" class="loading">Loading...</div>
+    <div v-else-if="error" class="error-message">{{ error }}</div>
+    <div v-else class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            {% for field in fields -%}
+            <th>{{ field.name | capitalize }}</th>
+            {% endfor -%}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in items" :key="item.id">
+            <td>{{"{{"}} item.id {{"}}"}}</td>
+            {% for field in fields -%}
+            <td>{{"{{"}} item.{{ field.name }} {{"}}"}}</td>
+            {% endfor -%}
+            <td class="actions">
+              <button @click="editItem(item.id)" class="btn btn-sm btn-secondary">Edit</button>
+              <button @click="deleteItem(item.id)" class="btn btn-sm btn-danger">Delete</button>
+            </td>
+          </tr>
+          <tr v-if="items.length === 0">
+            <td :colspan="{{ fields | length + 2 }}" class="text-center">No items found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.list-container {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-primary {
+  background-color: #4f46e5;
+  color: white;
+}
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+.table-responsive {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.table th, .table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+.table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.loading, .error-message {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.125rem;
+}
+.error-message {
+  color: #ef4444;
+}
+.text-center {
+  text-align: center;
+}
+</style>

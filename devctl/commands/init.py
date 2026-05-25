@@ -1,3 +1,8 @@
+"""
+CLI command group for initializing new projects.
+Supports Spring Boot, Angular, and Vue.js.
+"""
+
 import typer
 
 # Angular Generator

@@ -1,9 +1,14 @@
+"""
+Spring Boot resource scaffolding generator.
+Handles the creation of MVC components, DTOs, Mappers, and Security configuration.
+"""
+
 import os
 
 import typer
 from jinja2 import Environment, FileSystemLoader
 
-# Dictionnaire de traduction CLI -> Java
+# Dictionary mapping CLI types to Java types
 JAVA_TYPE_MAP = {
     "string": "String",
     "int": "Integer",

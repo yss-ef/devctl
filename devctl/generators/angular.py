@@ -1,3 +1,8 @@
+"""
+Generators for Angular projects.
+Includes boilerplate generation and environment configuration.
+"""
+
 import json
 import os
 import subprocess
@@ -12,12 +17,12 @@ def setup_angular_environments(project_path: str):
     """
     typer.secho("⚙️  Configuring Proxy and Environments...", fg=typer.colors.CYAN)
 
-    # 1. Chemins cibles
+    # 1. Target paths
     src_dir = os.path.join(project_path, "src")
     env_dir = os.path.join(src_dir, "environments")
     os.makedirs(env_dir, exist_ok=True)
 
-    # 2. Rendu des templates via Jinja2
+    # 2. Template rendering via Jinja2
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "angular", "config")
     env = Environment(loader=FileSystemLoader(templates_dir))
 
@@ -94,10 +99,9 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         )
         subprocess.run(command, check=True)
 
-        # --- NOUVEAU : Appel de la configuration post-installation ---
+        # Post-installation configuration
         project_full_path = os.path.join(os.getcwd(), safe_name)
         setup_angular_environments(project_full_path)
-        # -------------------------------------------------------------
 
         typer.secho(
             f"✅ Frontend '{safe_name}' successfully generated and configured!",

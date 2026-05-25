@@ -1,3 +1,8 @@
+"""
+Generators for Spring Boot projects.
+Includes boilerplate downloading via Spring Initializr and POM patching.
+"""
+
 import io
 import os
 import stat
@@ -158,7 +163,7 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         "security",
         "devtools",
         "thymeleaf",
-        db_dependency,  # postgresql ou mysql
+        db_dependency,  # postgresql or mysql
     ]
     dependencies = ",".join(official_deps)
 
