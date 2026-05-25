@@ -4,13 +4,28 @@ Identifies Spring Boot, Angular, Vue.js, and Docker components in a directory tr
 """
 
 import os
+from pathlib import Path
+
+# Directories to ignore during scanning
+IGNORED_DIRECTORIES = {
+    "node_modules",
+    "target",
+    ".git",
+    ".angular",
+    "dist",
+    "build",
+    "venv",
+    ".venv",
+    "__pycache__",
+}
 
 
 def detect_environment(root_path: str = "."):
     """
-    Scans the directory and its subfolders to identify components.
+    Scans the directory tree and its subfolders to identify components.
     Returns the state and absolute paths of each component.
     """
+    root = Path(root_path).resolve()
     env_state = {
         "has_docker_compose": False,
         "docker_path": None,
@@ -20,29 +35,37 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
-        "project_root": os.path.abspath(root_path),
+        "project_root": str(root),
     }
 
-    for dirpath, _dirnames, filenames in os.walk(root_path):
-        # Optimization: ignore heavy folders for an instant scan
-        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular"]):
-            continue
+    for dirpath, dirnames, filenames in os.walk(root):
+        # In-place modification of dirnames to prune the traversal
+        dirnames[:] = [d for d in dirnames if d not in IGNORED_DIRECTORIES]
+        
+        current_path = Path(dirpath)
+        filename_set = set(filenames)
 
-        if "docker-compose.yml" in filenames and not env_state["has_docker_compose"]:
+        # 1. Docker Compose detection
+        if "docker-compose.yml" in filename_set and not env_state["has_docker_compose"]:
             env_state["has_docker_compose"] = True
-            env_state["docker_path"] = dirpath
+            env_state["docker_path"] = str(current_path)
 
-        if ("pom.xml" in filenames or "mvnw" in filenames) and not env_state["has_spring"]:
+        # 2. Spring Boot detection
+        if ("pom.xml" in filename_set or "mvnw" in filename_set) and not env_state["has_spring"]:
             env_state["has_spring"] = True
-            env_state["spring_path"] = dirpath
+            env_state["spring_path"] = str(current_path)
 
-        if "angular.json" in filenames and not env_state["has_angular"]:
+        # 3. Angular detection
+        if "angular.json" in filename_set and not env_state["has_angular"]:
             env_state["has_angular"] = True
-            env_state["angular_path"] = dirpath
+            env_state["angular_path"] = str(current_path)
 
-        vue_files = ["vite.config.ts", "vite.config.js"]
-        if any(f in filenames for f in vue_files) and not env_state["has_vue"]:
-            env_state["has_vue"] = True
-            env_state["vue_path"] = dirpath
+        # 4. Vue.js (Vite) detection
+        vue_markers = {"vite.config.ts", "vite.config.js"}
+        if (vue_markers & filename_set) and not env_state["has_vue"]:
+            # Special case: don't shadow Angular if it also has a vite config (unlikely but safe)
+            if not env_state["has_angular"]:
+                env_state["has_vue"] = True
+                env_state["vue_path"] = str(current_path)
 
     return env_state
