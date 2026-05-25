@@ -11,6 +11,7 @@ from devctl.generators.scaffold_angular import generate_angular_resource
 from devctl.generators.scaffold_spring import generate_spring_resource
 from devctl.generators.scaffold_vue import generate_vue_resource
 from devctl.orchestrator.scanner import detect_environment
+from devctl.utils.dependencies import check_tool
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
 
@@ -33,6 +34,7 @@ def resource(
 
     # Check for Spring Boot project
     if env_state["has_spring"]:
+        check_tool("java", "generating Spring Boot resources")
         project_detected = True
         typer.secho(
             "🍃 Spring Boot project detected. Launching Java generator...", fg=typer.colors.GREEN
@@ -47,6 +49,7 @@ def resource(
 
     # Check for Angular project
     if env_state["has_angular"]:
+        check_tool("npm", "generating Angular resources")
         project_detected = True
         typer.secho(
             "🅰️ Angular project detected. Launching TypeScript generator...", fg=typer.colors.CYAN
@@ -58,6 +61,7 @@ def resource(
 
     # Check for Vue.js project
     if env_state.get("has_vue"):
+        check_tool("npm", "generating Vue.js resources")
         project_detected = True
         typer.secho("🟢 Vue.js project detected. Launching Vue generator...", fg=typer.colors.GREEN)
         try:
