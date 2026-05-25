@@ -34,9 +34,7 @@ def setup_angular_environments(project_path: str):
             with open(target_path, "w", encoding="utf-8") as f:
                 f.write(content)
         except Exception as e:
-            typer.secho(
-                f"⚠️  Error while generating {tpl_name}: {e}", fg=typer.colors.YELLOW
-            )
+            typer.secho(f"⚠️  Error while generating {tpl_name}: {e}", fg=typer.colors.YELLOW)
 
     # 3. Modify angular.json to enable the proxy
     angular_json_path = os.path.join(project_path, "angular.json")
