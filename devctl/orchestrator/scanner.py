@@ -41,7 +41,7 @@ def detect_environment(root_path: str = "."):
     for dirpath, dirnames, filenames in os.walk(root):
         # In-place modification of dirnames to prune the traversal
         dirnames[:] = [d for d in dirnames if d not in IGNORED_DIRECTORIES]
-        
+
         current_path = Path(dirpath)
         filename_set = set(filenames)
 
