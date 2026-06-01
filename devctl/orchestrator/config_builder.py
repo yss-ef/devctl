@@ -18,7 +18,14 @@ def generate_config(project_name: str, db_type: str = "postgres", custom_port: i
 
     # Intelligent default port resolution
     if custom_port is None:
-        db_port = 5432 if db_type == "postgres" else 3306
+        if db_type == "postgres":
+            db_port = 5432
+        elif db_type == "mysql":
+            db_port = 3306
+        elif db_type == "mongodb":
+            db_port = 27017
+        else:
+            db_port = 5432
     else:
         db_port = custom_port
 
