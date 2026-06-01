@@ -82,9 +82,7 @@ def detect_environment(root_path: str = "."):
 
         # 4. Vite-based detection (Vue/React)
         vue_markers = {"vite.config.ts", "vite.config.js"}
-        if (vue_markers & filename_set) and not any(
-            [env_state["has_vue"], env_state["has_react"]]
-        ):
+        if (vue_markers & filename_set) and not any([env_state["has_vue"], env_state["has_react"]]):
             # Distinguish by package.json
             pkg_path = current_path / "package.json"
             if pkg_path.exists():
