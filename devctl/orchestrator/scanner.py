@@ -1,6 +1,10 @@
 """
 Project scanner and environment detector.
+<<<<<<< HEAD
 Identifies Spring Boot, Angular, Vue.js, React, NextJS, NestJS, NodeJS, FastAPI, and Docker components in a directory tree.
+=======
+Identifies Spring Boot, Angular, Vue.js, Django, and Docker components in a directory tree.
+>>>>>>> feat/django
 """
 
 import os
@@ -21,6 +25,7 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
+<<<<<<< HEAD
         "has_react": False,
         "react_path": None,
         "has_nextjs": False,
@@ -31,12 +36,20 @@ def detect_environment(root_path: str = "."):
         "nodejs_path": None,
         "has_fastapi": False,
         "fastapi_path": None,
+=======
+        "has_django": False,
+        "django_path": None,
+>>>>>>> feat/django
         "project_root": os.path.abspath(root_path),
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):
         # Optimization: ignore heavy folders for an instant scan
+<<<<<<< HEAD
         if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist", ".next", ".venv"]):
+=======
+        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", ".venv"]):
+>>>>>>> feat/django
             continue
 
         if "docker-compose.yml" in filenames and not env_state["has_docker_compose"]:
@@ -92,6 +105,16 @@ def detect_environment(root_path: str = "."):
                     if "fastapi" in f.read().lower():
                         env_state["has_fastapi"] = True
                         env_state["fastapi_path"] = dirpath
+            except Exception:
+                pass
+
+        if "manage.py" in filenames and "requirements.txt" in filenames:
+            req_path = os.path.join(dirpath, "requirements.txt")
+            try:
+                with open(req_path, "r") as f:
+                    if "django" in f.read().lower():
+                        env_state["has_django"] = True
+                        env_state["django_path"] = dirpath
             except Exception:
                 pass
 
