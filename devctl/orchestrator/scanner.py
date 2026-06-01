@@ -1,10 +1,6 @@
 """
 Project scanner and environment detector.
-<<<<<<< HEAD
-Identifies Spring Boot, Angular, Vue.js, React, NestJS, NodeJS, and Docker components in a directory tree.
-=======
-Identifies Spring Boot, Angular, Vue.js, NextJS, and Docker components in a directory tree.
->>>>>>> feat/nextjs
+Identifies Spring Boot, Angular, Vue.js, React, NextJS, NestJS, NodeJS, FastAPI, and Docker components in a directory tree.
 """
 
 import os
@@ -25,27 +21,22 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
-<<<<<<< HEAD
         "has_react": False,
         "react_path": None,
+        "has_nextjs": False,
+        "nextjs_path": None,
         "has_nest": False,
         "nest_path": None,
         "has_nodejs": False,
         "nodejs_path": None,
-=======
-        "has_nextjs": False,
-        "nextjs_path": None,
->>>>>>> feat/nextjs
+        "has_fastapi": False,
+        "fastapi_path": None,
         "project_root": os.path.abspath(root_path),
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):
         # Optimization: ignore heavy folders for an instant scan
-<<<<<<< HEAD
-        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist"]):
-=======
-        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", ".next"]):
->>>>>>> feat/nextjs
+        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist", ".next", ".venv"]):
             continue
 
         if "docker-compose.yml" in filenames and not env_state["has_docker_compose"]:
@@ -86,12 +77,22 @@ def detect_environment(root_path: str = "."):
             env_state["has_nest"] = True
             env_state["nest_path"] = dirpath
 
-        if "package.json" in filenames and not any([env_state["has_angular"], env_state["has_vue"], env_state["has_react"], env_state["has_nest"]]):
-            env_state["has_nodejs"] = True
-            env_state["nodejs_path"] = dirpath
-
         if any(f.startswith("next.config.") for f in filenames) and not env_state["has_nextjs"]:
             env_state["has_nextjs"] = True
             env_state["nextjs_path"] = dirpath
+
+        if "package.json" in filenames and not any([env_state["has_angular"], env_state["has_vue"], env_state["has_react"], env_state["has_nest"], env_state["has_nextjs"]]):
+            env_state["has_nodejs"] = True
+            env_state["nodejs_path"] = dirpath
+
+        if "main.py" in filenames and "requirements.txt" in filenames:
+            req_path = os.path.join(dirpath, "requirements.txt")
+            try:
+                with open(req_path, "r") as f:
+                    if "fastapi" in f.read().lower():
+                        env_state["has_fastapi"] = True
+                        env_state["fastapi_path"] = dirpath
+            except Exception:
+                pass
 
     return env_state

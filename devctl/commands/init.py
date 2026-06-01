@@ -1,6 +1,6 @@
 """
 CLI command group for initializing new projects.
-Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, and NextJS.
+Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, and FastAPI.
 """
 
 import typer
@@ -15,6 +15,7 @@ from devctl.generators.nestjs import generate_nest_boilerplate
 from devctl.generators.nodejs import generate_nodejs_boilerplate
 from devctl.generators.react import generate_react_boilerplate
 from devctl.generators.nextjs import generate_nextjs_boilerplate
+from devctl.generators.fastapi import generate_fastapi_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -130,3 +131,17 @@ def init_nextjs(name: str):
 
     if success:
         typer.secho("\nNextJS project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("fastapi")
+def init_fastapi(name: str):
+    """
+    Initializes a new FastAPI backend project.
+    """
+    check_tool("python3", "initializing a FastAPI project")
+
+    typer.secho(f"Initializing FastAPI project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_fastapi_boilerplate(name)
+
+    if success:
+        typer.secho("\nFastAPI project ready!", fg=typer.colors.GREEN)

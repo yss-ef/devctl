@@ -8,6 +8,7 @@ import sys
 import time
 import threading
 import signal
+import os
 from pathlib import Path
 from typing import List
 
@@ -91,25 +92,23 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             t.start()
             active_threads.append(t)
 
-<<<<<<< HEAD
-        # 3. Start Frontends (Angular / Vue / React)
-        frontends = [p for p in projects if p.kind in ["angular", "vue", "react"]]
+        # 3. Start Frontends (Angular / Vue / React / NextJS)
+        frontends = [p for p in projects if p.kind in ["angular", "vue", "react", "nextjs"]]
         for p in frontends:
-            color = "cyan" if p.kind == "angular" else ("magenta" if p.kind == "vue" else "blue")
-            cmd = ["npx", "ng", "serve"] if p.kind == "angular" else ["npm", "run", "dev"]
+            if p.kind == "angular":
+                color = "cyan"
+                cmd = ["npx", "ng", "serve"]
+            elif p.kind == "vue":
+                color = "magenta"
+                cmd = ["npm", "run", "dev"]
+            elif p.kind == "react":
+                color = "blue"
+                cmd = ["npm", "run", "dev"]
+            else: # nextjs
+                color = "yellow"
+                cmd = ["npm", "run", "dev"]
             
-            fg_color = typer.colors.CYAN if p.kind == "angular" else (typer.colors.MAGENTA if p.kind == "vue" else typer.colors.BLUE)
-            typer.secho(f"Starting {p.kind.capitalize()}: {p.name}...", fg=fg_color)
-=======
-        # 3. Start Frontends (Angular / Vue / NextJS)
-        frontends = [p for p in projects if p.kind in ["angular", "vue", "nextjs"]]
-        for p in frontends:
-            color = "cyan" if p.kind == "angular" else ("magenta" if p.kind == "vue" else "yellow")
-            icon = "🅰️" if p.kind == "angular" else ("🟢" if p.kind == "vue" else "▲")
-            cmd = ["npx", "ng", "serve"] if p.kind == "angular" else ["npm", "run", "dev"]
-            
-            typer.secho(f"{icon} Starting {p.kind.capitalize()}: {p.name}...", fg=typer.colors.CYAN if p.kind == "angular" else (typer.colors.MAGENTA if p.kind == "vue" else typer.colors.YELLOW))
->>>>>>> feat/nextjs
+            typer.secho(f"Starting {p.kind.capitalize()}: {p.name}...", fg=getattr(typer.colors, color.upper()))
             
             proc = subprocess.Popen(
                 cmd,
@@ -157,6 +156,29 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             active_processes.append((p.name, proc))
             
             t = threading.Thread(target=stream_logs, args=(p.name, proc, "green"), daemon=True)
+            t.start()
+            active_threads.append(t)
+
+        # 6. Start FastAPI Backends
+        fastapi_apps = [p for p in projects if p.kind == "fastapi"]
+        for p in fastapi_apps:
+            typer.secho(f"Starting FastAPI: {p.name}...", fg=typer.colors.CYAN)
+            
+            # Use venv if exists
+            venv_python = os.path.join(str(p.path), ".venv", "bin", "python3")
+            if not os.path.exists(venv_python):
+                venv_python = "python3"
+                
+            proc = subprocess.Popen(
+                [venv_python, "-m", "uvicorn", "main:app", "--reload"],
+                cwd=str(p.path),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=1,
+            )
+            active_processes.append((p.name, proc))
+            
+            t = threading.Thread(target=stream_logs, args=(p.name, proc, "cyan"), daemon=True)
             t.start()
             active_threads.append(t)
 

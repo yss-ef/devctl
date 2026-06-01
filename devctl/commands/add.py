@@ -1,6 +1,6 @@
 """
 CLI command group for adding new resources to existing projects.
-Supports Spring Boot, Angular, Vue.js, NestJS, and NodeJS scaffolding.
+Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, and FastAPI scaffolding.
 """
 
 import os
@@ -14,6 +14,7 @@ from devctl.generators.scaffold_nestjs import generate_nest_resource
 from devctl.generators.scaffold_nodejs import generate_nodejs_resource
 from devctl.generators.scaffold_react import generate_react_resource
 from devctl.generators.scaffold_nextjs import generate_nextjs_resource
+from devctl.generators.scaffold_fastapi import generate_fastapi_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -96,9 +97,18 @@ def resource(
         except Exception as e:
             typer.secho(f"Error: NextJS generation failed: {e}", fg=typer.colors.RED)
 
+    # Check for FastAPI project
+    if env_state.get("has_fastapi"):
+        project_detected = True
+        typer.secho("FastAPI project detected. Launching FastAPI generator...", fg=typer.colors.CYAN)
+        try:
+            generate_fastapi_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"Error: FastAPI generation failed: {e}", fg=typer.colors.RED)
+
     # Check for NodeJS project
     if os.path.exists("package.json") and not project_detected:
-        # Heuristic for generic nodejs project if not already caught by angular/vue/react/nextjs
+        # Heuristic for generic nodejs project if not already caught by angular/vue/react/nextjs/nest
         project_detected = True
         typer.secho("NodeJS project detected. Launching NodeJS generator...", fg=typer.colors.GREEN)
         try:
@@ -110,7 +120,7 @@ def resource(
     if not project_detected:
         typer.secho(
             "Error: Unable to determine project type. "
-            "Please run from within a Spring, Angular, React, NextJS or Vue.js project directory.",
+            "Please run from within a Spring, Angular, React, NextJS, FastAPI or Vue.js project directory.",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)

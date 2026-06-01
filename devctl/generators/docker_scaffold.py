@@ -132,6 +132,14 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
         if any(f.startswith("next.config.") for f in filename_set):
             candidates.append(("nextjs", project_path))
         
+        if "main.py" in filename_set and "requirements.txt" in filename_set:
+            try:
+                reqs = (project_path / "requirements.txt").read_text()
+                if "fastapi" in reqs.lower():
+                    candidates.append(("fastapi", project_path))
+            except Exception:
+                pass
+
         if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest", "nextjs"] for k, p in candidates if p == project_path):
             candidates.append(("nodejs", project_path))
 
@@ -198,6 +206,8 @@ def _dockerfile_content(env: Environment, project: DockerProject) -> str:
         return env.get_template("nodejs/Dockerfile.j2").render(project=project)
     if project.kind == "nextjs":
         return env.get_template("nextjs/Dockerfile.j2").render(project=project)
+    if project.kind == "fastapi":
+        return env.get_template("fastapi/Dockerfile.j2").render(project=project)
     return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 
