@@ -3,9 +3,10 @@ Generators for NodeJS (Express) projects.
 Includes boilerplate generation with TypeScript and Express.
 """
 
+import json
 import os
 import subprocess
-import json
+
 import typer
 
 
@@ -19,29 +20,50 @@ def generate_nodejs_boilerplate(project_name: str) -> bool:
 
     try:
         os.makedirs(project_path, exist_ok=True)
-        
+
         # 1. Initialize package.json
-        typer.secho("📦 Initializing package.json...", fg=typer.colors.CYAN)
-        subprocess.run(["npm", "init", "-y"], cwd=project_path, check=True, stdout=subprocess.DEVNULL)
-        
-        # 2. Install dependencies
-        typer.secho("⏳ Installing dependencies (express, typescript, ts-node, nodemon)...", fg=typer.colors.CYAN)
+        typer.secho("Initializing package.json...", fg=typer.colors.CYAN)
         subprocess.run(
-            ["npm", "install", "express", "dotenv"], 
-            cwd=project_path, check=True, stdout=subprocess.DEVNULL
+            ["npm", "init", "-y"], cwd=project_path, check=True, stdout=subprocess.DEVNULL
+        )
+
+        # 2. Install dependencies
+        typer.secho(
+            "Installing dependencies (express, typescript, ts-node, nodemon)...",
+            fg=typer.colors.CYAN,
         )
         subprocess.run(
-            ["npm", "install", "-D", "typescript", "@types/node", "@types/express", "ts-node", "nodemon", "rimraf"],
-            cwd=project_path, check=True, stdout=subprocess.DEVNULL
+            ["npm", "install", "express", "dotenv"],
+            cwd=project_path,
+            check=True,
+            stdout=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            [
+                "npm",
+                "install",
+                "-D",
+                "typescript",
+                "@types/node",
+                "@types/express",
+                "ts-node",
+                "nodemon",
+                "rimraf",
+            ],
+            cwd=project_path,
+            check=True,
+            stdout=subprocess.DEVNULL,
         )
 
         # 3. Initialize TypeScript
-        typer.secho("⚙️  Configuring TypeScript...", fg=typer.colors.CYAN)
-        subprocess.run(["npx", "tsc", "--init"], cwd=project_path, check=True, stdout=subprocess.DEVNULL)
-        
+        typer.secho("Configuring TypeScript...", fg=typer.colors.CYAN)
+        subprocess.run(
+            ["npx", "tsc", "--init"], cwd=project_path, check=True, stdout=subprocess.DEVNULL
+        )
+
         # 4. Create folder structure
         os.makedirs(os.path.join(project_path, "src"), exist_ok=True)
-        
+
         # 5. Create basic index.ts
         index_ts = """import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
@@ -67,21 +89,21 @@ app.listen(port, () => {
         # 6. Update package.json scripts
         with open(os.path.join(project_path, "package.json"), "r") as f:
             pkg = json.load(f)
-        
+
         pkg["scripts"] = {
             "start": "node dist/index.js",
             "build": "rimraf dist && tsc",
-            "dev": "nodemon src/index.ts"
+            "dev": "nodemon src/index.ts",
         }
-        
+
         with open(os.path.join(project_path, "package.json"), "w") as f:
             json.dump(pkg, f, indent=2)
 
         typer.secho(
-            f"✅ NodeJS/Express project '{safe_name}' successfully generated!", fg=typer.colors.GREEN
+            f"NodeJS/Express project '{safe_name}' successfully generated!", fg=typer.colors.GREEN
         )
         return True
 
     except Exception as e:
-        typer.secho(f"❌ NodeJS/Express initialization failed: {e}", fg=typer.colors.RED)
+        typer.secho(f"Error: NodeJS/Express initialization failed: {e}", fg=typer.colors.RED)
         return False

@@ -4,7 +4,9 @@ Handles the creation of components, hooks, and services.
 """
 
 import os
+
 import typer
+
 from devctl.orchestrator.scanner import detect_environment
 
 
@@ -25,7 +27,7 @@ def generate_react_resource(resource_name: str, fields_str: str, root_path: str 
     # Structure: src/components/ResourceName/...
     components_dir = os.path.join(react_root, "src", "components", entity_name)
     services_dir = os.path.join(react_root, "src", "services")
-    
+
     os.makedirs(components_dir, exist_ok=True)
     os.makedirs(services_dir, exist_ok=True)
 

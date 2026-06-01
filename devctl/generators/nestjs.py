@@ -3,7 +3,6 @@ Generators for NestJS projects.
 Includes boilerplate generation via Nest CLI.
 """
 
-import os
 import subprocess
 
 import typer
@@ -21,10 +20,20 @@ def generate_nest_boilerplate(project_name: str) -> bool:
         # --package-manager npm: ensures npm is used
         # --strict: enables strict mode
         # --skip-git: devctl might be in a git repo already
-        typer.secho("📦 Scaffolding NestJS project (this may take a minute)...", fg=typer.colors.CYAN)
+        typer.secho("Scaffolding NestJS project (this may take a minute)...", fg=typer.colors.CYAN)
         subprocess.run(
-            ["npx", "-p", "@nestjs/cli", "nest", "new", safe_name, "--package-manager", "npm", "--skip-git"],
-            check=True
+            [
+                "npx",
+                "-p",
+                "@nestjs/cli",
+                "nest",
+                "new",
+                safe_name,
+                "--package-manager",
+                "npm",
+                "--skip-git",
+            ],
+            check=True,
         )
 
         typer.secho(

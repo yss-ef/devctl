@@ -3,8 +3,8 @@ Generators for NextJS projects.
 Includes boilerplate generation via create-next-app.
 """
 
-import os
 import subprocess
+
 import typer
 
 
@@ -16,7 +16,7 @@ def generate_nextjs_boilerplate(project_name: str) -> bool:
     safe_name = project_name.lower().replace("_", "-")
 
     try:
-        typer.secho("📦 Scaffolding NextJS project (this may take a minute)...", fg=typer.colors.CYAN)
+        typer.secho("Scaffolding NextJS project (this may take a minute)...", fg=typer.colors.CYAN)
         # --ts: TypeScript
         # --eslint: ESLint
         # --tailwind: Tailwind CSS
@@ -24,8 +24,20 @@ def generate_nextjs_boilerplate(project_name: str) -> bool:
         # --app: Use App Router
         # --import-alias: alias for imports
         subprocess.run(
-            ["npx", "create-next-app@latest", safe_name, "--ts", "--eslint", "--tailwind", "--src-dir", "--app", "--import-alias", "@/*", "--use-npm"],
-            check=True
+            [
+                "npx",
+                "create-next-app@latest",
+                safe_name,
+                "--ts",
+                "--eslint",
+                "--tailwind",
+                "--src-dir",
+                "--app",
+                "--import-alias",
+                "@/*",
+                "--use-npm",
+            ],
+            check=True,
         )
 
         typer.secho(

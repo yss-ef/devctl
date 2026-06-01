@@ -4,7 +4,9 @@ Handles the creation of routers, schemas, and models.
 """
 
 import os
+
 import typer
+
 from devctl.orchestrator.scanner import detect_environment
 
 
@@ -26,11 +28,12 @@ def generate_fastapi_resource(resource_name: str, fields_str: str, root_path: st
     routers_dir = os.path.join(fastapi_root, "routers")
     schemas_dir = os.path.join(fastapi_root, "schemas")
     models_dir = os.path.join(fastapi_root, "models")
-    
+
     for d in [routers_dir, schemas_dir, models_dir]:
         os.makedirs(d, exist_ok=True)
         # Ensure __init__.py exists
-        with open(os.path.join(d, "__init__.py"), "a"): pass
+        with open(os.path.join(d, "__init__.py"), "a"):
+            pass
 
     typer.secho(f"⚙️  Generating FastAPI resource '{entity_name}'...", fg=typer.colors.CYAN)
 
@@ -64,24 +67,6 @@ router = APIRouter(
     tags=["{resource_lower}s"]
 )
 
-@{resource_lower}.get("/", response_model=List[schemas.{entity_name}])
-def read_{resource_lower}s():
-    return []
-
-@{resource_lower}.post("/", response_model=schemas.{entity_name})
-def create_{resource_lower}({resource_lower}: schemas.{entity_name}Create):
-    return {{"id": 1, **{resource_lower}.dict()}}
-"""
-    # Note: fixed typo in template during thought but let's correct it properly
-    router_content = f"""from fastapi import APIRouter, HTTPException
-from typing import List
-from schemas import {resource_lower} as schemas
-
-router = APIRouter(
-    prefix="/{resource_lower}s",
-    tags=["{resource_lower}s"]
-)
-
 @router.get("/", response_model=List[schemas.{entity_name}])
 def read_{resource_lower}s():
     return []
@@ -93,6 +78,6 @@ def create_{resource_lower}(item: schemas.{entity_name}Create):
     with open(os.path.join(routers_dir, f"{resource_lower}.py"), "w") as f:
         f.write(router_content)
 
-    typer.secho(f"✅ {entity_name} FastAPI feature successfully generated!", fg=typer.colors.GREEN)
+    typer.secho(f"{entity_name} FastAPI feature successfully generated!", fg=typer.colors.GREEN)
     typer.echo(f"  - Created: schemas/{resource_lower}.py")
     typer.echo(f"  - Created: routers/{resource_lower}.py")

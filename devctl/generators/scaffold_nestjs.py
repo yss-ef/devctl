@@ -3,9 +3,10 @@ NestJS resource scaffolding generator.
 Handles the creation of modules, controllers, and services using Nest CLI.
 """
 
-import os
 import subprocess
+
 import typer
+
 from devctl.orchestrator.scanner import detect_environment
 
 
@@ -31,13 +32,21 @@ def generate_nest_resource(resource_name: str, fields_str: str, root_path: str =
         subprocess.run(
             ["npx", "@nestjs/cli", "g", "resource", resource_lower, "--no-spec"],
             cwd=nest_root,
-            check=True
+            check=True,
         )
 
-        typer.secho(f"✅ {resource_name} NestJS resource successfully generated!", fg=typer.colors.GREEN)
-        typer.echo(f"💡 Note: Fields [{fields_str}] were provided but manual DTO update is recommended for NestJS.")
+        typer.secho(
+            f"✅ {resource_name} NestJS resource successfully generated!", fg=typer.colors.GREEN
+        )
+        typer.echo(
+            f"💡 Note: Fields [{fields_str}] were provided but manual DTO update "
+            "is recommended for NestJS."
+        )
 
     except subprocess.CalledProcessError as e:
-        typer.secho(f"❌ Nest CLI resource generation failed with code: {e.returncode}", fg=typer.colors.RED)
+        typer.secho(
+            f"❌ Nest CLI resource generation failed with code: {e.returncode}",
+            fg=typer.colors.RED,
+        )
     except Exception as e:
         typer.secho(f"⚠️  An unexpected error occurred: {e}", fg=typer.colors.YELLOW)
