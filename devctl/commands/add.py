@@ -7,9 +7,9 @@ import os
 
 import typer
 
-from devctl.generators.scaffold_angular import generate_angular_resource
-from devctl.generators.scaffold_spring import generate_spring_resource
-from devctl.generators.scaffold_vue import generate_vue_resource
+from devctl.generators.angular.scaffold import generate_angular_resource
+from devctl.generators.spring.scaffold import generate_spring_resource
+from devctl.generators.vue.scaffold import generate_vue_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")

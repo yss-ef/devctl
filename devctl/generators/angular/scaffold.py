@@ -6,9 +6,9 @@ Handles the creation of features including models, services, and components.
 import os
 
 import typer
-from jinja2 import Environment, FileSystemLoader
 
 from devctl.orchestrator.scanner import detect_environment
+from devctl.utils.templates import get_jinja_env
 
 # Dictionary mapping CLI types to TypeScript types
 TS_TYPE_MAP = {
@@ -117,8 +117,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
         },
     ]
 
-    templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "angular", "feature")
-    env = Environment(loader=FileSystemLoader(templates_dir))
+    env = get_jinja_env("angular/feature")
 
     typer.secho(f"⚙️  Generating Angular feature '{entity_name}'...", fg=typer.colors.CYAN)
 

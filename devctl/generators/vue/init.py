@@ -7,7 +7,8 @@ import os
 import subprocess
 
 import typer
-from jinja2 import Environment, FileSystemLoader
+
+from devctl.utils.templates import get_jinja_env
 
 
 def setup_vue_proxy(project_path: str):
@@ -16,8 +17,7 @@ def setup_vue_proxy(project_path: str):
     """
     typer.secho("⚙️  Configuring Vite Proxy for Spring Boot...", fg=typer.colors.CYAN)
 
-    templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "vue", "config")
-    env = Environment(loader=FileSystemLoader(templates_dir))
+    env = get_jinja_env("vue/config")
 
     target_path = os.path.join(project_path, "vite.config.ts")
 
@@ -52,8 +52,7 @@ def setup_vue_router(project_path: str):
         os.makedirs(router_dir, exist_ok=True)
 
         # 3. Jinja2 template rendering
-        templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "vue", "config")
-        env = Environment(loader=FileSystemLoader(templates_dir))
+        env = get_jinja_env("vue/config")
 
         files_to_generate = {
             "router.ts.j2": os.path.join(router_dir, "index.ts"),
