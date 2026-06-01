@@ -11,6 +11,7 @@ from devctl.generators.angular import generate_angular_boilerplate
 # Spring generator
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
+from devctl.generators.svelte import generate_svelte_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -70,3 +71,17 @@ def init_vue(name: str):
 
     if success:
         typer.secho("\n✨ Vue.js project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("svelte")
+def init_svelte(name: str):
+    """
+    Initializes a new SvelteKit frontend project.
+    """
+    check_tool("npm", "initializing a Svelte project")
+
+    typer.secho(f"🚀 Initializing Svelte project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_svelte_boilerplate(name)
+
+    if success:
+        typer.secho("\n✨ Svelte project ready!", fg=typer.colors.GREEN)
