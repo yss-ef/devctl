@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import typer
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from devctl.generators.docker_scaffold import (
