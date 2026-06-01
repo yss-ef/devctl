@@ -1,14 +1,6 @@
 """
 Project scanner and environment detector.
-<<<<<<< HEAD
-<<<<<<< HEAD
-Identifies Spring Boot, Angular, Vue.js, React, NextJS, NestJS, NodeJS, FastAPI, and Docker components in a directory tree.
-=======
-Identifies Spring Boot, Angular, Vue.js, Django, and Docker components in a directory tree.
->>>>>>> feat/django
-=======
-Identifies Spring Boot, Angular, Vue.js, Svelte, and Docker components in a directory tree.
->>>>>>> feat/svelte
+Identifies Spring Boot, Angular, Vue.js, React, NextJS, NestJS, NodeJS, FastAPI, Django, Svelte, Go, and Docker components in a directory tree.
 """
 
 import os
@@ -29,8 +21,6 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
-<<<<<<< HEAD
-<<<<<<< HEAD
         "has_react": False,
         "react_path": None,
         "has_nextjs": False,
@@ -41,28 +31,18 @@ def detect_environment(root_path: str = "."):
         "nodejs_path": None,
         "has_fastapi": False,
         "fastapi_path": None,
-=======
         "has_django": False,
         "django_path": None,
->>>>>>> feat/django
-=======
         "has_svelte": False,
         "svelte_path": None,
->>>>>>> feat/svelte
+        "has_go": False,
+        "go_path": None,
         "project_root": os.path.abspath(root_path),
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):
         # Optimization: ignore heavy folders for an instant scan
-<<<<<<< HEAD
-<<<<<<< HEAD
-        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist", ".next", ".venv"]):
-=======
-        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", ".venv"]):
->>>>>>> feat/django
-=======
-        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", ".svelte-kit"]):
->>>>>>> feat/svelte
+        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist", ".next", ".venv", ".svelte-kit"]):
             continue
 
         if "docker-compose.yml" in filenames and not env_state["has_docker_compose"]:
@@ -111,21 +91,15 @@ def detect_environment(root_path: str = "."):
             env_state["has_nodejs"] = True
             env_state["nodejs_path"] = dirpath
 
-        if "main.py" in filenames and "requirements.txt" in filenames:
+        if "requirements.txt" in filenames:
             req_path = os.path.join(dirpath, "requirements.txt")
             try:
                 with open(req_path, "r") as f:
-                    if "fastapi" in f.read().lower():
+                    req_content = f.read().lower()
+                    if "fastapi" in req_content and not env_state["has_fastapi"]:
                         env_state["has_fastapi"] = True
                         env_state["fastapi_path"] = dirpath
-            except Exception:
-                pass
-
-        if "manage.py" in filenames and "requirements.txt" in filenames:
-            req_path = os.path.join(dirpath, "requirements.txt")
-            try:
-                with open(req_path, "r") as f:
-                    if "django" in f.read().lower():
+                    if "django" in req_content and not env_state["has_django"]:
                         env_state["has_django"] = True
                         env_state["django_path"] = dirpath
             except Exception:
@@ -134,5 +108,9 @@ def detect_environment(root_path: str = "."):
         if "svelte.config.js" in filenames and not env_state["has_svelte"]:
             env_state["has_svelte"] = True
             env_state["svelte_path"] = dirpath
+
+        if "go.mod" in filenames and not env_state["has_go"]:
+            env_state["has_go"] = True
+            env_state["go_path"] = dirpath
 
     return env_state

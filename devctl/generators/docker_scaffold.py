@@ -144,6 +144,9 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                     candidates.append(("django", project_path))
             except Exception:
                 pass
+        
+        if "go.mod" in filename_set:
+            candidates.append(("go", project_path))
 
         if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest", "nextjs", "svelte"] for k, p in candidates if p == project_path):
             candidates.append(("nodejs", project_path))
@@ -217,6 +220,8 @@ def _dockerfile_content(env: Environment, project: DockerProject) -> str:
         return env.get_template("django/Dockerfile.j2").render(project=project)
     if project.kind == "svelte":
         return env.get_template("svelte/Dockerfile.j2").render(project=project)
+    if project.kind == "go":
+        return env.get_template("go/Dockerfile.j2").render(project=project)
     return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 

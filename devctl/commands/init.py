@@ -1,6 +1,6 @@
 """
 CLI command group for initializing new projects.
-Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI, Django, and Svelte.
+Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI, Django, Svelte, and Go.
 """
 
 import typer
@@ -18,6 +18,7 @@ from devctl.generators.nextjs import generate_nextjs_boilerplate
 from devctl.generators.fastapi import generate_fastapi_boilerplate
 from devctl.generators.django import generate_django_boilerplate
 from devctl.generators.svelte import generate_svelte_boilerplate
+from devctl.generators.go_fiber import generate_go_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -175,3 +176,17 @@ def init_svelte(name: str):
 
     if success:
         typer.secho("\nSvelte project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("go")
+def init_go(name: str):
+    """
+    Initializes a new Go/Fiber backend project.
+    """
+    check_tool("go", "initializing a Go project")
+
+    typer.secho(f"Initializing Go project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_go_boilerplate(name)
+
+    if success:
+        typer.secho("\nGo project ready!", fg=typer.colors.GREEN)
