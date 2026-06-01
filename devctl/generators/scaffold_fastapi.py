@@ -4,7 +4,9 @@ Handles the creation of routers, schemas, and models.
 """
 
 import os
+
 import typer
+
 from devctl.orchestrator.scanner import detect_environment
 
 
@@ -26,13 +28,14 @@ def generate_fastapi_resource(resource_name: str, fields_str: str, root_path: st
     routers_dir = os.path.join(fastapi_root, "routers")
     schemas_dir = os.path.join(fastapi_root, "schemas")
     models_dir = os.path.join(fastapi_root, "models")
-    
+
     for d in [routers_dir, schemas_dir, models_dir]:
         os.makedirs(d, exist_ok=True)
         # Ensure __init__.py exists
-        with open(os.path.join(d, "__init__.py"), "a"): pass
+        with open(os.path.join(d, "__init__.py"), "a"):
+            pass
 
-    typer.secho(f"⚙️  Generating FastAPI resource '{entity_name}'...", fg=typer.colors.CYAN)
+    typer.secho(f"Generating FastAPI resource '{entity_name}'...", fg=typer.colors.CYAN)
 
     # 1. Generate Schema (Pydantic)
     schema_content = f"""from pydantic import BaseModel

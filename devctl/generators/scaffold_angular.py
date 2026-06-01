@@ -155,6 +155,9 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
                     f.write("")
                 typer.echo(f"  - Created (empty): {comp['dir']}/{target_file_name}")
             else:
-                typer.secho(f"Warning: Failed to generate {comp['template']}: {e}", fg=typer.colors.YELLOW)
+                typer.secho(
+                    f"Warning: Failed to generate {comp['template']}: {e}",
+                    fg=typer.colors.YELLOW,
+                )
 
     typer.secho(f"{entity_name} feature successfully generated!", fg=typer.colors.GREEN)

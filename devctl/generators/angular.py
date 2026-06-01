@@ -94,9 +94,7 @@ def generate_angular_boilerplate(project_name: str) -> bool:
     try:
         command = ["ng", "new", safe_name, "--routing=true", "--style=scss", "--skip-git=true"]
 
-        typer.secho(
-            "Downloading npm packages... (This may take 1-2 minutes)", fg=typer.colors.CYAN
-        )
+        typer.secho("Downloading npm packages... (This may take 1-2 minutes)", fg=typer.colors.CYAN)
         subprocess.run(command, check=True)
 
         # Post-installation configuration

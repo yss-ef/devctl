@@ -4,30 +4,32 @@ Handles the creation of routes and controllers.
 """
 
 import os
+
 import typer
+
 from devctl.orchestrator.scanner import detect_environment
 
 
-def generate_nodejs_resource(resource_name: str, fields_str: str, root_path: str = "."):
+def generate_nodejs_resource(resource_name: str, _fields_str: str, root_path: str = "."):
     """
     Scaffolds a NodeJS/Express resource.
     """
     # Using basic manual file writing for simplicity and speed
     # In a more advanced version, we could use Jinja2 templates
-    
+
     resource_lower = resource_name.lower()
     entity_name = resource_name.capitalize()
-    
+
     src_dir = os.path.join(root_path, "src")
     if not os.path.exists(src_dir):
         # Try to find nodejs path from scanner
-        env_state = detect_environment(root_path)
+        detect_environment(root_path)
         # We need to add has_nodejs to scanner or just check if src exists in root
         src_dir = os.path.join(root_path, "src")
 
     routes_dir = os.path.join(src_dir, "routes")
     controllers_dir = os.path.join(src_dir, "controllers")
-    
+
     os.makedirs(routes_dir, exist_ok=True)
     os.makedirs(controllers_dir, exist_ok=True)
 
@@ -47,9 +49,9 @@ export const get{entity_name}ById = (req: Request, res: Response) => {{
 
 export const create{entity_name} = (req: Request, res: Response) => {{
   const data = req.body;
-  res.status(201).json({{ 
+  res.status(201).json({{
     message: '{entity_name} created',
-    data 
+    data
   }});
 }};
 """
@@ -76,4 +78,4 @@ export default router;
     typer.secho(f"✅ {entity_name} NodeJS resource successfully generated!", fg=typer.colors.GREEN)
     typer.echo(f"  - Created: controllers/{resource_lower}.controller.ts")
     typer.echo(f"  - Created: routes/{resource_lower}.routes.ts")
-    typer.echo(f"💡 Don't forget to register the route in your main app file.")
+    typer.echo("💡 Don't forget to register the route in your main app file.")

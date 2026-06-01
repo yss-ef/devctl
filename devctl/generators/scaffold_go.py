@@ -4,7 +4,9 @@ Handles the creation of handlers and models.
 """
 
 import os
+
 import typer
+
 from devctl.orchestrator.scanner import detect_environment
 
 
@@ -25,7 +27,7 @@ def generate_go_resource(resource_name: str, fields_str: str, root_path: str = "
     # Structure: handlers/resource.go, models/resource.go
     handlers_dir = os.path.join(go_root, "handlers")
     models_dir = os.path.join(go_root, "models")
-    
+
     os.makedirs(handlers_dir, exist_ok=True)
     os.makedirs(models_dir, exist_ok=True)
 
