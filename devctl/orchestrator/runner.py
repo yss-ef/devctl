@@ -67,7 +67,10 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
                 sys.exit(1)
 
             for compose_path in docker_composes:
-                typer.secho(f"Starting Docker Compose DB in {compose_path}...", fg=typer.colors.CYAN)
+                typer.secho(
+                    f"Starting Docker Compose DB in {compose_path}...",
+                    fg=typer.colors.CYAN,
+                )
                 subprocess.run(
                     ["docker", "compose", "-f", "docker-compose-db.yml", "up", "-d"],
                     cwd=str(compose_path),

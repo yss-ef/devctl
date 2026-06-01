@@ -1,5 +1,6 @@
-import typer
 from pathlib import Path
+
+import typer
 
 from devctl.generators.docker_scaffold import (
     DockerScaffoldError,
@@ -38,7 +39,11 @@ def deploy(
         typer.secho(f"Error: {exc}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from exc
 
-    typer.secho(f"Deployment scaffolding complete for {result.root_path}", fg=typer.colors.CYAN, bold=True)
+    typer.secho(
+        f"Deployment scaffolding complete for {result.root_path}",
+        fg=typer.colors.CYAN,
+        bold=True,
+    )
 
     typer.echo("\nDetected services:")
     for service in result.services:

@@ -8,7 +8,7 @@ import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
@@ -221,7 +221,7 @@ def scaffold_docker_assets(
 
     # Also scaffold the global docker-compose-prod.yml
     compose_path = root / "docker-compose-prod.yml"
-    compose_content = _generate_compose_content(root, projects)
+    compose_content = _generate_compose_content(projects)
     operations.append(
         _write_file(
             compose_path,
@@ -234,7 +234,7 @@ def scaffold_docker_assets(
     return DockerScaffoldResult(root_path=root, services=projects, operations=operations)
 
 
-def _generate_compose_content(root: Path, projects: list[DockerProject]) -> str:
+def _generate_compose_content(projects: list[DockerProject]) -> str:
     services_data = []
     databases = []
     seen_db_names = set()
