@@ -173,16 +173,16 @@ def deploy(path: Path = PATH_ARGUMENT):
     """
     Generate a global docker-compose.yml by scanning subdirectories.
     """
-    typer.secho(f"🚀 Preparing deployment for {path.resolve()}...", fg=typer.colors.CYAN, bold=True)
+    typer.secho(f"Preparing deployment for {path.resolve()}...", fg=typer.colors.CYAN, bold=True)
 
     try:
         projects = discover_docker_projects(path)
     except Exception as e:
-        typer.secho(f"❌ Error scanning projects: {e}", fg=typer.colors.RED)
+        typer.secho(f"Error: Scanning failed: {e}", fg=typer.colors.RED)
         raise typer.Exit(1) from e
 
     if not projects:
-        typer.secho("❌ No supported projects (Spring, Angular, Vue) found.", fg=typer.colors.RED)
+        typer.secho("Error: No supported projects (Spring, Angular, Vue) found.", fg=typer.colors.RED)
         raise typer.Exit(1)
 
     services_data = []
@@ -193,7 +193,7 @@ def deploy(path: Path = PATH_ARGUMENT):
         dockerfile_path = project.path / "Dockerfile"
         if not dockerfile_path.exists():
             typer.secho(
-                f"⚠️ Warning: No Dockerfile found in {project.path}. "
+                f"Warning: No Dockerfile found in {project.path}. "
                 "You may need to run 'devctl dockerize' first.",
                 fg=typer.colors.YELLOW,
             )
@@ -231,5 +231,5 @@ def deploy(path: Path = PATH_ARGUMENT):
     output_path = path / "docker-compose.yml"
     output_path.write_text(output, encoding="utf-8")
 
-    typer.secho(f"✅ Generated {output_path}", fg=typer.colors.GREEN, bold=True)
+    typer.secho(f"Generated {output_path}", fg=typer.colors.GREEN, bold=True)
     typer.echo(f"Summary: {len(services_data)} services, {len(databases)} databases.")

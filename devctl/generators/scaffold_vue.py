@@ -19,7 +19,7 @@ def generate_vue_resource(resource_name: str, fields_str: str, root_path: str = 
     env_state = detect_environment(root_path)
 
     if not env_state["has_vue"]:
-        typer.secho("❌ Error: No Vue.js project detected here.", fg=typer.colors.RED)
+        typer.secho("Error: No Vue.js project detected here.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     vue_root = env_state["vue_path"]
@@ -74,7 +74,7 @@ def generate_vue_resource(resource_name: str, fields_str: str, root_path: str = 
         autoescape=select_autoescape(["html", "xml"]),
     )
 
-    typer.secho(f"⚙️  Generating Vue.js feature '{entity_name}'...", fg=typer.colors.CYAN)
+    typer.secho(f"Generating Vue.js feature '{entity_name}'...", fg=typer.colors.CYAN)
 
     # Template data
     context = {
@@ -106,6 +106,6 @@ def generate_vue_resource(resource_name: str, fields_str: str, root_path: str = 
             typer.echo(f"  - Created: {display_dir}/{target_file_name}")
 
         except Exception as e:
-            typer.secho(f"⚠️  Error on {comp['template']}: {e}", fg=typer.colors.YELLOW)
+            typer.secho(f"Warning: Error on {comp['template']}: {e}", fg=typer.colors.YELLOW)
 
-    typer.secho(f"✅ {entity_name} Vue feature successfully generated!", fg=typer.colors.GREEN)
+    typer.secho(f"{entity_name} Vue feature successfully generated!", fg=typer.colors.GREEN)

@@ -51,7 +51,7 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
     global active_processes
 
     def signal_handler(sig, frame):
-        typer.echo("\n🛑 Shutdown requested. Cleaning up...")
+        typer.echo("\nShutdown requested. Cleaning up...")
         cleanup_and_exit(docker_composes)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -61,22 +61,22 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
         # 1. Start Databases
         if docker_composes:
             if not is_docker_running():
-                typer.secho("❌ Error: Docker service is not running.", fg=typer.colors.RED)
+                typer.secho("Error: Docker service is not running.", fg=typer.colors.RED)
                 sys.exit(1)
 
             for compose_path in docker_composes:
-                typer.secho(f"🐳 Starting Docker Compose in {compose_path}...", fg=typer.colors.CYAN)
+                typer.secho(f"Starting Docker Compose in {compose_path}...", fg=typer.colors.CYAN)
                 subprocess.run(
                     ["docker", "compose", "up", "-d"], cwd=str(compose_path), check=True
                 )
             
-            typer.echo("⏳ Waiting 5s for databases to initialize...")
+            typer.echo("Waiting 5s for databases to initialize...")
             time.sleep(5)
 
         # 2. Start Backends (Spring Boot)
         backends = [p for p in projects if p.kind == "spring"]
         for p in backends:
-            typer.secho(f"🍃 Starting Spring Boot: {p.name}...", fg=typer.colors.GREEN)
+            typer.secho(f"Starting Spring Boot: {p.name}...", fg=typer.colors.GREEN)
             
             proc = subprocess.Popen(
                 ["./mvnw", "spring-boot:run"],
@@ -95,10 +95,9 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
         frontends = [p for p in projects if p.kind in ["angular", "vue"]]
         for p in frontends:
             color = "cyan" if p.kind == "angular" else "magenta"
-            icon = "🅰️" if p.kind == "angular" else "🟢"
             cmd = ["npx", "ng", "serve"] if p.kind == "angular" else ["npm", "run", "dev"]
             
-            typer.secho(f"{icon} Starting {p.kind.capitalize()}: {p.name}...", fg=typer.colors.CYAN if p.kind == "angular" else typer.colors.MAGENTA)
+            typer.secho(f"Starting {p.kind.capitalize()}: {p.name}...", fg=typer.colors.CYAN if p.kind == "angular" else typer.colors.MAGENTA)
             
             proc = subprocess.Popen(
                 cmd,
@@ -114,11 +113,11 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             active_threads.append(t)
 
         if not active_processes and not docker_composes:
-            typer.secho("⚠️ No projects or databases detected to run.", fg=typer.colors.YELLOW)
+            typer.secho("Warning: No projects or databases detected to run.", fg=typer.colors.YELLOW)
             return
 
         typer.secho(
-            "\n✨ Development environment active! Press Ctrl+C to stop everything gracefully.\n",
+            "\nDevelopment environment active! Press Ctrl+C to stop everything gracefully.\n",
             fg=typer.colors.GREEN,
             bold=True,
         )
@@ -129,11 +128,11 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             # Check if any process has died unexpectedly
             for name, proc in active_processes:
                 if proc.poll() is not None:
-                    typer.secho(f"⚠️ Process {name} exited with code {proc.returncode}", fg=typer.colors.RED)
+                    typer.secho(f"Warning: Process {name} exited with code {proc.returncode}", fg=typer.colors.RED)
                     active_processes.remove((name, proc))
 
     except Exception as e:
-        typer.secho(f"❌ A system error occurred: {e}", fg=typer.colors.RED)
+        typer.secho(f"Error: A system error occurred: {e}", fg=typer.colors.RED)
         cleanup_and_exit(docker_composes)
 
 
@@ -159,7 +158,7 @@ def cleanup_and_exit(docker_composes: List[Path]):
                 stderr=subprocess.DEVNULL,
             )
         except Exception:
-            typer.secho(f"⚠️ Warning: Docker cleanup failed for {compose_path}", fg=typer.colors.RED)
+            typer.secho(f"Warning: Docker cleanup failed for {compose_path}", fg=typer.colors.RED)
 
-    typer.secho("✅ Cleanup finished. Environment is clean.", fg=typer.colors.GREEN)
+    typer.secho("Cleanup finished. Environment is clean.", fg=typer.colors.GREEN)
     sys.exit(0)

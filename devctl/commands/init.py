@@ -31,16 +31,16 @@ def init_spring(
 
     # Strict input validation
     if db not in ["postgres", "mysql"]:
-        typer.secho(f"❌ Error: Database '{db}' is not supported.", fg=typer.colors.RED)
+        typer.secho(f"Error: Database '{db}' is not supported.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    typer.secho(f"🚀 Initializing Spring Boot project: '{name}'...", fg=typer.colors.CYAN)
+    typer.secho(f"Initializing Spring Boot project: '{name}'...", fg=typer.colors.CYAN)
 
     success_download = download_spring_boilerplate(name, db_type=db)
 
     if success_download:
         generate_config(name, db_type=db, custom_port=port)
-        typer.secho("\n✨ Spring project ready!", fg=typer.colors.GREEN)
+        typer.secho("\nSpring project ready!", fg=typer.colors.GREEN)
 
 
 @app.command("angular")
@@ -51,11 +51,11 @@ def init_angular(name: str):
     check_tool("npm", "initializing an Angular project")
     check_tool("ng", "initializing an Angular project")
 
-    typer.secho(f"🚀 Initializing Angular project: '{name}'...", fg=typer.colors.CYAN)
+    typer.secho(f"Initializing Angular project: '{name}'...", fg=typer.colors.CYAN)
     success = generate_angular_boilerplate(name)
 
     if success:
-        typer.secho("\n✨ Angular project ready!", fg=typer.colors.GREEN)
+        typer.secho("\nAngular project ready!", fg=typer.colors.GREEN)
 
 
 @app.command("vue")
@@ -65,8 +65,8 @@ def init_vue(name: str):
     """
     check_tool("npm", "initializing a Vue.js project")
 
-    typer.secho(f"🚀 Initializing Vue.js project: '{name}'...", fg=typer.colors.CYAN)
+    typer.secho(f"Initializing Vue.js project: '{name}'...", fg=typer.colors.CYAN)
     success = generate_vue_boilerplate(name)
 
     if success:
-        typer.secho("\n✨ Vue.js project ready!", fg=typer.colors.GREEN)
+        typer.secho("\nVue.js project ready!", fg=typer.colors.GREEN)

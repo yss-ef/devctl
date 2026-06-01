@@ -146,7 +146,7 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
     Automatically makes the Maven wrapper executable on Unix.
     """
     typer.secho(
-        f"🔄 Generating Spring Boot backend '{project_name}' (Driver: {db_type})...",
+        f"Generating Spring Boot backend '{project_name}' (Driver: {db_type})...",
         fg=typer.colors.CYAN,
     )
 
@@ -188,7 +188,7 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         response = requests.get(url, params=params)
 
         if response.status_code != 200:
-            typer.secho(f"❌ API Rejected: {response.text}", fg=typer.colors.RED)
+            typer.secho(f"Error: API Rejected: {response.text}", fg=typer.colors.RED)
             return False
 
         z = zipfile.ZipFile(io.BytesIO(response.content))
@@ -211,11 +211,11 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         os.chdir("..")
 
         typer.secho(
-            f"✅ Backend successfully generated in folder ./{project_name}!",
+            f"Backend successfully generated in folder ./{project_name}!",
             fg=typer.colors.GREEN,
         )
         return True
 
     except requests.exceptions.RequestException as e:
-        typer.secho(f"❌ Network error contacting API: {e}", fg=typer.colors.RED)
+        typer.secho(f"Error: Network error contacting API: {e}", fg=typer.colors.RED)
         return False

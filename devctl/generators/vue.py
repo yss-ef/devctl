@@ -14,7 +14,7 @@ def setup_vue_proxy(project_path: str):
     """
     Replaces the default vite.config.ts with our version including the proxy.
     """
-    typer.secho("⚙️  Configuring Vite Proxy for Spring Boot...", fg=typer.colors.CYAN)
+    typer.secho("Configuring Vite Proxy for Spring Boot...", fg=typer.colors.CYAN)
 
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "vue", "config")
     env = Environment(loader=FileSystemLoader(templates_dir))
@@ -28,14 +28,14 @@ def setup_vue_proxy(project_path: str):
             f.write(content)
         typer.echo("  - vite.config.ts updated with /api proxy.")
     except Exception as e:
-        typer.secho(f"⚠️  Error configuring proxy: {e}", fg=typer.colors.YELLOW)
+        typer.secho(f"Warning: Error configuring proxy: {e}", fg=typer.colors.YELLOW)
 
 
 def setup_vue_router(project_path: str):
     """
     Installs vue-router and configures the base architecture (main.ts, router, App.vue).
     """
-    typer.secho("🛣️  Installing and configuring vue-router...", fg=typer.colors.CYAN)
+    typer.secho("Installing and configuring vue-router...", fg=typer.colors.CYAN)
 
     try:
         # 1. NPM package installation
@@ -69,25 +69,25 @@ def setup_vue_router(project_path: str):
 
         typer.echo("  - Navigation architecture ready.")
     except Exception as e:
-        typer.secho(f"⚠️  Error configuring router: {e}", fg=typer.colors.YELLOW)
+        typer.secho(f"Warning: Error configuring router: {e}", fg=typer.colors.YELLOW)
 
 
 def generate_vue_boilerplate(project_name: str) -> bool:
     """
     Generates a Vue 3 + TypeScript project via Vite.
     """
-    typer.secho(f"🔄 Generating Vue.js frontend '{project_name}' via Vite...", fg=typer.colors.CYAN)
+    typer.secho(f"Generating Vue.js frontend '{project_name}' via Vite...", fg=typer.colors.CYAN)
     safe_name = project_name.lower().replace("_", "-")
 
     try:
-        typer.secho("📦 Scaffolding Vite project...", fg=typer.colors.CYAN)
+        typer.secho("Scaffolding Vite project...", fg=typer.colors.CYAN)
         subprocess.run(
             ["npm", "create", "vite@latest", safe_name, "--", "--template", "vue-ts"], check=True
         )
 
         project_full_path = os.path.join(os.getcwd(), safe_name)
 
-        typer.secho("⏳ Installing npm dependencies...", fg=typer.colors.CYAN)
+        typer.secho("Installing npm dependencies...", fg=typer.colors.CYAN)
         subprocess.run(["npm", "install"], cwd=project_full_path, check=True)
 
         # --- CALL OUR TWO CONFIGURATORS ---
@@ -96,10 +96,10 @@ def generate_vue_boilerplate(project_name: str) -> bool:
         # ----------------------------------------
 
         typer.secho(
-            f"✅ Vue.js frontend '{safe_name}' successfully generated!", fg=typer.colors.GREEN
+            f"Vue.js frontend '{safe_name}' successfully generated!", fg=typer.colors.GREEN
         )
         return True
 
     except subprocess.CalledProcessError as e:
-        typer.secho(f"❌ Vue/Vite process failed with code: {e.returncode}", fg=typer.colors.RED)
+        typer.secho(f"Error: Vue/Vite process failed with code: {e.returncode}", fg=typer.colors.RED)
         return False
