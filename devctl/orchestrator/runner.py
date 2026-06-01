@@ -14,6 +14,7 @@ from typing import List
 
 import typer
 from rich.console import Console
+from rich.markup import escape
 
 from devctl.generators.docker_scaffold import DockerProject
 
@@ -40,9 +41,9 @@ def stream_logs(name: str, process: subprocess.Popen, color: str):
         for line in iter(process.stdout.readline, b""):
             if line:
                 decoded_line = line.decode("utf-8", errors="ignore").rstrip()
-                console.print(f"[{color}]{name:>15} |[/{color}] {decoded_line}")
+                console.print(f"[{color}]{name:>15} |[/{color}] {escape(decoded_line)}")
     except Exception as e:
-        console.print(f"[red]Error streaming logs for {name}: {e}[/red]")
+        console.print(f"[red]Error streaming logs for {name}: {escape(str(e))}[/red]")
 
 
 def launch_dev_environment(projects: List[DockerProject], docker_composes: List[Path]):
