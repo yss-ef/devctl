@@ -1,6 +1,6 @@
 """
 CLI command group for adding new resources to existing projects.
-Supports Spring Boot, Angular, and Vue.js scaffolding.
+Supports Spring Boot, Angular, Vue.js, NestJS, and NodeJS scaffolding.
 """
 
 import os
@@ -11,6 +11,7 @@ from devctl.generators.scaffold_angular import generate_angular_resource
 from devctl.generators.scaffold_spring import generate_spring_resource
 from devctl.generators.scaffold_vue import generate_vue_resource
 from devctl.generators.scaffold_nestjs import generate_nest_resource
+from devctl.generators.scaffold_nodejs import generate_nodejs_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -74,6 +75,16 @@ def resource(
             generate_nest_resource(name, fields, root_path=".")
         except Exception as e:
             typer.secho(f"Error: Nest generation failed: {e}", fg=typer.colors.RED)
+
+    # Check for NodeJS project
+    if os.path.exists("package.json") and not project_detected:
+        # Heuristic for generic nodejs project if not already caught by angular/vue
+        project_detected = True
+        typer.secho("NodeJS project detected. Launching NodeJS generator...", fg=typer.colors.GREEN)
+        try:
+            generate_nodejs_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"Error: NodeJS generation failed: {e}", fg=typer.colors.RED)
 
     # Error message only if NO project detected
     if not project_detected:

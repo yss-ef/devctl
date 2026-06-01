@@ -1,6 +1,6 @@
 """
 CLI command group for initializing new projects.
-Supports Spring Boot, Angular, and Vue.js.
+Supports Spring Boot, Angular, Vue.js, NestJS, and NodeJS.
 """
 
 import typer
@@ -12,6 +12,7 @@ from devctl.generators.angular import generate_angular_boilerplate
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
 from devctl.generators.nestjs import generate_nest_boilerplate
+from devctl.generators.nodejs import generate_nodejs_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -85,3 +86,17 @@ def init_nest(name: str):
 
     if success:
         typer.secho("\nNestJS project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("nodejs")
+def init_nodejs(name: str):
+    """
+    Initializes a new NodeJS/Express backend project.
+    """
+    check_tool("npm", "initializing a NodeJS project")
+
+    typer.secho(f"Initializing NodeJS project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_nodejs_boilerplate(name)
+
+    if success:
+        typer.secho("\nNodeJS project ready!", fg=typer.colors.GREEN)

@@ -83,7 +83,7 @@ def sanitize_service_name(raw_name: str, fallback: str = "service") -> str:
 
 
 def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]:
-    """Discover all Spring Boot, Angular, and Vue/Vite projects under ``root_path``."""
+    """Discover all supported projects under ``root_path``."""
     root = Path(root_path).resolve()
     if not root.exists():
         raise DockerScaffoldError(f"Path does not exist: {root}")
@@ -107,6 +107,8 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
             candidates.append(("vue", project_path))
         if "nest-cli.json" in filename_set:
             candidates.append(("nest", project_path))
+        if "package.json" in filename_set and not any(k in ["angular", "vue", "nest"] for k, p in candidates if p == project_path):
+            candidates.append(("nodejs", project_path))
 
     used_names: set[str] = set()
     projects: list[DockerProject] = []
@@ -125,7 +127,7 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                 relative_context=_relative_context(root, project_path),
                 java_version=_spring_java_version(project_path) if kind == "spring" else None,
                 node_version=(
-                    _node_version(project_path, kind) if kind in {"angular", "vue"} else None
+                    _node_version(project_path, kind) if kind in {"angular", "vue", "nest", "nodejs"} else None
                 ),
                 angular_output_name=(
                     _angular_output_name(project_path) if kind == "angular" else None
@@ -146,7 +148,7 @@ def scaffold_docker_assets(
     root = Path(root_path).resolve()
     projects = discover_docker_projects(root)
     if not projects:
-        raise DockerScaffoldError("No Spring Boot, Angular, or Vue/Vite project detected.")
+        raise DockerScaffoldError("No supported project detected.")
 
     env = _template_environment()
     operations = [
@@ -167,6 +169,8 @@ def _dockerfile_content(env: Environment, project: DockerProject) -> str:
         return env.get_template("spring/Dockerfile.j2").render(project=project)
     if project.kind == "nest":
         return env.get_template("nestjs/Dockerfile.j2").render(project=project)
+    if project.kind == "nodejs":
+        return env.get_template("nodejs/Dockerfile.j2").render(project=project)
     return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 
@@ -298,7 +302,7 @@ def _node_version(project_path: Path, kind: str) -> str:
             return "20"
         return "18"
 
-    if kind == "nest":
+    if kind in ["nest", "nodejs"]:
         return "20"
 
     return "22"

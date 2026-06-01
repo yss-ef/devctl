@@ -1,6 +1,6 @@
 """
 Project scanner and environment detector.
-Identifies Spring Boot, Angular, Vue.js, and Docker components in a directory tree.
+Identifies Spring Boot, Angular, Vue.js, NestJS, NodeJS, and Docker components in a directory tree.
 """
 
 import os
@@ -22,6 +22,8 @@ def detect_environment(root_path: str = "."):
         "vue_path": None,
         "has_nest": False,
         "nest_path": None,
+        "has_nodejs": False,
+        "nodejs_path": None,
         "project_root": os.path.abspath(root_path),
     }
 
@@ -50,5 +52,9 @@ def detect_environment(root_path: str = "."):
         if "nest-cli.json" in filenames and not env_state["has_nest"]:
             env_state["has_nest"] = True
             env_state["nest_path"] = dirpath
+
+        if "package.json" in filenames and not any([env_state["has_angular"], env_state["has_vue"], env_state["has_nest"]]):
+            env_state["has_nodejs"] = True
+            env_state["nodejs_path"] = dirpath
 
     return env_state
