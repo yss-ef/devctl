@@ -1,6 +1,6 @@
 """
 Configuration builder for Spring Boot projects.
-Generates docker-compose.yml and application.properties with dynamic database settings.
+Generates docker-compose-db.yml and application.properties with dynamic database settings.
 """
 
 import os
@@ -43,7 +43,7 @@ def generate_config(project_name: str, db_type: str = "postgres", custom_port: i
 
     try:
         docker_template = env.get_template("docker-compose.yml.j2")
-        with open(os.path.join(project_path, "docker-compose.yml"), "w") as f:
+        with open(os.path.join(project_path, "docker-compose-db.yml"), "w") as f:
             f.write(docker_template.render(context))
 
         props_path = os.path.join(

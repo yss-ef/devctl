@@ -56,7 +56,7 @@ Launch your entire development environment in a single terminal.
 | **Run** | `devctl run` | Scans for databases, backends, and frontends and runs them. |
 
 ### Execution Logic
-1.  **Databases**: Starts Docker Compose services first and waits for initialization.
+1.  **Databases**: Starts Docker Compose DB services (from `docker-compose-db.yml`) first and waits for initialization.
 2.  **Backends**: Launches Spring, Nest, Express, Python, or Go APIs in parallel.
 3.  **Frontends**: Launches Angular, Vue, React, Svelte, or NextJS dev servers.
 4.  **Logging**: All output is prefixed by service name and color-coded.
@@ -83,7 +83,7 @@ Prepare for multi-service production or staging deployments.
 
 | Command | Usage | Description |
 | :--- | :--- | :--- |
-| **Deploy** | `devctl deploy [path]` | Generates a global `docker-compose.yml` for all services. |
+| **Deploy** | `devctl deploy [path]` | Generates a global `docker-compose-prod.yml` for all services. |
 
 ### Features
 *   **Automatic Linking**: Detects database configurations from backends and automatically links them to database services in the global compose file.

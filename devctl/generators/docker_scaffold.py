@@ -8,8 +8,9 @@ import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
 IGNORED_DIRECTORIES = {
@@ -201,7 +202,7 @@ def scaffold_docker_assets(
     force: bool = False,
     dry_run: bool = False,
 ) -> DockerScaffoldResult:
-    """Generate Dockerfiles for all supported projects in a tree."""
+    """Generate Dockerfiles and docker-compose-prod.yml for all supported projects in a tree."""
     root = Path(root_path).resolve()
     projects = discover_docker_projects(root)
     if not projects:
@@ -218,7 +219,249 @@ def scaffold_docker_assets(
         for project in projects
     ]
 
+    # Also scaffold the global docker-compose-prod.yml
+    compose_path = root / "docker-compose-prod.yml"
+    compose_content = _generate_compose_content(root, projects)
+    operations.append(
+        _write_file(
+            compose_path,
+            compose_content,
+            force=force,
+            dry_run=dry_run,
+        )
+    )
+
     return DockerScaffoldResult(root_path=root, services=projects, operations=operations)
+
+
+def _generate_compose_content(root: Path, projects: list[DockerProject]) -> str:
+    services_data = []
+    databases = []
+    seen_db_names = set()
+
+    for project in projects:
+        service_dict = {
+            "service_name": project.service_name,
+            "kind": project.kind,
+            "relative_context": project.relative_context,
+            "db": None,
+        }
+
+        if project.kind == "spring":
+            db_info = extract_db_info(project.path)
+            if db_info:
+                service_dict["db"] = db_info
+                if db_info["service_name"] not in seen_db_names:
+                    databases.append(db_info)
+                    seen_db_names.add(db_info["service_name"])
+
+        services_data.append(service_dict)
+
+    template_dir = Path(__file__).resolve().parent.parent / "templates" / "docker"
+    env = Environment(
+        loader=FileSystemLoader(str(template_dir)),
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
+    template = env.get_template("deploy.yml.j2")
+    return template.render(services=services_data, databases=databases)
+
+
+def extract_db_info(project_path: Path) -> Optional[Dict[str, Any]]:
+    """
+    Extract database information from a Spring Boot project's application.properties.
+    """
+    props_path = project_path / "src" / "main" / "resources" / "application.properties"
+    if not props_path.exists():
+        # Fallback to checking for docker-compose-db.yml in the same dir
+        return extract_db_from_compose(project_path / "docker-compose-db.yml")
+
+    content = props_path.read_text(encoding="utf-8", errors="ignore")
+
+    # spring.datasource.url=jdbc:postgresql://localhost:5432/sample_api_db
+    url_match = re.search(r"spring\.datasource\.url=jdbc:([^:]+)://[^:]+:(\d+)/([\w-]+)", content)
+    # spring.data.mongodb.uri=mongodb://admin:password@localhost:27017/db_name
+    mongo_match = re.search(
+        r"spring\.data\.mongodb\.uri=mongodb://([^:]+):([^@]+)@[^:]+:(\d+)/([\w-]+)", content
+    )
+
+    user_match = re.search(r"spring\.datasource\.username=([\w-]+)", content)
+    pass_match = re.search(r"spring\.datasource\.password=([\w-]+)", content)
+
+    if not url_match and not mongo_match:
+        return extract_db_from_compose(project_path / "docker-compose-db.yml")
+
+    if mongo_match:
+        db_type = "mongodb"
+        db_user = mongo_match.group(1)
+        db_pass = mongo_match.group(2)
+        db_port = mongo_match.group(3)
+        db_name = mongo_match.group(4)
+    else:
+        db_type_raw = url_match.group(1)
+        db_type = "postgresql" if "postgres" in db_type_raw else "mysql"
+        db_port = url_match.group(2)
+        db_name = url_match.group(3)
+        db_user = user_match.group(1) if user_match else "admin"
+        db_pass = pass_match.group(1) if pass_match else "password"
+
+    db_dict = _build_db_dict(db_type, db_port, db_name, db_user, db_pass)
+
+    # Try to refine service name from existing docker-compose if possible
+    compose_path = project_path / "docker-compose-db.yml"
+    if compose_path.exists():
+        try:
+            with open(compose_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+                if config and "services" in config:
+                    # Find the first service that looks like a database
+                    for s_name, s_cfg in config["services"].items():
+                        image = str(s_cfg.get("image", ""))
+                        if db_type == "postgresql" and "postgres" in image:
+                            db_dict["service_name"] = s_name
+                            break
+                        if db_type == "mysql" and "mysql" in image:
+                            db_dict["service_name"] = s_name
+                            break
+                        if db_type == "mongodb" and "mongo" in image:
+                            db_dict["service_name"] = s_name
+                            break
+        except (OSError, yaml.YAMLError):
+            pass
+
+    return db_dict
+
+
+def extract_db_from_compose(compose_path: Path) -> Optional[Dict[str, Any]]:
+    """
+    Extract database information from a docker-compose-db.yml file using PyYAML.
+    """
+    if not compose_path.exists():
+        return None
+
+    try:
+        with open(compose_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+    except Exception:
+        return None
+
+    if not config or "services" not in config:
+        return None
+
+    for service_name, service_cfg in config["services"].items():
+        image = str(service_cfg.get("image", ""))
+        if "postgres" in image or "mysql" in image or "mongo" in image:
+            if "postgres" in image:
+                db_type = "postgresql"
+            elif "mysql" in image:
+                db_type = "mysql"
+            else:
+                db_type = "mongodb"
+
+            env = service_cfg.get("environment", {})
+            env_dict = {}
+            if isinstance(env, list):
+                for item in env:
+                    if "=" in item:
+                        k, v = item.split("=", 1)
+                        env_dict[k] = v
+                    elif ":" in item:
+                        k, v = item.split(":", 1)
+                        env_dict[k] = v.strip()
+            elif isinstance(env, dict):
+                env_dict = env
+
+            if db_type == "postgresql":
+                user = env_dict.get("POSTGRES_USER", "admin")
+                password = env_dict.get("POSTGRES_PASSWORD", "password")
+                db_name = env_dict.get("POSTGRES_DB", "db")
+            elif db_type == "mysql":
+                user = env_dict.get("MYSQL_USER", env_dict.get("MYSQL_ROOT_PASSWORD", "admin"))
+                password = env_dict.get(
+                    "MYSQL_PASSWORD", env_dict.get("MYSQL_ROOT_PASSWORD", "password")
+                )
+                db_name = env_dict.get("MYSQL_DATABASE", "db")
+            else:
+                user = env_dict.get("MONGO_INITDB_ROOT_USERNAME", "admin")
+                password = env_dict.get("MONGO_INITDB_ROOT_PASSWORD", "password")
+                db_name = env_dict.get("MONGO_INITDB_DATABASE", "db")
+
+            ports = service_cfg.get("ports", [])
+            host_port = None
+            if ports and isinstance(ports, list):
+                first_port = str(ports[0])
+                if ":" in first_port:
+                    host_port = first_port.split(":")[0].strip("'").strip('"')
+
+            db_dict = _build_db_dict(
+                db_type,
+                host_port
+                or (
+                    "5432"
+                    if db_type == "postgresql"
+                    else ("3306" if db_type == "mysql" else "27017")
+                ),
+                db_name,
+                user,
+                password,
+            )
+            db_dict["service_name"] = service_name
+            return db_dict
+
+    return None
+
+
+def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str) -> Dict[str, Any]:
+    is_postgres = db_type == "postgresql"
+    is_mysql = db_type == "mysql"
+
+    if is_postgres:
+        internal_port = "5432"
+        image = "postgres:15-alpine"
+        vol_path = "/var/lib/postgresql/data"
+    elif is_mysql:
+        internal_port = "3306"
+        image = "mysql:8.0"
+        vol_path = "/var/lib/mysql/data"
+    else:
+        internal_port = "27017"
+        image = "mongo:6.0"
+        vol_path = "/data/db"
+
+    env = {}
+    if is_postgres:
+        env = {
+            "POSTGRES_USER": user,
+            "POSTGRES_PASSWORD": password,
+            "POSTGRES_DB": name,
+        }
+    elif is_mysql:
+        env = {
+            "MYSQL_ROOT_PASSWORD": password,
+            "MYSQL_DATABASE": name,
+            "MYSQL_USER": user,
+            "MYSQL_PASSWORD": password,
+        }
+    else:
+        env = {
+            "MONGO_INITDB_ROOT_USERNAME": user,
+            "MONGO_INITDB_ROOT_PASSWORD": password,
+            "MONGO_INITDB_DATABASE": name,
+        }
+
+    return {
+        "type": db_type,
+        "port": port,
+        "internal_port": internal_port,
+        "name": name,
+        "user": user,
+        "password": password,
+        "service_name": f"{name}-db",
+        "image": image,
+        "volume_name": f"{name}_data",
+        "volume_path": vol_path,
+        "env": env,
+    }
 
 
 def _dockerfile_content(env: Environment, project: DockerProject) -> str:

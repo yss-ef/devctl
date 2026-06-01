@@ -59,7 +59,11 @@ def test_launch_dev_environment_complex(mock_sleep, mock_run, mock_popen):
             launch_dev_environment(projects, docker_composes)
 
             # Verify Docker Compose started
-            mock_run.assert_any_call(["docker", "compose", "up", "-d"], cwd="/tmp/db", check=True)
+            mock_run.assert_any_call(
+                ["docker", "compose", "-f", "docker-compose-db.yml", "up", "-d"],
+                cwd="/tmp/db",
+                check=True,
+            )
 
             # Verify cleanup called
             mock_cleanup.assert_called_once()

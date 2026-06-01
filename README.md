@@ -15,7 +15,7 @@ containerization.
     (Entities, DTOs, Controllers, Services) across both backend and frontend
     layers simultaneously.
 -   **Instant Infrastructure**: Automatically generate optimized, multi-stage
-    `Dockerfiles` and global `docker-compose.yml` configurations by scanning
+    `Dockerfiles` and global `docker-compose-prod.yml` configurations by scanning
     your project tree.
 -   **Security by Default**: Inject standardized JWT authentication and security
     configurations into new projects.

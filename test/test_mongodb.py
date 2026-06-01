@@ -24,7 +24,7 @@ def test_deploy_mongodb(tmp_path):
     result = runner.invoke(app, ["deploy", str(tmp_path)])
 
     assert result.exit_code == 0
-    compose_file = tmp_path / "docker-compose.yml"
+    compose_file = tmp_path / "docker-compose-prod.yml"
     assert compose_file.exists()
 
     with open(compose_file, "r") as f:

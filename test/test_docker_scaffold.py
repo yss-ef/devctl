@@ -94,14 +94,15 @@ def test_scaffold_docker_assets_generates_only_dockerfiles(tmp_path):
 
     result = scaffold_docker_assets(tmp_path)
 
-    assert result.created_count == 2
+    assert result.created_count == 3
     assert (tmp_path / "api" / "Dockerfile").exists()
     assert (tmp_path / "web" / "Dockerfile").exists()
+    assert (tmp_path / "docker-compose-prod.yml").exists()
     assert not (tmp_path / "api" / ".dockerignore").exists()
     assert not (tmp_path / "web" / ".dockerignore").exists()
     assert not (tmp_path / "web" / "nginx.conf").exists()
     assert not (tmp_path / ".env.example").exists()
-    assert not (tmp_path / "docker-compose.yml").exists()
+    assert not (tmp_path / "docker-compose-db.yml").exists()
 
     spring_dockerfile = (tmp_path / "api" / "Dockerfile").read_text(encoding="utf-8")
     frontend_dockerfile = (tmp_path / "web" / "Dockerfile").read_text(encoding="utf-8")

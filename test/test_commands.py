@@ -20,7 +20,7 @@ def test_run_no_environment():
     """Ensure run command fails when no project is detected."""
     with patch("devctl.commands.run.discover_docker_projects") as mock_discover:
         mock_discover.return_value = []
-        # Also need to mock Path.rglob or something to avoid finding docker-compose.yml
+        # Also need to mock Path.rglob or something to avoid finding docker-compose-db.yml
         with patch("devctl.commands.run.Path.rglob") as mock_rglob:
             mock_rglob.return_value = []
             result = runner.invoke(app, ["run"])
@@ -77,5 +77,5 @@ def test_dockerize_generates_dockerfile_only(tmp_path):
 
     assert result.exit_code == 0
     assert (tmp_path / "Dockerfile").exists()
-    assert not (tmp_path / "docker-compose.yml").exists()
+    assert not (tmp_path / "docker-compose-db.yml").exists()
     assert not (tmp_path / ".dockerignore").exists()

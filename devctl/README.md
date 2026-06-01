@@ -135,7 +135,7 @@ sequenceDiagram
 ### 1. Intelligent environment scanning
 
 The `Scanner` searches for signature files such as `pom.xml`, `angular.json`,
-or `docker-compose.yml`. This allows the CLI to be context-aware and run
+or `docker-compose-db.yml`. This allows the CLI to be context-aware and run
 commands relative to project roots without complex configuration.
 
 ### 2. Parallel process management

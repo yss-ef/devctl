@@ -34,9 +34,9 @@ def test_detect_vue_project(tmp_path):
     assert state["vue_path"] == str(tmp_path)
 
 
-def test_detect_docker_compose(tmp_path):
-    """Ensure scanner detects docker-compose.yml."""
-    (tmp_path / "docker-compose.yml").write_text("version: '3'")
+def test_scanner_detects_docker(tmp_path):
+    """Ensure scanner detects docker-compose-db.yml."""
+    (tmp_path / "docker-compose-db.yml").write_text("version: '3'")
     state = detect_environment(str(tmp_path))
     assert state["has_docker_compose"] is True
     assert state["docker_path"] == str(tmp_path)

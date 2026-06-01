@@ -66,8 +66,12 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
                 sys.exit(1)
 
             for compose_path in docker_composes:
-                typer.secho(f"Starting Docker Compose in {compose_path}...", fg=typer.colors.CYAN)
-                subprocess.run(["docker", "compose", "up", "-d"], cwd=str(compose_path), check=True)
+                typer.secho(f"Starting Docker Compose DB in {compose_path}...", fg=typer.colors.CYAN)
+                subprocess.run(
+                    ["docker", "compose", "-f", "docker-compose-db.yml", "up", "-d"],
+                    cwd=str(compose_path),
+                    check=True,
+                )
 
             typer.echo("Waiting 5s for databases to initialize...")
             time.sleep(5)
@@ -282,10 +286,10 @@ def cleanup_and_exit(docker_composes: List[Path]):
             proc.kill()
 
     for compose_path in docker_composes:
-        typer.echo(f"Stopping Docker Compose in {compose_path}...")
+        typer.echo(f"Stopping Docker Compose DB in {compose_path}...")
         try:
             subprocess.run(
-                ["docker", "compose", "down", "-v"],
+                ["docker", "compose", "-f", "docker-compose-db.yml", "down", "-v"],
                 cwd=str(compose_path),
                 check=True,
                 stdout=subprocess.DEVNULL,

@@ -26,9 +26,9 @@ def run_env(ctx: typer.Context):
 
     projects = discover_docker_projects(".")
 
-    # Check for docker-compose.yml files
+    # Check for docker-compose-db.yml files
     docker_composes = []
-    for p in Path(".").rglob("docker-compose.yml"):
+    for p in Path(".").rglob("docker-compose-db.yml"):
         if "node_modules" not in str(p) and "target" not in str(p) and ".git" not in str(p):
             docker_composes.append(p.parent)
 
@@ -54,7 +54,7 @@ def run_env(ctx: typer.Context):
             else typer.style("MISSING", fg=typer.colors.RED)
         )
 
-    typer.echo(f"  - Docker Compose ({len(docker_composes)}) : {get_status(has_docker)}")
+    typer.echo(f"  - Docker Compose DB ({len(docker_composes)}) : {get_status(has_docker)}")
 
     for kind in sorted(counts.keys()):
         typer.echo(f"  - {kind.capitalize()} ({counts[kind]}) : {get_status(True)}")

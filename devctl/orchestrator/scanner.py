@@ -66,7 +66,7 @@ def detect_environment(root_path: str = "."):
         filename_set = set(filenames)
 
         # 1. Docker Compose detection
-        if "docker-compose.yml" in filename_set and not env_state["has_docker_compose"]:
+        if "docker-compose-db.yml" in filename_set and not env_state["has_docker_compose"]:
             env_state["has_docker_compose"] = True
             env_state["docker_path"] = str(current_path)
 

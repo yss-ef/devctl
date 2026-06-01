@@ -9,7 +9,7 @@ def test_deploy_no_project(tmp_path):
     """Ensure deploy fails when no supported project is detected."""
     result = runner.invoke(app, ["deploy", str(tmp_path)])
     assert result.exit_code == 1
-    assert "No supported projects" in result.stdout
+    assert "No supported project detected" in result.stdout
 
 
 def test_deploy_full_stack(tmp_path):
@@ -37,7 +37,7 @@ def test_deploy_full_stack(tmp_path):
     result = runner.invoke(app, ["deploy", str(tmp_path)])
 
     assert result.exit_code == 0
-    compose_file = tmp_path / "docker-compose.yml"
+    compose_file = tmp_path / "docker-compose-prod.yml"
     assert compose_file.exists()
 
     content = compose_file.read_text()
@@ -49,13 +49,13 @@ def test_deploy_full_stack(tmp_path):
 
 
 def test_deploy_with_existing_db_name(tmp_path):
-    """Ensure deploy respects service name from existing docker-compose.yml."""
+    """Ensure deploy respects service name from existing docker-compose-db.yml."""
     backend = tmp_path / "backend"
     backend.mkdir()
     (backend / "pom.xml").write_text(
         "<project><artifactId>api</artifactId></project>", encoding="utf-8"
     )
-    (backend / "docker-compose.yml").write_text(
+    (backend / "docker-compose-db.yml").write_text(
         "services:\n"
         "  custom-db:\n"
         "    image: postgres:15-alpine\n"
@@ -67,6 +67,6 @@ def test_deploy_with_existing_db_name(tmp_path):
     result = runner.invoke(app, ["deploy", str(tmp_path)])
 
     assert result.exit_code == 0
-    content = (tmp_path / "docker-compose.yml").read_text()
+    content = (tmp_path / "docker-compose-prod.yml").read_text()
     assert "custom-db:" in content
     assert "depends_on:\n      - custom-db" in content
