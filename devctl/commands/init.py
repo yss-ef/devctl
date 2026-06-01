@@ -21,7 +21,7 @@ app = typer.Typer(help="Initializes a new project based on the chosen framework.
 @app.command("spring")
 def init_spring(
     name: str,
-    db: str = typer.Option("postgres", help="Database type (postgres or mysql)"),
+    db: str = typer.Option("postgres", help="Database type (postgres, mysql, or mongodb)"),
     port: int = typer.Option(None, help="Local port (optional)"),
 ):
     """
@@ -30,7 +30,7 @@ def init_spring(
     check_tool("java", "initializing a Spring Boot project")
 
     # Strict input validation
-    if db not in ["postgres", "mysql"]:
+    if db not in ["postgres", "mysql", "mongodb"]:
         typer.secho(f"❌ Error: Database '{db}' is not supported.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
