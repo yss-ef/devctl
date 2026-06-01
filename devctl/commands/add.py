@@ -10,6 +10,7 @@ import typer
 from devctl.generators.scaffold_angular import generate_angular_resource
 from devctl.generators.scaffold_spring import generate_spring_resource
 from devctl.generators.scaffold_vue import generate_vue_resource
+from devctl.generators.scaffold_django import generate_django_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -64,6 +65,15 @@ def resource(
             generate_vue_resource(name, fields, root_path=".")
         except Exception as e:
             typer.secho(f"❌ Error during Vue generation: {e}", fg=typer.colors.RED)
+
+    # Check for Django project
+    if env_state.get("has_django"):
+        project_detected = True
+        typer.secho("🎸 Django project detected. Launching Django generator...", fg=typer.colors.GREEN)
+        try:
+            generate_django_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"❌ Error during Django generation: {e}", fg=typer.colors.RED)
 
     # Error message only if NO project detected
     if not project_detected:

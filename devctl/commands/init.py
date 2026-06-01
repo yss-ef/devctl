@@ -11,6 +11,7 @@ from devctl.generators.angular import generate_angular_boilerplate
 # Spring generator
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
+from devctl.generators.django import generate_django_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -70,3 +71,17 @@ def init_vue(name: str):
 
     if success:
         typer.secho("\n✨ Vue.js project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("django")
+def init_django(name: str):
+    """
+    Initializes a new Django backend project.
+    """
+    check_tool("python3", "initializing a Django project")
+
+    typer.secho(f"🚀 Initializing Django project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_django_boilerplate(name)
+
+    if success:
+        typer.secho("\n✨ Django project ready!", fg=typer.colors.GREEN)
