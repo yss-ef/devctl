@@ -170,6 +170,7 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
         for p in fastapi_apps:
             typer.secho(f"Starting FastAPI: {p.name}...", fg=typer.colors.CYAN)
 
+            # Use venv if exists
             venv_python = os.path.join(str(p.path), ".venv", "bin", "python3")
             if not os.path.exists(venv_python):
                 venv_python = "python3"
@@ -241,19 +242,6 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
 
         # Keep the main thread alive
         while True:
-            # Monitor process health
-            for name, p in processes:
-                exit_code = p.poll()
-                if exit_code is not None:
-                    typer.secho(
-                        f"\n❌ Critical Error: {name} process terminated unexpectedly "
-                        f"(Exit code: {exit_code}).",
-                        fg=typer.colors.RED,
-                        bold=True,
-                    )
-                    # Trigger shutdown logic
-                    raise KeyboardInterrupt
-
             time.sleep(1)
             # Check if any process has died unexpectedly
             for name, proc in active_processes:
