@@ -82,9 +82,7 @@ def detect_environment(root_path: str = "."):
 
         # 4. Vite-based detection (Vue/React)
         vue_markers = {"vite.config.ts", "vite.config.js"}
-        if (vue_markers & filename_set) and not any(
-            [env_state["has_vue"], env_state["has_react"]]
-        ):
+        if (vue_markers & filename_set) and not any([env_state["has_vue"], env_state["has_react"]]):
             # Distinguish by package.json
             pkg_path = current_path / "package.json"
             if pkg_path.exists():
@@ -133,14 +131,15 @@ def detect_environment(root_path: str = "."):
         if "requirements.txt" in filename_set:
             req_path = current_path / "requirements.txt"
             try:
-                req_content = req_path.read_text().lower()
+                req_content = req_path.read_text(encoding="utf-8").lower()
                 if "fastapi" in req_content and not env_state["has_fastapi"]:
                     env_state["has_fastapi"] = True
                     env_state["fastapi_path"] = str(current_path)
                 if "django" in req_content and not env_state["has_django"]:
                     env_state["has_django"] = True
                     env_state["django_path"] = str(current_path)
-            except Exception:
+            except (OSError, UnicodeDecodeError):
+                # Ignore unreadable requirements files during environment scanning
                 pass
 
         # 9. Svelte detection

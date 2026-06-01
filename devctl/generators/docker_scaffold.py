@@ -103,7 +103,7 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
             candidates.append(("spring", project_path))
         if "angular.json" in filename_set:
             candidates.append(("angular", project_path))
-        
+
         has_vite_config = {"vite.config.ts", "vite.config.js"} & filename_set
         if has_vite_config and "angular.json" not in filename_set:
             # Check package.json to distinguish between vue and react
@@ -114,13 +114,13 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                     deps = pkg.get("dependencies", {})
                     dev_deps = pkg.get("devDependencies", {})
                     all_deps = {**deps, **dev_deps}
-                    
+
                     if "vue" in all_deps:
                         candidates.append(("vue", project_path))
                     elif "react" in all_deps:
                         candidates.append(("react", project_path))
                     else:
-                        candidates.append(("vue", project_path)) # Fallback to vue
+                        candidates.append(("vue", project_path))  # Fallback to vue
                 except Exception:
                     candidates.append(("vue", project_path))
             else:
@@ -128,35 +128,41 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
 
         if "nest-cli.json" in filename_set:
             candidates.append(("nest", project_path))
-        
+
         if any(f.startswith("next.config.") for f in filename_set):
             candidates.append(("nextjs", project_path))
-        
+
         if "svelte.config.js" in filename_set:
             candidates.append(("svelte", project_path))
 
         if "main.py" in filename_set and "requirements.txt" in filename_set:
             try:
-                reqs = (project_path / "requirements.txt").read_text()
+                reqs = (project_path / "requirements.txt").read_text(encoding="utf-8")
                 if "fastapi" in reqs.lower():
                     candidates.append(("fastapi", project_path))
                 elif "django" in reqs.lower():
                     candidates.append(("django", project_path))
-            except Exception:
+            except (OSError, UnicodeDecodeError):
+                # Best-effort discovery: unreadable requirements files should not stop scanning.
                 pass
 
         if "manage.py" in filename_set and "requirements.txt" in filename_set:
             try:
-                reqs = (project_path / "requirements.txt").read_text()
+                reqs = (project_path / "requirements.txt").read_text(encoding="utf-8")
                 if "django" in reqs.lower():
                     candidates.append(("django", project_path))
-            except Exception:
+            except (OSError, UnicodeDecodeError):
+                # Best-effort discovery: ignore unreadable/invalid requirements.txt here.
                 pass
-        
+
         if "go.mod" in filename_set:
             candidates.append(("go", project_path))
 
-        if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest", "nextjs", "svelte"] for k, p in candidates if p == project_path):
+        if "package.json" in filename_set and not any(
+            k in ["angular", "vue", "react", "nest", "nextjs", "svelte"]
+            for k, p in candidates
+            if p == project_path
+        ):
             candidates.append(("nodejs", project_path))
 
     used_names: set[str] = set()
@@ -176,7 +182,9 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                 relative_context=_relative_context(root, project_path),
                 java_version=_spring_java_version(project_path) if kind == "spring" else None,
                 node_version=(
-                    _node_version(project_path, kind) if kind in {"angular", "vue", "react", "nest", "nodejs", "nextjs", "svelte"} else None
+                    _node_version(project_path, kind)
+                    if kind in {"angular", "vue", "react", "nest", "nodejs", "nextjs", "svelte"}
+                    else None
                 ),
                 angular_output_name=(
                     _angular_output_name(project_path) if kind == "angular" else None

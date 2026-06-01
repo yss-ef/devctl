@@ -1,24 +1,25 @@
 """
 CLI command group for initializing new projects.
-Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI, Django, Svelte, and Go.
+Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI,
+Django, Svelte, and Go.
 """
 
 import typer
 
 # Angular generator
 from devctl.generators.angular import generate_angular_boilerplate
+from devctl.generators.django import generate_django_boilerplate
+from devctl.generators.fastapi import generate_fastapi_boilerplate
+from devctl.generators.go_fiber import generate_go_boilerplate
+from devctl.generators.nestjs import generate_nest_boilerplate
+from devctl.generators.nextjs import generate_nextjs_boilerplate
+from devctl.generators.nodejs import generate_nodejs_boilerplate
+from devctl.generators.react import generate_react_boilerplate
 
 # Spring generator
 from devctl.generators.spring import download_spring_boilerplate
-from devctl.generators.vue import generate_vue_boilerplate
-from devctl.generators.nestjs import generate_nest_boilerplate
-from devctl.generators.nodejs import generate_nodejs_boilerplate
-from devctl.generators.react import generate_react_boilerplate
-from devctl.generators.nextjs import generate_nextjs_boilerplate
-from devctl.generators.fastapi import generate_fastapi_boilerplate
-from devctl.generators.django import generate_django_boilerplate
 from devctl.generators.svelte import generate_svelte_boilerplate
-from devctl.generators.go_fiber import generate_go_boilerplate
+from devctl.generators.vue import generate_vue_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
