@@ -1,24 +1,21 @@
 import yaml
+from pathlib import Path
 from typer.testing import CliRunner
-
 from devctl.main import app
 
 runner = CliRunner()
-
 
 def test_deploy_mongodb(tmp_path):
     """Ensure deploy correctly detects and configures MongoDB."""
     # Setup project with MongoDB properties
     backend = tmp_path / "mongo-api"
     backend.mkdir()
-    (backend / "pom.xml").write_text(
-        "<project><artifactId>mongo-api</artifactId></project>", encoding="utf-8"
-    )
+    (backend / "pom.xml").write_text("<project><artifactId>mongo-api</artifactId></project>", encoding="utf-8")
     props = backend / "src" / "main" / "resources"
     props.mkdir(parents=True)
     (props / "application.properties").write_text(
         "spring.data.mongodb.uri=mongodb://admin:pass@localhost:27017/mydb?authSource=admin",
-        encoding="utf-8",
+        encoding="utf-8"
     )
 
     result = runner.invoke(app, ["deploy", str(tmp_path)])
@@ -29,7 +26,7 @@ def test_deploy_mongodb(tmp_path):
 
     with open(compose_file, "r") as f:
         config = yaml.safe_load(f)
-
+    
     services = config["services"]
     assert "mydb-db" in services
     db_service = services["mydb-db"]

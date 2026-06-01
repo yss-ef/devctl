@@ -4,13 +4,11 @@ Handles the creation of components and routes.
 """
 
 import os
-
 import typer
-
 from devctl.orchestrator.scanner import detect_environment
 
 
-def generate_svelte_resource(resource_name: str, _fields_str: str, root_path: str = "."):
+def generate_svelte_resource(resource_name: str, fields_str: str, root_path: str = "."):
     """
     Scaffolds a Svelte resource (Route, Component).
     """
@@ -27,7 +25,7 @@ def generate_svelte_resource(resource_name: str, _fields_str: str, root_path: st
     # Structure: src/routes/resource-name/+page.svelte
     routes_dir = os.path.join(svelte_root, "src", "routes", resource_lower)
     components_dir = os.path.join(svelte_root, "src", "lib", "components")
-
+    
     os.makedirs(routes_dir, exist_ok=True)
     os.makedirs(components_dir, exist_ok=True)
 

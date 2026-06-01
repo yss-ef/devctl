@@ -32,10 +32,8 @@ def extract_db_info(project_path: Path) -> Optional[Dict[str, Any]]:
     # spring.datasource.url=jdbc:postgresql://localhost:5432/sample_api_db
     url_match = re.search(r"spring\.datasource\.url=jdbc:([^:]+)://[^:]+:(\d+)/([\w-]+)", content)
     # spring.data.mongodb.uri=mongodb://admin:password@localhost:27017/db_name
-    mongo_match = re.search(
-        r"spring\.data\.mongodb\.uri=mongodb://([^:]+):([^@]+)@[^:]+:(\d+)/([\w-]+)", content
-    )
-
+    mongo_match = re.search(r"spring\.data\.mongodb\.uri=mongodb://([^:]+):([^@]+)@[^:]+:(\d+)/([\w-]+)", content)
+    
     user_match = re.search(r"spring\.datasource\.username=([\w-]+)", content)
     pass_match = re.search(r"spring\.datasource\.password=([\w-]+)", content)
 
@@ -130,9 +128,7 @@ def extract_db_from_compose(compose_path: Path) -> Optional[Dict[str, Any]]:
                 db_name = env_dict.get("POSTGRES_DB", "db")
             elif db_type == "mysql":
                 user = env_dict.get("MYSQL_USER", env_dict.get("MYSQL_ROOT_PASSWORD", "admin"))
-                password = env_dict.get(
-                    "MYSQL_PASSWORD", env_dict.get("MYSQL_ROOT_PASSWORD", "password")
-                )
+                password = env_dict.get("MYSQL_PASSWORD", env_dict.get("MYSQL_ROOT_PASSWORD", "password"))
                 db_name = env_dict.get("MYSQL_DATABASE", "db")
             else:
                 user = env_dict.get("MONGO_INITDB_ROOT_USERNAME", "admin")
@@ -149,12 +145,7 @@ def extract_db_from_compose(compose_path: Path) -> Optional[Dict[str, Any]]:
 
             db_dict = _build_db_dict(
                 db_type,
-                host_port
-                or (
-                    "5432"
-                    if db_type == "postgresql"
-                    else ("3306" if db_type == "mysql" else "27017")
-                ),
+                host_port or ("5432" if db_type == "postgresql" else ("3306" if db_type == "mysql" else "27017")),
                 db_name,
                 user,
                 password,
@@ -168,6 +159,7 @@ def extract_db_from_compose(compose_path: Path) -> Optional[Dict[str, Any]]:
 def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str) -> Dict[str, Any]:
     is_postgres = db_type == "postgresql"
     is_mysql = db_type == "mysql"
+    is_mongo = db_type == "mongodb"
 
     if is_postgres:
         internal_port = "5432"
@@ -218,6 +210,7 @@ def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str)
     }
 
 
+
 @app.command()
 def deploy(path: Path = PATH_ARGUMENT):
     """
@@ -232,9 +225,7 @@ def deploy(path: Path = PATH_ARGUMENT):
         raise typer.Exit(1) from e
 
     if not projects:
-        typer.secho(
-            "Error: No supported projects (Spring, Angular, Vue) found.", fg=typer.colors.RED
-        )
+        typer.secho("Error: No supported projects (Spring, Angular, Vue) found.", fg=typer.colors.RED)
         raise typer.Exit(1)
 
     services_data = []

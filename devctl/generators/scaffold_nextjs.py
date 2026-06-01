@@ -4,13 +4,11 @@ Handles the creation of pages and components in the App Router.
 """
 
 import os
-
 import typer
-
 from devctl.orchestrator.scanner import detect_environment
 
 
-def generate_nextjs_resource(resource_name: str, _fields_str: str, root_path: str = "."):
+def generate_nextjs_resource(resource_name: str, fields_str: str, root_path: str = "."):
     """
     Scaffolds a NextJS resource (Page, Component).
     """
@@ -27,7 +25,7 @@ def generate_nextjs_resource(resource_name: str, _fields_str: str, root_path: st
     # Structure: src/app/resource-name/page.tsx
     app_dir = os.path.join(nextjs_root, "src", "app", resource_lower)
     components_dir = os.path.join(nextjs_root, "src", "components")
-
+    
     os.makedirs(app_dir, exist_ok=True)
     os.makedirs(components_dir, exist_ok=True)
 

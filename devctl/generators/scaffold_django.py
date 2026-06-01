@@ -4,9 +4,7 @@ Handles the creation of models, serializers, and views.
 """
 
 import os
-
 import typer
-
 from devctl.orchestrator.scanner import detect_environment
 
 
@@ -21,7 +19,7 @@ def generate_django_resource(resource_name: str, fields_str: str, root_path: str
         raise typer.Exit(code=1)
 
     django_root = env_state["django_path"]
-    resource_name.lower()
+    resource_lower = resource_name.lower()
     entity_name = resource_name.capitalize()
 
     # Structure: core/models.py, core/serializers.py, core/views.py
@@ -50,7 +48,7 @@ class {entity_name}(models.Model):
     if not os.path.exists(serializer_path):
         with open(serializer_path, "w") as f:
             f.write("from rest_framework import serializers\nfrom .models import *\n")
-
+            
     serializer_snippet = f"""
 class {entity_name}Serializer(serializers.ModelSerializer):
     class Meta:
@@ -74,6 +72,6 @@ class {entity_name}ViewSet(viewsets.ModelViewSet):
         f.write(view_snippet)
 
     typer.secho(f"✅ {entity_name} Django feature successfully generated!", fg=typer.colors.GREEN)
-    typer.echo("  - Updated: core/models.py")
-    typer.echo("  - Updated: core/serializers.py")
-    typer.echo("  - Updated: core/views.py")
+    typer.echo(f"  - Updated: core/models.py")
+    typer.echo(f"  - Updated: core/serializers.py")
+    typer.echo(f"  - Updated: core/views.py")
