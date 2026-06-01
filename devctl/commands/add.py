@@ -10,6 +10,7 @@ import typer
 from devctl.generators.scaffold_angular import generate_angular_resource
 from devctl.generators.scaffold_spring import generate_spring_resource
 from devctl.generators.scaffold_vue import generate_vue_resource
+from devctl.generators.scaffold_nestjs import generate_nest_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -64,6 +65,15 @@ def resource(
             generate_vue_resource(name, fields, root_path=".")
         except Exception as e:
             typer.secho(f"Error: Vue generation failed: {e}", fg=typer.colors.RED)
+
+    # Check for NestJS project
+    if env_state.get("has_nest"):
+        project_detected = True
+        typer.secho("NestJS project detected. Launching Nest generator...", fg=typer.colors.CYAN)
+        try:
+            generate_nest_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"Error: Nest generation failed: {e}", fg=typer.colors.RED)
 
     # Error message only if NO project detected
     if not project_detected:

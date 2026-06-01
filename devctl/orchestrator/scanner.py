@@ -20,12 +20,14 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
+        "has_nest": False,
+        "nest_path": None,
         "project_root": os.path.abspath(root_path),
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):
         # Optimization: ignore heavy folders for an instant scan
-        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular"]):
+        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist"]):
             continue
 
         if "docker-compose.yml" in filenames and not env_state["has_docker_compose"]:
@@ -44,5 +46,9 @@ def detect_environment(root_path: str = "."):
         if any(f in filenames for f in vue_files) and not env_state["has_vue"]:
             env_state["has_vue"] = True
             env_state["vue_path"] = dirpath
+
+        if "nest-cli.json" in filenames and not env_state["has_nest"]:
+            env_state["has_nest"] = True
+            env_state["nest_path"] = dirpath
 
     return env_state
