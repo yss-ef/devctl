@@ -20,6 +20,8 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
+        "has_nodejs": False,
+        "nodejs_path": None,
         "project_root": os.path.abspath(root_path),
     }
 
@@ -44,5 +46,9 @@ def detect_environment(root_path: str = "."):
         if any(f in filenames for f in vue_files) and not env_state["has_vue"]:
             env_state["has_vue"] = True
             env_state["vue_path"] = dirpath
+
+        if "package.json" in filenames and not any([env_state["has_angular"], env_state["has_vue"]]):
+            env_state["has_nodejs"] = True
+            env_state["nodejs_path"] = dirpath
 
     return env_state

@@ -11,6 +11,7 @@ from devctl.generators.angular import generate_angular_boilerplate
 # Spring generator
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
+from devctl.generators.nodejs import generate_nodejs_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -70,3 +71,17 @@ def init_vue(name: str):
 
     if success:
         typer.secho("\n✨ Vue.js project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("nodejs")
+def init_nodejs(name: str):
+    """
+    Initializes a new NodeJS/Express backend project.
+    """
+    check_tool("npm", "initializing a NodeJS project")
+
+    typer.secho(f"🚀 Initializing NodeJS project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_nodejs_boilerplate(name)
+
+    if success:
+        typer.secho("\n✨ NodeJS project ready!", fg=typer.colors.GREEN)

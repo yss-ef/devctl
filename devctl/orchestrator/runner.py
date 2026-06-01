@@ -113,6 +113,24 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             t.start()
             active_threads.append(t)
 
+        # 4. Start NodeJS/Express Backends
+        nodejs_apps = [p for p in projects if p.kind == "nodejs"]
+        for p in nodejs_apps:
+            typer.secho(f"📦 Starting NodeJS: {p.name}...", fg=typer.colors.GREEN)
+            
+            proc = subprocess.Popen(
+                ["npm", "run", "dev"],
+                cwd=str(p.path),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=1,
+            )
+            active_processes.append((p.name, proc))
+            
+            t = threading.Thread(target=stream_logs, args=(p.name, proc, "green"), daemon=True)
+            t.start()
+            active_threads.append(t)
+
         if not active_processes and not docker_composes:
             typer.secho("⚠️ No projects or databases detected to run.", fg=typer.colors.YELLOW)
             return
