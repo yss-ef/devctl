@@ -102,12 +102,33 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
             candidates.append(("spring", project_path))
         if "angular.json" in filename_set:
             candidates.append(("angular", project_path))
+        
         has_vite_config = {"vite.config.ts", "vite.config.js"} & filename_set
         if has_vite_config and "angular.json" not in filename_set:
-            candidates.append(("vue", project_path))
+            # Check package.json to distinguish between vue and react
+            pkg_path = project_path / "package.json"
+            if pkg_path.exists():
+                try:
+                    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+                    deps = pkg.get("dependencies", {})
+                    dev_deps = pkg.get("devDependencies", {})
+                    all_deps = {**deps, **dev_deps}
+                    
+                    if "vue" in all_deps:
+                        candidates.append(("vue", project_path))
+                    elif "react" in all_deps:
+                        candidates.append(("react", project_path))
+                    else:
+                        candidates.append(("vue", project_path)) # Fallback to vue
+                except Exception:
+                    candidates.append(("vue", project_path))
+            else:
+                candidates.append(("vue", project_path))
+
         if "nest-cli.json" in filename_set:
             candidates.append(("nest", project_path))
-        if "package.json" in filename_set and not any(k in ["angular", "vue", "nest"] for k, p in candidates if p == project_path):
+        
+        if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest"] for k, p in candidates if p == project_path):
             candidates.append(("nodejs", project_path))
 
     used_names: set[str] = set()
@@ -127,7 +148,7 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                 relative_context=_relative_context(root, project_path),
                 java_version=_spring_java_version(project_path) if kind == "spring" else None,
                 node_version=(
-                    _node_version(project_path, kind) if kind in {"angular", "vue", "nest", "nodejs"} else None
+                    _node_version(project_path, kind) if kind in {"angular", "vue", "react", "nest", "nodejs"} else None
                 ),
                 angular_output_name=(
                     _angular_output_name(project_path) if kind == "angular" else None

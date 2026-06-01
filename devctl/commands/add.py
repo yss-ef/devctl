@@ -12,6 +12,7 @@ from devctl.generators.scaffold_spring import generate_spring_resource
 from devctl.generators.scaffold_vue import generate_vue_resource
 from devctl.generators.scaffold_nestjs import generate_nest_resource
 from devctl.generators.scaffold_nodejs import generate_nodejs_resource
+from devctl.generators.scaffold_react import generate_react_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -76,6 +77,15 @@ def resource(
         except Exception as e:
             typer.secho(f"Error: Nest generation failed: {e}", fg=typer.colors.RED)
 
+    # Check for React project
+    if env_state.get("has_react"):
+        project_detected = True
+        typer.secho("React project detected. Launching React generator...", fg=typer.colors.BLUE)
+        try:
+            generate_react_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"Error: React generation failed: {e}", fg=typer.colors.RED)
+
     # Check for NodeJS project
     if os.path.exists("package.json") and not project_detected:
         # Heuristic for generic nodejs project if not already caught by angular/vue
@@ -90,7 +100,7 @@ def resource(
     if not project_detected:
         typer.secho(
             "Error: Unable to determine project type. "
-            "Please run from within a Spring, Angular, or Vue.js project directory.",
+            "Please run from within a Spring, Angular, React or Vue.js project directory.",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)

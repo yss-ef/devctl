@@ -1,9 +1,10 @@
 """
 Project scanner and environment detector.
-Identifies Spring Boot, Angular, Vue.js, NestJS, NodeJS, and Docker components in a directory tree.
+Identifies Spring Boot, Angular, Vue.js, React, NestJS, NodeJS, and Docker components in a directory tree.
 """
 
 import os
+import json
 
 
 def detect_environment(root_path: str = "."):
@@ -20,6 +21,8 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
+        "has_react": False,
+        "react_path": None,
         "has_nest": False,
         "nest_path": None,
         "has_nodejs": False,
@@ -45,15 +48,32 @@ def detect_environment(root_path: str = "."):
             env_state["angular_path"] = dirpath
 
         vue_files = ["vite.config.ts", "vite.config.js"]
-        if any(f in filenames for f in vue_files) and not env_state["has_vue"]:
-            env_state["has_vue"] = True
-            env_state["vue_path"] = dirpath
+        if any(f in filenames for f in vue_files) and not any([env_state["has_vue"], env_state["has_react"]]):
+            # Distinguish by package.json
+            pkg_path = os.path.join(dirpath, "package.json")
+            if os.path.exists(pkg_path):
+                try:
+                    with open(pkg_path, "r") as f:
+                        pkg = json.load(f)
+                        all_deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+                        if "react" in all_deps:
+                            env_state["has_react"] = True
+                            env_state["react_path"] = dirpath
+                        else:
+                            env_state["has_vue"] = True
+                            env_state["vue_path"] = dirpath
+                except Exception:
+                    env_state["has_vue"] = True
+                    env_state["vue_path"] = dirpath
+            else:
+                env_state["has_vue"] = True
+                env_state["vue_path"] = dirpath
 
         if "nest-cli.json" in filenames and not env_state["has_nest"]:
             env_state["has_nest"] = True
             env_state["nest_path"] = dirpath
 
-        if "package.json" in filenames and not any([env_state["has_angular"], env_state["has_vue"], env_state["has_nest"]]):
+        if "package.json" in filenames and not any([env_state["has_angular"], env_state["has_vue"], env_state["has_react"], env_state["has_nest"]]):
             env_state["has_nodejs"] = True
             env_state["nodejs_path"] = dirpath
 

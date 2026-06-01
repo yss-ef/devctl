@@ -13,6 +13,7 @@ from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
 from devctl.generators.nestjs import generate_nest_boilerplate
 from devctl.generators.nodejs import generate_nodejs_boilerplate
+from devctl.generators.react import generate_react_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -100,3 +101,17 @@ def init_nodejs(name: str):
 
     if success:
         typer.secho("\nNodeJS project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("react")
+def init_react(name: str):
+    """
+    Initializes a new ReactJS frontend project (Vite + TS).
+    """
+    check_tool("npm", "initializing a ReactJS project")
+
+    typer.secho(f"Initializing ReactJS project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_react_boilerplate(name)
+
+    if success:
+        typer.secho("\nReactJS project ready!", fg=typer.colors.GREEN)
