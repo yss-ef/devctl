@@ -1,6 +1,10 @@
 """
 Project scanner and environment detector.
+<<<<<<< HEAD
 Identifies Spring Boot, Angular, Vue.js, React, NestJS, NodeJS, and Docker components in a directory tree.
+=======
+Identifies Spring Boot, Angular, Vue.js, NextJS, and Docker components in a directory tree.
+>>>>>>> feat/nextjs
 """
 
 import os
@@ -21,18 +25,27 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
+<<<<<<< HEAD
         "has_react": False,
         "react_path": None,
         "has_nest": False,
         "nest_path": None,
         "has_nodejs": False,
         "nodejs_path": None,
+=======
+        "has_nextjs": False,
+        "nextjs_path": None,
+>>>>>>> feat/nextjs
         "project_root": os.path.abspath(root_path),
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):
         # Optimization: ignore heavy folders for an instant scan
+<<<<<<< HEAD
         if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist"]):
+=======
+        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", ".next"]):
+>>>>>>> feat/nextjs
             continue
 
         if "docker-compose.yml" in filenames and not env_state["has_docker_compose"]:
@@ -76,5 +89,9 @@ def detect_environment(root_path: str = "."):
         if "package.json" in filenames and not any([env_state["has_angular"], env_state["has_vue"], env_state["has_react"], env_state["has_nest"]]):
             env_state["has_nodejs"] = True
             env_state["nodejs_path"] = dirpath
+
+        if any(f.startswith("next.config.") for f in filenames) and not env_state["has_nextjs"]:
+            env_state["has_nextjs"] = True
+            env_state["nextjs_path"] = dirpath
 
     return env_state

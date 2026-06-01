@@ -41,7 +41,7 @@ def test_dockerize_no_project(tmp_path):
     """Ensure dockerize fails when no supported project is detected."""
     result = runner.invoke(app, ["dockerize", str(tmp_path)])
     assert result.exit_code == 1
-    assert "No Spring Boot, Angular, or Vue/Vite project detected" in result.stdout
+    assert "Error: No supported project detected." in result.stdout
 
 
 def test_dockerize_dry_run(tmp_path):

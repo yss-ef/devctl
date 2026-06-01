@@ -16,6 +16,7 @@ IGNORED_DIRECTORIES = {
     ".angular",
     ".git",
     ".mvn",
+    ".next",
     ".pytest_cache",
     ".venv",
     "__pycache__",
@@ -128,7 +129,10 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
         if "nest-cli.json" in filename_set:
             candidates.append(("nest", project_path))
         
-        if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest"] for k, p in candidates if p == project_path):
+        if any(f.startswith("next.config.") for f in filename_set):
+            candidates.append(("nextjs", project_path))
+        
+        if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest", "nextjs"] for k, p in candidates if p == project_path):
             candidates.append(("nodejs", project_path))
 
     used_names: set[str] = set()
@@ -148,7 +152,7 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                 relative_context=_relative_context(root, project_path),
                 java_version=_spring_java_version(project_path) if kind == "spring" else None,
                 node_version=(
-                    _node_version(project_path, kind) if kind in {"angular", "vue", "react", "nest", "nodejs"} else None
+                    _node_version(project_path, kind) if kind in {"angular", "vue", "react", "nest", "nodejs", "nextjs"} else None
                 ),
                 angular_output_name=(
                     _angular_output_name(project_path) if kind == "angular" else None
@@ -192,6 +196,8 @@ def _dockerfile_content(env: Environment, project: DockerProject) -> str:
         return env.get_template("nestjs/Dockerfile.j2").render(project=project)
     if project.kind == "nodejs":
         return env.get_template("nodejs/Dockerfile.j2").render(project=project)
+    if project.kind == "nextjs":
+        return env.get_template("nextjs/Dockerfile.j2").render(project=project)
     return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 
@@ -323,7 +329,7 @@ def _node_version(project_path: Path, kind: str) -> str:
             return "20"
         return "18"
 
-    if kind in ["nest", "nodejs"]:
+    if kind in ["nest", "nodejs", "nextjs"]:
         return "20"
 
     return "22"

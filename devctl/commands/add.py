@@ -13,6 +13,7 @@ from devctl.generators.scaffold_vue import generate_vue_resource
 from devctl.generators.scaffold_nestjs import generate_nest_resource
 from devctl.generators.scaffold_nodejs import generate_nodejs_resource
 from devctl.generators.scaffold_react import generate_react_resource
+from devctl.generators.scaffold_nextjs import generate_nextjs_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -86,9 +87,18 @@ def resource(
         except Exception as e:
             typer.secho(f"Error: React generation failed: {e}", fg=typer.colors.RED)
 
+    # Check for NextJS project
+    if env_state.get("has_nextjs"):
+        project_detected = True
+        typer.secho("NextJS project detected. Launching NextJS generator...", fg=typer.colors.YELLOW)
+        try:
+            generate_nextjs_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"Error: NextJS generation failed: {e}", fg=typer.colors.RED)
+
     # Check for NodeJS project
     if os.path.exists("package.json") and not project_detected:
-        # Heuristic for generic nodejs project if not already caught by angular/vue
+        # Heuristic for generic nodejs project if not already caught by angular/vue/react/nextjs
         project_detected = True
         typer.secho("NodeJS project detected. Launching NodeJS generator...", fg=typer.colors.GREEN)
         try:
@@ -100,7 +110,7 @@ def resource(
     if not project_detected:
         typer.secho(
             "Error: Unable to determine project type. "
-            "Please run from within a Spring, Angular, React or Vue.js project directory.",
+            "Please run from within a Spring, Angular, React, NextJS or Vue.js project directory.",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)
