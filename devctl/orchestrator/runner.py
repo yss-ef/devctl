@@ -91,14 +91,14 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             t.start()
             active_threads.append(t)
 
-        # 3. Start Frontends (Angular / Vue)
-        frontends = [p for p in projects if p.kind in ["angular", "vue"]]
+        # 3. Start Frontends (Angular / Vue / NextJS)
+        frontends = [p for p in projects if p.kind in ["angular", "vue", "nextjs"]]
         for p in frontends:
-            color = "cyan" if p.kind == "angular" else "magenta"
-            icon = "🅰️" if p.kind == "angular" else "🟢"
+            color = "cyan" if p.kind == "angular" else ("magenta" if p.kind == "vue" else "yellow")
+            icon = "🅰️" if p.kind == "angular" else ("🟢" if p.kind == "vue" else "▲")
             cmd = ["npx", "ng", "serve"] if p.kind == "angular" else ["npm", "run", "dev"]
             
-            typer.secho(f"{icon} Starting {p.kind.capitalize()}: {p.name}...", fg=typer.colors.CYAN if p.kind == "angular" else typer.colors.MAGENTA)
+            typer.secho(f"{icon} Starting {p.kind.capitalize()}: {p.name}...", fg=typer.colors.CYAN if p.kind == "angular" else (typer.colors.MAGENTA if p.kind == "vue" else typer.colors.YELLOW))
             
             proc = subprocess.Popen(
                 cmd,

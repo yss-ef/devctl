@@ -105,6 +105,8 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
         has_vite_config = {"vite.config.ts", "vite.config.js"} & filename_set
         if has_vite_config and "angular.json" not in filename_set:
             candidates.append(("vue", project_path))
+        if any(f.startswith("next.config.") for f in filename_set):
+            candidates.append(("nextjs", project_path))
 
     used_names: set[str] = set()
     projects: list[DockerProject] = []
@@ -163,6 +165,8 @@ def scaffold_docker_assets(
 def _dockerfile_content(env: Environment, project: DockerProject) -> str:
     if project.kind == "spring":
         return env.get_template("spring/Dockerfile.j2").render(project=project)
+    if project.kind == "nextjs":
+        return env.get_template("nextjs/Dockerfile.j2").render(project=project)
     return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 
