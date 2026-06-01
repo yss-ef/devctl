@@ -58,12 +58,10 @@ def detect_environment(root_path: str = "."):
         "project_root": str(root),
     }
 
-    for dirpath, dirnames, filenames in os.walk(root):
-        # In-place modification of dirnames to prune the traversal
-        dirnames[:] = [d for d in dirnames if d not in IGNORED_DIRECTORIES]
-
-        current_path = Path(dirpath)
-        filename_set = set(filenames)
+    for dirpath, _dirnames, filenames in os.walk(root_path):
+        # Optimization: ignore heavy folders for instant scan
+        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular"]):
+            continue
 
         # 1. Docker Compose detection
         if "docker-compose.yml" in filename_set and not env_state["has_docker_compose"]:

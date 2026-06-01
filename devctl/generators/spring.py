@@ -150,7 +150,7 @@ def download_spring_boilerplate(project_name: str, db_type: str = "postgres"):
         fg=typer.colors.CYAN,
     )
 
-    # Java rule: a package name cannot contain hyphens
+    # Java rule: a package name cannot contain dashes
     safe_package_name = project_name.replace("-", "").replace("_", "").lower()
 
     # Dynamic mapping for the Spring API

@@ -39,7 +39,7 @@ def setup_angular_environments(project_path: str):
             with open(target_path, "w", encoding="utf-8") as f:
                 f.write(content)
         except Exception as e:
-            typer.secho(f"Warning: Failed to generate {tpl_name}: {e}", fg=typer.colors.YELLOW)
+            typer.secho(f"⚠️  Error while generating {tpl_name}: {e}", fg=typer.colors.YELLOW)
 
     # 3. Modify angular.json to enable the proxy
     angular_json_path = os.path.join(project_path, "angular.json")
@@ -48,10 +48,10 @@ def setup_angular_environments(project_path: str):
             angular_config = json.load(f)
 
         try:
-            # Find the default project name (usually the same name as the folder)
+            # Find the default project name (usually the same as the folder name)
             project_name = list(angular_config["projects"].keys())[0]
 
-            # Injection of proxyConfig into the "serve" architect
+            # Inject proxyConfig into the "serve" architect
             serve_target = angular_config["projects"][project_name]["architect"]["serve"]
 
             # Ensure "options" exists
@@ -66,7 +66,7 @@ def setup_angular_environments(project_path: str):
             typer.echo("  - angular.json updated with proxyConfig.")
         except Exception as e:
             typer.secho(
-                f"Warning: Unable to modify angular.json automatically: {e}",
+                f"⚠️  Could not automatically modify angular.json: {e}",
                 fg=typer.colors.YELLOW,
             )
 

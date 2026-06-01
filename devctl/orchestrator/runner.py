@@ -47,7 +47,7 @@ def stream_logs(name: str, process: subprocess.Popen, color: str):
 
 def launch_dev_environment(projects: List[DockerProject], docker_composes: List[Path]):
     """
-    Launches the necessary processes in parallel with structured startup and log streaming.
+    Launches the necessary processes in parallel.
     """
     global active_processes
 
@@ -59,58 +59,8 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
     signal.signal(signal.SIGTERM, signal_handler)
 
     try:
-        # 1. Start Databases
-        if docker_composes:
-            if not is_docker_running():
-                typer.secho("Error: Docker service is not running.", fg=typer.colors.RED)
-                sys.exit(1)
-
-            for compose_path in docker_composes:
-                typer.secho(f"Starting Docker Compose in {compose_path}...", fg=typer.colors.CYAN)
-                subprocess.run(["docker", "compose", "up", "-d"], cwd=str(compose_path), check=True)
-
-            typer.echo("Waiting 5s for databases to initialize...")
-            time.sleep(5)
-
-        # 2. Start Backends (Spring Boot)
-        backends = [p for p in projects if p.kind == "spring"]
-        for p in backends:
-            typer.secho(f"Starting Spring Boot: {p.name}...", fg=typer.colors.GREEN)
-
-            proc = subprocess.Popen(
-                ["./mvnw", "spring-boot:run"],
-                cwd=str(p.path),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                bufsize=1,
-            )
-            active_processes.append((p.name, proc))
-
-            t = threading.Thread(target=stream_logs, args=(p.name, proc, "green"), daemon=True)
-            t.start()
-            active_threads.append(t)
-
-        # 3. Start Frontends (Angular / Vue / React / NextJS / Svelte)
-        frontends = [
-            p for p in projects if p.kind in ["angular", "vue", "react", "nextjs", "svelte"]
-        ]
-        for p in frontends:
-            if p.kind == "angular":
-                color = "cyan"
-                cmd = ["npx", "ng", "serve"]
-            elif p.kind == "vue":
-                color = "magenta"
-                cmd = ["npm", "run", "dev"]
-            elif p.kind == "react":
-                color = "blue"
-                cmd = ["npm", "run", "dev"]
-            elif p.kind == "nextjs":
-                color = "yellow"
-                cmd = ["npm", "run", "dev"]
-            else:  # svelte
-                color = "red"
-                cmd = ["npm", "run", "dev"]
-
+        # 4. Start Vue.js Frontend
+        if env_state.get("has_vue"):
             typer.secho(
                 f"Starting {p.kind.capitalize()}: {p.name}...",
                 fg=getattr(typer.colors, color.upper()),
@@ -125,9 +75,12 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             )
             active_processes.append((p.name, proc))
 
-            t = threading.Thread(target=stream_logs, args=(p.name, proc, color), daemon=True)
-            t.start()
-            active_threads.append(t)
+        # 1. Start Database
+        if env_state["has_docker_compose"]:
+            if not is_docker_running():
+                typer.secho("❌ Error: Docker service is not running.", fg=typer.colors.RED)
+                typer.echo("💡 Hint: sudo systemctl start docker")
+                sys.exit(1)
 
         # 4. Start NestJS Backends
         nest_apps = [p for p in projects if p.kind == "nest"]
@@ -161,71 +114,28 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             )
             active_processes.append((p.name, proc))
 
-            t = threading.Thread(target=stream_logs, args=(p.name, proc, "green"), daemon=True)
-            t.start()
-            active_threads.append(t)
-
-        # 6. Start FastAPI Backends
-        fastapi_apps = [p for p in projects if p.kind == "fastapi"]
-        for p in fastapi_apps:
-            typer.secho(f"Starting FastAPI: {p.name}...", fg=typer.colors.CYAN)
-
-            venv_python = os.path.join(str(p.path), ".venv", "bin", "python3")
-            if not os.path.exists(venv_python):
-                venv_python = "python3"
-
-            proc = subprocess.Popen(
-                [venv_python, "-m", "uvicorn", "main:app", "--reload"],
-                cwd=str(p.path),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                bufsize=1,
+            # 2. Start Spring Boot Backend
+        if env_state["has_spring"]:
+            typer.secho(
+                f"🍃 Starting Spring Boot from {env_state['spring_path']}...",
+                fg=typer.colors.GREEN,
             )
             active_processes.append((p.name, proc))
 
-            t = threading.Thread(target=stream_logs, args=(p.name, proc, "cyan"), daemon=True)
-            t.start()
-            active_threads.append(t)
+            # Native execution
+            p_spring = subprocess.Popen(["./mvnw", "spring-boot:run"], cwd=env_state["spring_path"])
+            processes.append(("Spring Boot", p_spring))
 
-        # 7. Start Django Backends
-        django_apps = [p for p in projects if p.kind == "django"]
-        for p in django_apps:
-            typer.secho(f"Starting Django: {p.name}...", fg=typer.colors.GREEN)
-
-            venv_python = os.path.join(str(p.path), ".venv", "bin", "python3")
-            if not os.path.exists(venv_python):
-                venv_python = "python3"
-
-            proc = subprocess.Popen(
-                [venv_python, "manage.py", "runserver"],
-                cwd=str(p.path),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                bufsize=1,
+        # 3. Start Angular Frontend
+        if env_state["has_angular"]:
+            typer.secho(
+                f"🅰️ Starting Angular from {env_state['angular_path']}...", fg=typer.colors.CYAN
             )
             active_processes.append((p.name, proc))
 
-            t = threading.Thread(target=stream_logs, args=(p.name, proc, "green"), daemon=True)
-            t.start()
-            active_threads.append(t)
-
-        # 8. Start Go Backends
-        go_apps = [p for p in projects if p.kind == "go"]
-        for p in go_apps:
-            typer.secho(f"Starting Go: {p.name}...", fg=typer.colors.CYAN)
-
-            proc = subprocess.Popen(
-                ["go", "run", "."],
-                cwd=str(p.path),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                bufsize=1,
-            )
-            active_processes.append((p.name, proc))
-
-            t = threading.Thread(target=stream_logs, args=(p.name, proc, "cyan"), daemon=True)
-            t.start()
-            active_threads.append(t)
+            # Native execution
+            p_angular = subprocess.Popen(["npx", "ng", "serve"], cwd=env_state["angular_path"])
+            processes.append(("Angular", p_angular))
 
         if not active_processes and not docker_composes:
             typer.secho(

@@ -1,12 +1,12 @@
 import typer
 
 # Import command modules
-from devctl.commands import add, deploy, docker, init, run
+from devctl.commands import add, docker, init, run
 
 # Create the main Typer application
 app = typer.Typer(help="devctl: Local orchestrator for your Spring/Angular projects")
 
-# Register sub-commands
+# Register sub-menus
 app.add_typer(init.app, name="init", help="Initialize a new project with its codebase.")
 app.add_typer(run.app, name="run", help="Launch the local development environment in parallel.")
 app.add_typer(add.app, name="add", help="Generate code and business resources.")
@@ -22,7 +22,7 @@ def callback():
     """
     devctl: Local orchestrator for your projects
     """
-    # This empty callback allows Typer to understand it handles a multi-command menu
+    # This empty callback allows Typer to understand it's managing a multi-command menu
     pass
 
 
@@ -36,7 +36,7 @@ def ping():
 
 def main():
     """
-    Entry point called by the operating system (via pyproject.toml)
+    Application entry point called by the OS (via pyproject.toml)
     """
     app()
 

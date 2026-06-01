@@ -1,17 +1,16 @@
-# Environnements virtuels Python
-venv/
-env/
-.env
 
+*$py.class
+build/
 # Cache et fichiers compilés Python
+devctl.egg-info/
+dist/
+# Dossier pycharm
+*.egg-info/
+.env
+env/
+# Environnements virtuels Python
+# Fichiers de build Typer / Setuptools
+.idea/devctl.egg-info/
 __pycache__/
 *.py[cod]
-*$py.class
-
-# Fichiers de build Typer / Setuptools
-build/
-dist/
-*.egg-info/
-
-# Dossier pycharm
-.idea/
+venv/

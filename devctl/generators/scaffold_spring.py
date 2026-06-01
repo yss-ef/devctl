@@ -22,7 +22,7 @@ JAVA_TYPE_MAP = {
 
 def parse_fields(fields_str: str):
     """
-    Transforms terminal field strings into injectable data.
+    Transforms terminal string into injectable data.
     Example: "name:string, age:int" -> [{"name": "name", "java_type": "String"}, ...]
     """
     if not fields_str:
@@ -42,8 +42,8 @@ def parse_fields(fields_str: str):
 
 def find_spring_base_package_and_path():
     """
-    Searches for the directory containing the @SpringBootApplication class.
-    This is the most reliable way to find the base package without parsing pom.xml.
+    Searches for the folder containing the @SpringBootApplication class.
+    This is the most reliable method to find the base package without parsing pom.xml.
     """
     java_src_dir = os.path.join(os.getcwd(), "src", "main", "java")
 
@@ -62,7 +62,7 @@ def find_spring_base_package_and_path():
 
 def generate_spring_resource(resource_name: str, fields_str: str):
     """
-    Orchestrates the creation of MVC + DTOs + Mapper architecture.
+    Orchestrates the creation of the MVC + DTOs + Mapper architecture.
     """
     base_package, base_path = find_spring_base_package_and_path()
 
@@ -75,7 +75,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
     entity_name = resource_name.capitalize()
 
-    # Detailed configuration for sub-folders (DTOs, Mappers)
+    # New detailed configuration to handle sub-folders (DTOs, Mapper)
     components = [
         {"dir": "entity", "suffix": "Entity", "template": "Entity.java.j2"},
         {"dir": "repository", "suffix": "Repository", "template": "Repository.java.j2"},
@@ -100,11 +100,11 @@ def generate_spring_resource(resource_name: str, fields_str: str):
         target_file_name = f"{class_name}.java"
 
         # Create sub-folder if it doesn't exist (e.g., src/.../dto/request)
-        # os.path.normpath handles OS-specific slashes
+        # os.path.normpath handles slashes depending on the OS (Linux/Windows)
         target_dir = os.path.join(base_path, os.path.normpath(comp["dir"]))
         os.makedirs(target_dir, exist_ok=True)
 
-        # Data passed to the Jinja2 template
+        # Template data for Jinja2
         context = {
             "base_package": base_package,
             "class_name": class_name,

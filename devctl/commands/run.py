@@ -63,5 +63,5 @@ def run_env(ctx: typer.Context):
         typer.secho("\nError: No valid development environment detected here.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    # Transfer control to the system orchestration layer
-    launch_dev_environment(projects, docker_composes)
+    # Hand off to the system orchestration layer
+    launch_dev_environment(env_state)

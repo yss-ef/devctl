@@ -38,7 +38,7 @@ def setup_vue_router(project_path: str):
     typer.secho("Installing and configuring vue-router...", fg=typer.colors.CYAN)
 
     try:
-        # 1. NPM package installation
+        # 1. Install npm package
         subprocess.run(
             ["npm", "install", "vue-router@4"],
             cwd=project_path,
@@ -46,12 +46,12 @@ def setup_vue_router(project_path: str):
             stdout=subprocess.DEVNULL,
         )
 
-        # 2. Router directory creation
+        # 2. Create router directory
         src_dir = os.path.join(project_path, "src")
         router_dir = os.path.join(src_dir, "router")
         os.makedirs(router_dir, exist_ok=True)
 
-        # 3. Jinja2 template rendering
+        # 3. Render Jinja2 templates
         templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "vue", "config")
         env = Environment(loader=FileSystemLoader(templates_dir))
 
