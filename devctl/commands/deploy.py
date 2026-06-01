@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import typer
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from devctl.generators.docker_scaffold import (
@@ -30,81 +31,157 @@ def extract_db_info(project_path: Path) -> Optional[Dict[str, Any]]:
 
     # spring.datasource.url=jdbc:postgresql://localhost:5432/sample_api_db
     url_match = re.search(r"spring\.datasource\.url=jdbc:([^:]+)://[^:]+:(\d+)/([\w-]+)", content)
+    # spring.data.mongodb.uri=mongodb://admin:password@localhost:27017/db_name
+    mongo_match = re.search(
+        r"spring\.data\.mongodb\.uri=mongodb://([^:]+):([^@]+)@[^:]+:(\d+)/([\w-]+)", content
+    )
+
     user_match = re.search(r"spring\.datasource\.username=([\w-]+)", content)
     pass_match = re.search(r"spring\.datasource\.password=([\w-]+)", content)
 
-    if not url_match:
+    if not url_match and not mongo_match:
         return extract_db_from_compose(project_path / "docker-compose.yml")
 
-    db_type_raw = url_match.group(1)
-    db_type = "postgresql" if "postgres" in db_type_raw else "mysql"
-    db_port = url_match.group(2)
-    db_name = url_match.group(3)
-    db_user = user_match.group(1) if user_match else "admin"
-    db_pass = pass_match.group(1) if pass_match else "password"
+    if mongo_match:
+        db_type = "mongodb"
+        db_user = mongo_match.group(1)
+        db_pass = mongo_match.group(2)
+        db_port = mongo_match.group(3)
+        db_name = mongo_match.group(4)
+    else:
+        db_type_raw = url_match.group(1)
+        db_type = "postgresql" if "postgres" in db_type_raw else "mysql"
+        db_port = url_match.group(2)
+        db_name = url_match.group(3)
+        db_user = user_match.group(1) if user_match else "admin"
+        db_pass = pass_match.group(1) if pass_match else "password"
 
     db_dict = _build_db_dict(db_type, db_port, db_name, db_user, db_pass)
 
     # Try to refine service name from existing docker-compose if possible
     compose_path = project_path / "docker-compose.yml"
     if compose_path.exists():
-        compose_content = compose_path.read_text(encoding="utf-8", errors="ignore")
-        service_match = re.search(r"services:\s*\n\s+([\w-]+):", compose_content)
-        if service_match:
-            db_dict["service_name"] = service_match.group(1)
+        try:
+            with open(compose_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+                if config and "services" in config:
+                    # Find the first service that looks like a database
+                    for s_name, s_cfg in config["services"].items():
+                        image = str(s_cfg.get("image", ""))
+                        if db_type == "postgresql" and "postgres" in image:
+                            db_dict["service_name"] = s_name
+                            break
+                        if db_type == "mysql" and "mysql" in image:
+                            db_dict["service_name"] = s_name
+                            break
+                        if db_type == "mongodb" and "mongo" in image:
+                            db_dict["service_name"] = s_name
+                            break
+        except (OSError, yaml.YAMLError):
+            # Ignore parsing errors; fall back to default service name
+            pass
 
     return db_dict
 
 
 def extract_db_from_compose(compose_path: Path) -> Optional[Dict[str, Any]]:
     """
-    Extract database information from a docker-compose.yml file using regex.
+    Extract database information from a docker-compose.yml file using PyYAML.
     """
     if not compose_path.exists():
         return None
 
-    content = compose_path.read_text(encoding="utf-8", errors="ignore")
-
-    # This is a bit hacky without PyYAML but follows devctl's generated structure
-    # Try to find the first service name under 'services:'
-    service_match = re.search(r"services:\s*\n\s+([\w-]+):", content)
-    original_service_name = service_match.group(1) if service_match else None
-
-    image_match = re.search(r"image:\s+(postgres|mysql)(:[\w.-]+)?", content)
-    if not image_match:
+    try:
+        with open(compose_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+    except Exception:
         return None
 
-    db_type = "postgresql" if image_match.group(1) == "postgres" else "mysql"
+    if not config or "services" not in config:
+        return None
 
-    # Try to find env vars
-    if db_type == "postgresql":
-        user = re.search(r"POSTGRES_USER:\s+([\w-]+)", content)
-        password = re.search(r"POSTGRES_PASSWORD:\s+([\w-]+)", content)
-        db_name = re.search(r"POSTGRES_DB:\s+([\w-]+)", content)
-    else:
-        user = re.search(r"MYSQL_USER:\s+([\w-]+)", content)
-        password = re.search(r"MYSQL_PASSWORD:\s+([\w-]+)", content)
-        db_name = re.search(r"MYSQL_DATABASE:\s+([\w-]+)", content)
+    for service_name, service_cfg in config["services"].items():
+        image = str(service_cfg.get("image", ""))
+        if "postgres" in image or "mysql" in image or "mongo" in image:
+            if "postgres" in image:
+                db_type = "postgresql"
+            elif "mysql" in image:
+                db_type = "mysql"
+            else:
+                db_type = "mongodb"
 
-    port_match = re.search(r"\"(\d+):(\d+)\"", content)
+            # Extract environment variables
+            env = service_cfg.get("environment", {})
+            env_dict = {}
+            if isinstance(env, list):
+                for item in env:
+                    if "=" in item:
+                        k, v = item.split("=", 1)
+                        env_dict[k] = v
+                    elif ":" in item:
+                        k, v = item.split(":", 1)
+                        env_dict[k] = v.strip()
+            elif isinstance(env, dict):
+                env_dict = env
 
-    db_dict = _build_db_dict(
-        db_type,
-        port_match.group(1) if port_match else ("5432" if db_type == "postgresql" else "3306"),
-        db_name.group(1) if db_name else "db",
-        user.group(1) if user else "admin",
-        password.group(1) if password else "password",
-    )
+            # Extract info based on db_type
+            if db_type == "postgresql":
+                user = env_dict.get("POSTGRES_USER", "admin")
+                password = env_dict.get("POSTGRES_PASSWORD", "password")
+                db_name = env_dict.get("POSTGRES_DB", "db")
+            elif db_type == "mysql":
+                user = env_dict.get("MYSQL_USER", env_dict.get("MYSQL_ROOT_PASSWORD", "admin"))
+                password = env_dict.get(
+                    "MYSQL_PASSWORD", env_dict.get("MYSQL_ROOT_PASSWORD", "password")
+                )
+                db_name = env_dict.get("MYSQL_DATABASE", "db")
+            else:
+                user = env_dict.get("MONGO_INITDB_ROOT_USERNAME", "admin")
+                password = env_dict.get("MONGO_INITDB_ROOT_PASSWORD", "password")
+                db_name = env_dict.get("MONGO_INITDB_DATABASE", "db")
 
-    if original_service_name:
-        db_dict["service_name"] = original_service_name
+            # Extract port
+            ports = service_cfg.get("ports", [])
+            host_port = None
+            if ports and isinstance(ports, list):
+                first_port = str(ports[0])
+                if ":" in first_port:
+                    host_port = first_port.split(":")[0].strip("'").strip('"')
 
-    return db_dict
+            db_dict = _build_db_dict(
+                db_type,
+                host_port
+                or (
+                    "5432"
+                    if db_type == "postgresql"
+                    else ("3306" if db_type == "mysql" else "27017")
+                ),
+                db_name,
+                user,
+                password,
+            )
+            db_dict["service_name"] = service_name
+            return db_dict
+
+    return None
 
 
 def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str) -> Dict[str, Any]:
     is_postgres = db_type == "postgresql"
-    internal_port = "5432" if is_postgres else "3306"
+    is_mysql = db_type == "mysql"
+
+    if is_postgres:
+        internal_port = "5432"
+        image = "postgres:15-alpine"
+        vol_path = "/var/lib/postgresql/data"
+    elif is_mysql:
+        internal_port = "3306"
+        image = "mysql:8.0"
+        vol_path = "/var/lib/mysql/data"
+    else:
+        internal_port = "27017"
+        image = "mongo:6.0"
+        vol_path = "/data/db"
 
     env = {}
     if is_postgres:
@@ -113,12 +190,18 @@ def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str)
             "POSTGRES_PASSWORD": password,
             "POSTGRES_DB": name,
         }
-    else:
+    elif is_mysql:
         env = {
             "MYSQL_ROOT_PASSWORD": password,
             "MYSQL_DATABASE": name,
             "MYSQL_USER": user,
             "MYSQL_PASSWORD": password,
+        }
+    else:
+        env = {
+            "MONGO_INITDB_ROOT_USERNAME": user,
+            "MONGO_INITDB_ROOT_PASSWORD": password,
+            "MONGO_INITDB_DATABASE": name,
         }
 
     return {
@@ -129,9 +212,9 @@ def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str)
         "user": user,
         "password": password,
         "service_name": f"{name}-db",
-        "image": "postgres:15-alpine" if is_postgres else "mysql:8.0",
+        "image": image,
         "volume_name": f"{name}_data",
-        "volume_path": "/var/lib/postgresql/data" if is_postgres else "/var/lib/mysql/data",
+        "volume_path": vol_path,
         "env": env,
     }
 
@@ -141,16 +224,18 @@ def deploy(path: Path = PATH_ARGUMENT):
     """
     Generate a global docker-compose.yml by scanning subdirectories.
     """
-    typer.secho(f"🚀 Preparing deployment for {path.resolve()}...", fg=typer.colors.CYAN, bold=True)
+    typer.secho(f"Preparing deployment for {path.resolve()}...", fg=typer.colors.CYAN, bold=True)
 
     try:
         projects = discover_docker_projects(path)
     except Exception as e:
-        typer.secho(f"❌ Error scanning projects: {e}", fg=typer.colors.RED)
+        typer.secho(f"Error: Scanning failed: {e}", fg=typer.colors.RED)
         raise typer.Exit(1) from e
 
     if not projects:
-        typer.secho("❌ No supported projects (Spring, Angular, Vue) found.", fg=typer.colors.RED)
+        typer.secho(
+            "Error: No supported projects (Spring, Angular, Vue) found.", fg=typer.colors.RED
+        )
         raise typer.Exit(1)
 
     services_data = []
@@ -161,7 +246,7 @@ def deploy(path: Path = PATH_ARGUMENT):
         dockerfile_path = project.path / "Dockerfile"
         if not dockerfile_path.exists():
             typer.secho(
-                f"⚠️ Warning: No Dockerfile found in {project.path}. "
+                f"Warning: No Dockerfile found in {project.path}. "
                 "You may need to run 'devctl dockerize' first.",
                 fg=typer.colors.YELLOW,
             )
@@ -199,5 +284,5 @@ def deploy(path: Path = PATH_ARGUMENT):
     output_path = path / "docker-compose.yml"
     output_path.write_text(output, encoding="utf-8")
 
-    typer.secho(f"✅ Generated {output_path}", fg=typer.colors.GREEN, bold=True)
+    typer.secho(f"Generated {output_path}", fg=typer.colors.GREEN, bold=True)
     typer.echo(f"Summary: {len(services_data)} services, {len(databases)} databases.")

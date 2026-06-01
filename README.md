@@ -1,123 +1,86 @@
 # devctl
 
-`devctl` is a command-line interface (CLI) designed to automate and orchestrate the local development lifecycle, specifically tailored for Spring Boot, Angular, and Vue.js architectures.
+`devctl` is a professional command-line interface (CLI) designed to automate and
+orchestrate the development lifecycle for modern full-stack architectures. It
+provides a unified workflow for managing backends (Spring Boot, NestJS, Go,
+FastAPI), frontends (Angular, Vue, React, NextJS, Svelte), and their
+containerization.
 
-## Purpose
+## Core Features
 
-Modern full-stack development involves repetitive configuration and environment management tasks that are prone to human error. `devctl` provides a unified point of control to automate these processes, allowing developers to focus on implementation rather than infrastructure.
-
-Key challenges addressed:
-*   Standardized database configuration via Docker.
-*   Automated security boilerplate generation (JWT, Filters, Configuration).
-*   Surgical CRUD layer generation (Entity, Repository, Service, Controller).
-*   Concurrent process management for multi-tier applications.
-*   Automated environment cleanup.
-
-## Architecture and Integration
-
-The tool is built on a modular Python 3 architecture leveraging industry-standard libraries:
-
-*   **CLI Engine**: Typer-based interface for type-safe command execution.
-*   **Templating**: Jinja2 for dynamic generation of Java, TypeScript, and configuration assets.
-*   **Spring Integration**: Integration with the Spring Initializr API for tailored project bootstrapping.
-*   **Frontend Orchestration**: Native support for @angular/cli and Vite.
-*   **Orchestration Engine**: Recursive scanning for project detection and parallel process management.
-*   **Container Management**: Lifecycle management for Docker Compose, including volume persistence control.
-
-## System Requirements
-
-The following dependencies must be available in the system path:
-
-*   **Python**: >= 3.9
-*   **Docker & Docker Compose**
-*   **Java**: 17+ (for Spring Boot modules)
-*   **Node.js & npm**: (for Angular/Vue.js modules)
-*   **Angular CLI**: Required for Angular project initialization.
+-   **Multi-Stack Orchestration**: Launch databases, multiple microservices, and
+    frontend dev servers with a single command. Includes real-time, prefixed log
+    streaming.
+-   **Full-Stack Scaffolding**: Generate consistent business resources
+    (Entities, DTOs, Controllers, Services) across both backend and frontend
+    layers simultaneously.
+-   **Instant Infrastructure**: Automatically generate optimized, multi-stage
+    `Dockerfiles` and global `docker-compose.yml` configurations by scanning
+    your project tree.
+-   **Security by Default**: Inject standardized JWT authentication and security
+    configurations into new projects.
 
 ## Installation
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/your-username/devctl.git
-    cd devctl
-    ```
-
-2.  **Configure a virtual environment**:
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # Linux/macOS
-    # .venv\Scripts\activate   # Windows
-    ```
-
-3.  **Install the package**:
-    ```bash
-    pip install -e .
-    ```
-
-4.  **Verify installation**:
-    ```bash
-    devctl ping
-    ```
-
-## Command Reference
-
-### Project Initialization
-
-Bootstrap new projects with pre-configured defaults and security standards.
-
-*   **Spring Boot**:
-    ```bash
-    devctl init spring "api-service" --db [postgres|mysql] --port 5432
-    ```
-*   **Angular**:
-    ```bash
-    devctl init angular "web-client"
-    ```
-*   **Vue.js**:
-    ```bash
-    devctl init vue "vue-client"
-    ```
-
-### Resource Scaffolding
-
-Inject business resources into existing project structures. The command automatically detects active modules and updates both backend and frontend layers.
+You can install `devctl` locally for development:
 
 ```bash
-devctl add resource "Product" --fields "name:string,price:double,quantity:int"
+git clone https://github.com/yss-ef/devctl.git
+cd devctl
+pip install -e .
 ```
-*Supported types: string, int, double, float, boolean, date.*
 
-### Orchestration
+## Quick Start
 
-Scan the current directory tree and launch all detected components (Database, Backend, Frontend) in parallel.
+### 1. Initialize a Full-Stack Project
+
+Create a new backend and frontend in seconds:
+
+```bash
+mkdir my-app && cd my-app
+devctl init spring api --db postgres
+devctl init angular front
+```
+
+### 2. Add a Business Resource
+
+Generate a complete vertical slice of your application:
+
+```bash
+devctl add resource Product -f "name:string,price:double,quantity:int"
+```
+
+### 3. Run the Environment
+
+Launch everything in parallel with automatic database startup:
 
 ```bash
 devctl run
 ```
 
-Upon termination (Ctrl+C), `devctl` gracefully stops all processes and performs a clean teardown of Docker resources.
+## Supported Stacks
 
-### Dockerfile Scaffolding
+| Type | Frameworks / Technologies |
+| :--- | :--- |
+| **Backends** | Spring Boot, NestJS, Express (NodeJS), FastAPI, Django, Go (Fiber) |
+| **Frontends** | Angular, Vue.js, ReactJS, NextJS, Svelte |
+| **Databases** | PostgreSQL, MySQL, MongoDB |
 
-Generate Dockerfiles for all detected Spring Boot, Angular, and Vue/Vite services without building or running containers.
+## Documentation
 
-```bash
-devctl dockerize
-devctl dockerize ./my-workspace --dry-run
-devctl dockerize --force
-```
+For a detailed reference of all available commands and their options, see the
+[Commands Reference](COMMANDS.md).
 
-Generated assets are intentionally limited to service-local `Dockerfile` files. Existing Dockerfiles are skipped by default; use `--force` to replace them.
+## Contributing
 
-Build an image from a generated Dockerfile with:
-
-```bash
-docker build -t my-service ./my-service
-```
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for
+development setup and code quality guidelines.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
-Authored by Youssef Fellah.  
-Personal Project.
+---
+Authored by Youssef Fellah.
+Professional Development Orchestrator.

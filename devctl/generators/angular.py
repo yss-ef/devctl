@@ -15,7 +15,7 @@ def setup_angular_environments(project_path: str):
     """
     Generates environments and proxy for an Angular project.
     """
-    typer.secho("⚙️  Configuring Proxy and Environments...", fg=typer.colors.CYAN)
+    typer.secho("Configuring Proxy and Environments...", fg=typer.colors.CYAN)
 
     # 1. Target paths
     src_dir = os.path.join(project_path, "src")
@@ -75,7 +75,7 @@ def generate_angular_boilerplate(project_name: str) -> bool:
     """
     Generates an Angular project via the native CLI (@angular/cli) and configures it.
     """
-    typer.secho(f"🔄 Generating Angular frontend '{project_name}'...", fg=typer.colors.CYAN)
+    typer.secho(f"Generating Angular frontend '{project_name}'...", fg=typer.colors.CYAN)
 
     safe_name = project_name.lower().replace("_", "-")
 
@@ -83,20 +83,18 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         subprocess.run(["ng", "version"], capture_output=True, check=True)
     except FileNotFoundError:
         typer.secho(
-            "❌ Error: Angular CLI ('ng') not found on your system.",
+            "Error: Angular CLI ('ng') not found on your system.",
             fg=typer.colors.RED,
         )
         return False
     except subprocess.CalledProcessError:
-        typer.secho("❌ Error: Angular CLI is installed but not responding.", fg=typer.colors.RED)
+        typer.secho("Error: Angular CLI is installed but not responding.", fg=typer.colors.RED)
         return False
 
     try:
         command = ["ng", "new", safe_name, "--routing=true", "--style=scss", "--skip-git=true"]
 
-        typer.secho(
-            "📦 Downloading npm packages... (This may take 1-2 minutes)", fg=typer.colors.CYAN
-        )
+        typer.secho("Downloading npm packages... (This may take 1-2 minutes)", fg=typer.colors.CYAN)
         subprocess.run(command, check=True)
 
         # Post-installation configuration
@@ -104,11 +102,11 @@ def generate_angular_boilerplate(project_name: str) -> bool:
         setup_angular_environments(project_full_path)
 
         typer.secho(
-            f"✅ Frontend '{safe_name}' successfully generated and configured!",
+            f"Frontend '{safe_name}' successfully generated and configured!",
             fg=typer.colors.GREEN,
         )
         return True
 
     except subprocess.CalledProcessError as e:
-        typer.secho(f"❌ Angular process failed with code: {e.returncode}", fg=typer.colors.RED)
+        typer.secho(f"Error: Angular process failed with code: {e.returncode}", fg=typer.colors.RED)
         return False

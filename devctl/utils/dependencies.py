@@ -15,7 +15,7 @@ def check_tool(tool_name: str, required_for: str = "this operation"):
     """
     if shutil.which(tool_name) is None:
         typer.secho(
-            f"\n❌ Error: '{tool_name}' is not installed or not in your PATH.",
+            f"\nError: '{tool_name}' is not installed or not in your PATH.",
             fg=typer.colors.RED,
             bold=True,
         )
@@ -31,6 +31,6 @@ def check_tool(tool_name: str, required_for: str = "this operation"):
         }
 
         if tool_name in hints:
-            typer.echo(f"💡 Hint: {hints[tool_name]}")
+            typer.echo(f"Hint: {hints[tool_name]}")
 
         raise typer.Exit(code=1)

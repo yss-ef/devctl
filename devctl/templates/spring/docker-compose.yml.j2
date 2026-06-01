@@ -13,11 +13,17 @@ services:
       MYSQL_DATABASE: {{ db_name }}
       MYSQL_USER: {{ db_user }}
       MYSQL_PASSWORD: {{ db_password }}
+    {% elif db_type == 'mongodb' %}
+    image: mongo:6.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: {{ db_user }}
+      MONGO_INITDB_ROOT_PASSWORD: {{ db_password }}
+      MONGO_INITDB_DATABASE: {{ db_name }}
     {% endif %}
     ports:
-      - "{{ db_port }}:{% if db_type == 'postgres' %}5432{% else %}3306{% endif %}"
+      - "{{ db_port }}:{% if db_type == 'postgres' %}5432{% elif db_type == 'mysql' %}3306{% else %}27017{% endif %}"
     volumes:
-      - {{ db_name }}_data:/var/lib/{% if db_type == 'postgres' %}postgresql{% else %}mysql{% endif %}/data
+      - {{ db_name }}_data:{% if db_type == 'postgres' %}/var/lib/postgresql/data{% elif db_type == 'mysql' %}/var/lib/mysql/data{% else %}/data/db{% endif %}
 
 volumes:
   {{ db_name }}_data:

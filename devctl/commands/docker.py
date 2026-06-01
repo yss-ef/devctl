@@ -43,11 +43,11 @@ def dockerize(
             dry_run=dry_run,
         )
     except DockerScaffoldError as exc:
-        typer.secho(f"❌ {exc}", fg=typer.colors.RED)
+        typer.secho(f"Error: {exc}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from exc
 
     mode = "Dry run" if dry_run else "Docker scaffolding"
-    typer.secho(f"🐳 {mode} complete for {result.root_path}", fg=typer.colors.CYAN, bold=True)
+    typer.secho(f"{mode} complete for {result.root_path}", fg=typer.colors.CYAN, bold=True)
 
     typer.echo("\nDetected services:")
     for service in result.services:

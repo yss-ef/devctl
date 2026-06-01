@@ -16,6 +16,7 @@ IGNORED_DIRECTORIES = {
     ".angular",
     ".git",
     ".mvn",
+    ".next",
     ".pytest_cache",
     ".venv",
     "__pycache__",
@@ -83,7 +84,7 @@ def sanitize_service_name(raw_name: str, fallback: str = "service") -> str:
 
 
 def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]:
-    """Discover all Spring Boot, Angular, and Vue/Vite projects under ``root_path``."""
+    """Discover all supported projects under ``root_path``."""
     root = Path(root_path).resolve()
     if not root.exists():
         raise DockerScaffoldError(f"Path does not exist: {root}")
@@ -102,9 +103,67 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
             candidates.append(("spring", project_path))
         if "angular.json" in filename_set:
             candidates.append(("angular", project_path))
+
         has_vite_config = {"vite.config.ts", "vite.config.js"} & filename_set
         if has_vite_config and "angular.json" not in filename_set:
-            candidates.append(("vue", project_path))
+            # Check package.json to distinguish between vue and react
+            pkg_path = project_path / "package.json"
+            if pkg_path.exists():
+                try:
+                    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+                    deps = pkg.get("dependencies", {})
+                    dev_deps = pkg.get("devDependencies", {})
+                    all_deps = {**deps, **dev_deps}
+
+                    if "vue" in all_deps:
+                        candidates.append(("vue", project_path))
+                    elif "react" in all_deps:
+                        candidates.append(("react", project_path))
+                    else:
+                        candidates.append(("vue", project_path))  # Fallback to vue
+                except Exception:
+                    candidates.append(("vue", project_path))
+            else:
+                candidates.append(("vue", project_path))
+
+        if "nest-cli.json" in filename_set:
+            candidates.append(("nest", project_path))
+
+        if any(f.startswith("next.config.") for f in filename_set):
+            candidates.append(("nextjs", project_path))
+
+        if "svelte.config.js" in filename_set:
+            candidates.append(("svelte", project_path))
+
+        if "main.py" in filename_set and "requirements.txt" in filename_set:
+            try:
+                reqs = (project_path / "requirements.txt").read_text(encoding="utf-8")
+                if "fastapi" in reqs.lower():
+                    candidates.append(("fastapi", project_path))
+                elif "django" in reqs.lower():
+                    candidates.append(("django", project_path))
+            except (OSError, UnicodeDecodeError):
+                # Best-effort discovery: unreadable requirements files should not stop scanning.
+                pass
+
+        if "manage.py" in filename_set and "requirements.txt" in filename_set:
+            try:
+                reqs = (project_path / "requirements.txt").read_text(encoding="utf-8")
+                if "django" in reqs.lower():
+                    candidates.append(("django", project_path))
+            except (OSError, UnicodeDecodeError):
+                # Best-effort discovery: ignore unreadable/invalid requirements.txt here.
+                pass
+
+        if "go.mod" in filename_set:
+            candidates.append(("go", project_path))
+
+        if "package.json" in filename_set and not any(
+            k in ["angular", "vue", "react", "nest", "nextjs", "svelte"]
+            for k, p in candidates
+            if p == project_path
+        ):
+            candidates.append(("nodejs", project_path))
 
     used_names: set[str] = set()
     projects: list[DockerProject] = []
@@ -123,7 +182,9 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                 relative_context=_relative_context(root, project_path),
                 java_version=_spring_java_version(project_path) if kind == "spring" else None,
                 node_version=(
-                    _node_version(project_path, kind) if kind in {"angular", "vue"} else None
+                    _node_version(project_path, kind)
+                    if kind in {"angular", "vue", "react", "nest", "nodejs", "nextjs", "svelte"}
+                    else None
                 ),
                 angular_output_name=(
                     _angular_output_name(project_path) if kind == "angular" else None
@@ -144,7 +205,7 @@ def scaffold_docker_assets(
     root = Path(root_path).resolve()
     projects = discover_docker_projects(root)
     if not projects:
-        raise DockerScaffoldError("No Spring Boot, Angular, or Vue/Vite project detected.")
+        raise DockerScaffoldError("No supported project detected.")
 
     env = _template_environment()
     operations = [
@@ -163,6 +224,20 @@ def scaffold_docker_assets(
 def _dockerfile_content(env: Environment, project: DockerProject) -> str:
     if project.kind == "spring":
         return env.get_template("spring/Dockerfile.j2").render(project=project)
+    if project.kind == "nest":
+        return env.get_template("nestjs/Dockerfile.j2").render(project=project)
+    if project.kind == "nodejs":
+        return env.get_template("nodejs/Dockerfile.j2").render(project=project)
+    if project.kind == "nextjs":
+        return env.get_template("nextjs/Dockerfile.j2").render(project=project)
+    if project.kind == "fastapi":
+        return env.get_template("fastapi/Dockerfile.j2").render(project=project)
+    if project.kind == "django":
+        return env.get_template("django/Dockerfile.j2").render(project=project)
+    if project.kind == "svelte":
+        return env.get_template("svelte/Dockerfile.j2").render(project=project)
+    if project.kind == "go":
+        return env.get_template("go/Dockerfile.j2").render(project=project)
     return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 
@@ -293,6 +368,9 @@ def _node_version(project_path: Path, kind: str) -> str:
         if angular_major >= 17:
             return "20"
         return "18"
+
+    if kind in ["nest", "nodejs", "nextjs", "svelte"]:
+        return "20"
 
     return "22"
 

@@ -43,7 +43,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     env_state = detect_environment(root_path)
 
     if not env_state["has_angular"]:
-        typer.secho("❌ Error: No Angular project detected here.", fg=typer.colors.RED)
+        typer.secho("Error: No Angular project detected here.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     angular_root = env_state["angular_path"]
@@ -120,7 +120,7 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "angular", "feature")
     env = Environment(loader=FileSystemLoader(templates_dir))
 
-    typer.secho(f"⚙️  Generating Angular feature '{entity_name}'...", fg=typer.colors.CYAN)
+    typer.secho(f"Generating Angular feature '{entity_name}'...", fg=typer.colors.CYAN)
 
     # Template data
     context = {
@@ -155,6 +155,9 @@ def generate_angular_resource(resource_name: str, fields_str: str, root_path: st
                     f.write("")
                 typer.echo(f"  - Created (empty): {comp['dir']}/{target_file_name}")
             else:
-                typer.secho(f"⚠️  Error on {comp['template']}: {e}", fg=typer.colors.YELLOW)
+                typer.secho(
+                    f"Warning: Failed to generate {comp['template']}: {e}",
+                    fg=typer.colors.YELLOW,
+                )
 
-    typer.secho(f"✅ {entity_name} feature successfully generated!", fg=typer.colors.GREEN)
+    typer.secho(f"{entity_name} feature successfully generated!", fg=typer.colors.GREEN)

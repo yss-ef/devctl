@@ -68,7 +68,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
     if not base_package:
         typer.secho(
-            "❌ Error: Unable to find a valid Spring Boot project here.",
+            "Error: Unable to find a valid Spring Boot project here.",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)
@@ -91,7 +91,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
     env = Environment(loader=FileSystemLoader(templates_dir))
 
     typer.secho(
-        f"⚙️  Generating Spring resource '{entity_name}' (with MapStruct & DTOs)...",
+        f"Generating Spring resource '{entity_name}' (with MapStruct & DTOs)...",
         fg=typer.colors.CYAN,
     )
 
@@ -121,7 +121,7 @@ def generate_spring_resource(resource_name: str, fields_str: str):
 
         typer.echo(f"  - Created: {comp['dir']}/{target_file_name}")
 
-    typer.secho(f"✅ {entity_name} architecture successfully generated!", fg=typer.colors.GREEN)
+    typer.secho(f"{entity_name} architecture successfully generated!", fg=typer.colors.GREEN)
 
 
 def generate_spring_security(_root_path: str = "."):
@@ -133,7 +133,7 @@ def generate_spring_security(_root_path: str = "."):
 
     if not base_package:
         typer.secho(
-            "❌ Error: Unable to locate Java package for security.",
+            "Error: Unable to locate Java package for security.",
             fg=typer.colors.RED,
         )
         return
@@ -153,7 +153,7 @@ def generate_spring_security(_root_path: str = "."):
         "ApplicationConfig.java",
     ]
 
-    typer.secho(f"🛡️  Injecting JWT security into {base_package}.config...", fg=typer.colors.CYAN)
+    typer.secho(f"Injecting JWT security into {base_package}.config...", fg=typer.colors.CYAN)
 
     for filename in security_files:
         template = env.get_template(f"{filename}.j2")
@@ -163,4 +163,4 @@ def generate_spring_security(_root_path: str = "."):
             f.write(content)
         typer.echo(f"  - Created: config/{filename}")
 
-    typer.secho("✅ Security initialized successfully!", fg=typer.colors.GREEN)
+    typer.secho("Security initialized successfully!", fg=typer.colors.GREEN)
