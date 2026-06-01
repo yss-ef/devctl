@@ -1,6 +1,6 @@
 """
 Project scanner and environment detector.
-Identifies Spring Boot, Angular, Vue.js, and Docker components in a directory tree.
+Identifies Spring Boot, Angular, Vue.js, Go (Fiber), and Docker components in a directory tree.
 """
 
 import os
@@ -20,6 +20,8 @@ def detect_environment(root_path: str = "."):
         "angular_path": None,
         "has_vue": False,
         "vue_path": None,
+        "has_go": False,
+        "go_path": None,
         "project_root": os.path.abspath(root_path),
     }
 
@@ -44,5 +46,9 @@ def detect_environment(root_path: str = "."):
         if any(f in filenames for f in vue_files) and not env_state["has_vue"]:
             env_state["has_vue"] = True
             env_state["vue_path"] = dirpath
+
+        if "go.mod" in filenames and not env_state["has_go"]:
+            env_state["has_go"] = True
+            env_state["go_path"] = dirpath
 
     return env_state
