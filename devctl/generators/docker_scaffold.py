@@ -104,7 +104,25 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
             candidates.append(("angular", project_path))
         has_vite_config = {"vite.config.ts", "vite.config.js"} & filename_set
         if has_vite_config and "angular.json" not in filename_set:
-            candidates.append(("vue", project_path))
+            # Check package.json to distinguish between vue and react
+            pkg_path = project_path / "package.json"
+            if pkg_path.exists():
+                try:
+                    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+                    deps = pkg.get("dependencies", {})
+                    dev_deps = pkg.get("devDependencies", {})
+                    all_deps = {**deps, **dev_deps}
+                    
+                    if "vue" in all_deps:
+                        candidates.append(("vue", project_path))
+                    elif "react" in all_deps:
+                        candidates.append(("react", project_path))
+                    else:
+                        candidates.append(("vue", project_path)) # Fallback to vue
+                except Exception:
+                    candidates.append(("vue", project_path))
+            else:
+                candidates.append(("vue", project_path))
 
     used_names: set[str] = set()
     projects: list[DockerProject] = []
