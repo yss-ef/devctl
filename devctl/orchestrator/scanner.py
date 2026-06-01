@@ -1,10 +1,14 @@
 """
 Project scanner and environment detector.
 <<<<<<< HEAD
+<<<<<<< HEAD
 Identifies Spring Boot, Angular, Vue.js, React, NextJS, NestJS, NodeJS, FastAPI, and Docker components in a directory tree.
 =======
 Identifies Spring Boot, Angular, Vue.js, Django, and Docker components in a directory tree.
 >>>>>>> feat/django
+=======
+Identifies Spring Boot, Angular, Vue.js, Svelte, and Docker components in a directory tree.
+>>>>>>> feat/svelte
 """
 
 import os
@@ -26,6 +30,7 @@ def detect_environment(root_path: str = "."):
         "has_vue": False,
         "vue_path": None,
 <<<<<<< HEAD
+<<<<<<< HEAD
         "has_react": False,
         "react_path": None,
         "has_nextjs": False,
@@ -40,16 +45,24 @@ def detect_environment(root_path: str = "."):
         "has_django": False,
         "django_path": None,
 >>>>>>> feat/django
+=======
+        "has_svelte": False,
+        "svelte_path": None,
+>>>>>>> feat/svelte
         "project_root": os.path.abspath(root_path),
     }
 
     for dirpath, _dirnames, filenames in os.walk(root_path):
         # Optimization: ignore heavy folders for an instant scan
 <<<<<<< HEAD
+<<<<<<< HEAD
         if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", "dist", ".next", ".venv"]):
 =======
         if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", ".venv"]):
 >>>>>>> feat/django
+=======
+        if any(ignored in dirpath for ignored in ["node_modules", "target", ".git", ".angular", ".svelte-kit"]):
+>>>>>>> feat/svelte
             continue
 
         if "docker-compose.yml" in filenames and not env_state["has_docker_compose"]:
@@ -117,5 +130,9 @@ def detect_environment(root_path: str = "."):
                         env_state["django_path"] = dirpath
             except Exception:
                 pass
+
+        if "svelte.config.js" in filenames and not env_state["has_svelte"]:
+            env_state["has_svelte"] = True
+            env_state["svelte_path"] = dirpath
 
     return env_state

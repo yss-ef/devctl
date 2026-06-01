@@ -92,8 +92,8 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             t.start()
             active_threads.append(t)
 
-        # 3. Start Frontends (Angular / Vue / React / NextJS)
-        frontends = [p for p in projects if p.kind in ["angular", "vue", "react", "nextjs"]]
+        # 3. Start Frontends (Angular / Vue / React / NextJS / Svelte)
+        frontends = [p for p in projects if p.kind in ["angular", "vue", "react", "nextjs", "svelte"]]
         for p in frontends:
             if p.kind == "angular":
                 color = "cyan"
@@ -104,8 +104,11 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             elif p.kind == "react":
                 color = "blue"
                 cmd = ["npm", "run", "dev"]
-            else: # nextjs
+            elif p.kind == "nextjs":
                 color = "yellow"
+                cmd = ["npm", "run", "dev"]
+            else: # svelte
+                color = "red"
                 cmd = ["npm", "run", "dev"]
             
             typer.secho(f"Starting {p.kind.capitalize()}: {p.name}...", fg=getattr(typer.colors, color.upper()))
@@ -123,7 +126,6 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             t.start()
             active_threads.append(t)
 
-<<<<<<< HEAD
         # 4. Start NestJS Backends
         nest_apps = [p for p in projects if p.kind == "nest"]
         for p in nest_apps:
@@ -149,19 +151,6 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             
             proc = subprocess.Popen(
                 ["npm", "run", "dev"],
-=======
-        # 4. Start Django Backends
-        django_apps = [p for p in projects if p.kind == "django"]
-        for p in django_apps:
-            typer.secho(f"🎸 Starting Django: {p.name}...", fg=typer.colors.GREEN)
-            
-            venv_python = os.path.join(str(p.path), ".venv", "bin", "python3")
-            if not os.path.exists(venv_python):
-                venv_python = "python3"
-                
-            proc = subprocess.Popen(
-                [venv_python, "manage.py", "runserver"],
->>>>>>> feat/django
                 cwd=str(p.path),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -173,13 +162,11 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             t.start()
             active_threads.append(t)
 
-<<<<<<< HEAD
         # 6. Start FastAPI Backends
         fastapi_apps = [p for p in projects if p.kind == "fastapi"]
         for p in fastapi_apps:
             typer.secho(f"Starting FastAPI: {p.name}...", fg=typer.colors.CYAN)
             
-            # Use venv if exists
             venv_python = os.path.join(str(p.path), ".venv", "bin", "python3")
             if not os.path.exists(venv_python):
                 venv_python = "python3"
@@ -197,8 +184,28 @@ def launch_dev_environment(projects: List[DockerProject], docker_composes: List[
             t.start()
             active_threads.append(t)
 
-=======
->>>>>>> feat/django
+        # 7. Start Django Backends
+        django_apps = [p for p in projects if p.kind == "django"]
+        for p in django_apps:
+            typer.secho(f"Starting Django: {p.name}...", fg=typer.colors.GREEN)
+            
+            venv_python = os.path.join(str(p.path), ".venv", "bin", "python3")
+            if not os.path.exists(venv_python):
+                venv_python = "python3"
+                
+            proc = subprocess.Popen(
+                [venv_python, "manage.py", "runserver"],
+                cwd=str(p.path),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=1,
+            )
+            active_processes.append((p.name, proc))
+            
+            t = threading.Thread(target=stream_logs, args=(p.name, proc, "green"), daemon=True)
+            t.start()
+            active_threads.append(t)
+
         if not active_processes and not docker_composes:
             typer.secho("Warning: No projects or databases detected to run.", fg=typer.colors.YELLOW)
             return

@@ -1,6 +1,6 @@
 """
 CLI command group for adding new resources to existing projects.
-Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI, and Django scaffolding.
+Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI, Django, and Svelte scaffolding.
 """
 
 import os
@@ -16,6 +16,7 @@ from devctl.generators.scaffold_react import generate_react_resource
 from devctl.generators.scaffold_nextjs import generate_nextjs_resource
 from devctl.generators.scaffold_fastapi import generate_fastapi_resource
 from devctl.generators.scaffold_django import generate_django_resource
+from devctl.generators.scaffold_svelte import generate_svelte_resource
 from devctl.orchestrator.scanner import detect_environment
 
 app = typer.Typer(help="Adds resources to the current project (Scaffolding).")
@@ -116,6 +117,15 @@ def resource(
         except Exception as e:
             typer.secho(f"Error: Django generation failed: {e}", fg=typer.colors.RED)
 
+    # Check for Svelte project
+    if env_state.get("has_svelte"):
+        project_detected = True
+        typer.secho("Svelte project detected. Launching Svelte generator...", fg=typer.colors.RED)
+        try:
+            generate_svelte_resource(name, fields, root_path=".")
+        except Exception as e:
+            typer.secho(f"Error: Svelte generation failed: {e}", fg=typer.colors.RED)
+
     # Check for NodeJS project
     if os.path.exists("package.json") and not project_detected:
         # Heuristic for generic nodejs project if not already caught by others
@@ -130,7 +140,7 @@ def resource(
     if not project_detected:
         typer.secho(
             "Error: Unable to determine project type. "
-            "Please run from within a Spring, Angular, React, NextJS, FastAPI, Django or Vue.js project directory.",
+            "Please run from within a supported project directory (Spring, Angular, React, NextJS, FastAPI, Django, Svelte, or Vue.js).",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)

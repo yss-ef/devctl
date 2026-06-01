@@ -106,7 +106,6 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
         
         has_vite_config = {"vite.config.ts", "vite.config.js"} & filename_set
         if has_vite_config and "angular.json" not in filename_set:
-<<<<<<< HEAD
             # Check package.json to distinguish between vue and react
             pkg_path = project_path / "package.json"
             if pkg_path.exists():
@@ -133,26 +132,21 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
         if any(f.startswith("next.config.") for f in filename_set):
             candidates.append(("nextjs", project_path))
         
+        if "svelte.config.js" in filename_set:
+            candidates.append(("svelte", project_path))
+
         if "main.py" in filename_set and "requirements.txt" in filename_set:
             try:
                 reqs = (project_path / "requirements.txt").read_text()
                 if "fastapi" in reqs.lower():
                     candidates.append(("fastapi", project_path))
-            except Exception:
-                pass
-
-        if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest", "nextjs"] for k, p in candidates if p == project_path):
-            candidates.append(("nodejs", project_path))
-=======
-            candidates.append(("vue", project_path))
-        if "manage.py" in filename_set and "requirements.txt" in filename_set:
-            try:
-                reqs = (project_path / "requirements.txt").read_text()
-                if "django" in reqs.lower():
+                elif "django" in reqs.lower():
                     candidates.append(("django", project_path))
             except Exception:
                 pass
->>>>>>> feat/django
+
+        if "package.json" in filename_set and not any(k in ["angular", "vue", "react", "nest", "nextjs", "svelte"] for k, p in candidates if p == project_path):
+            candidates.append(("nodejs", project_path))
 
     used_names: set[str] = set()
     projects: list[DockerProject] = []
@@ -171,7 +165,7 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                 relative_context=_relative_context(root, project_path),
                 java_version=_spring_java_version(project_path) if kind == "spring" else None,
                 node_version=(
-                    _node_version(project_path, kind) if kind in {"angular", "vue", "react", "nest", "nodejs", "nextjs"} else None
+                    _node_version(project_path, kind) if kind in {"angular", "vue", "react", "nest", "nodejs", "nextjs", "svelte"} else None
                 ),
                 angular_output_name=(
                     _angular_output_name(project_path) if kind == "angular" else None
@@ -211,7 +205,6 @@ def scaffold_docker_assets(
 def _dockerfile_content(env: Environment, project: DockerProject) -> str:
     if project.kind == "spring":
         return env.get_template("spring/Dockerfile.j2").render(project=project)
-<<<<<<< HEAD
     if project.kind == "nest":
         return env.get_template("nestjs/Dockerfile.j2").render(project=project)
     if project.kind == "nodejs":
@@ -220,10 +213,10 @@ def _dockerfile_content(env: Environment, project: DockerProject) -> str:
         return env.get_template("nextjs/Dockerfile.j2").render(project=project)
     if project.kind == "fastapi":
         return env.get_template("fastapi/Dockerfile.j2").render(project=project)
-=======
     if project.kind == "django":
         return env.get_template("django/Dockerfile.j2").render(project=project)
->>>>>>> feat/django
+    if project.kind == "svelte":
+        return env.get_template("svelte/Dockerfile.j2").render(project=project)
     return env.get_template("frontend/Dockerfile.j2").render(project=project)
 
 
@@ -355,7 +348,7 @@ def _node_version(project_path: Path, kind: str) -> str:
             return "20"
         return "18"
 
-    if kind in ["nest", "nodejs", "nextjs"]:
+    if kind in ["nest", "nodejs", "nextjs", "svelte"]:
         return "20"
 
     return "22"

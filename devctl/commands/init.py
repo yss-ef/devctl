@@ -1,6 +1,6 @@
 """
 CLI command group for initializing new projects.
-Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI, and Django.
+Supports Spring Boot, Angular, Vue.js, NestJS, NodeJS, React, NextJS, FastAPI, Django, and Svelte.
 """
 
 import typer
@@ -17,6 +17,7 @@ from devctl.generators.react import generate_react_boilerplate
 from devctl.generators.nextjs import generate_nextjs_boilerplate
 from devctl.generators.fastapi import generate_fastapi_boilerplate
 from devctl.generators.django import generate_django_boilerplate
+from devctl.generators.svelte import generate_svelte_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -160,3 +161,17 @@ def init_django(name: str):
 
     if success:
         typer.secho("\nDjango project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("svelte")
+def init_svelte(name: str):
+    """
+    Initializes a new SvelteKit frontend project.
+    """
+    check_tool("npm", "initializing a Svelte project")
+
+    typer.secho(f"Initializing Svelte project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_svelte_boilerplate(name)
+
+    if success:
+        typer.secho("\nSvelte project ready!", fg=typer.colors.GREEN)
