@@ -1,10 +1,13 @@
-# devctl: Core Engine Documentation
+# Devctl core engine documentation
 
-Welcome to the internal documentation of the **devctl** core engine. This directory contains the implementation of the CLI, orchestrator, and generators.
+This documentation describes the internal architecture of the `devctl` core
+engine, including the implementation of the CLI, orchestrator, and
+generators.
 
-## System Architecture
+## System architecture
 
-`devctl` is designed as a modular CLI application. It follows a layered approach where the CLI commands delegate work to specialized orchestrators and generators.
+`devctl` is a modular CLI application. The CLI layer delegates tasks to
+specialized orchestrators and generators.
 
 ```mermaid
 graph TD
@@ -22,9 +25,9 @@ graph TD
     Runner --> Docker[Docker Compose]
 ```
 
-## Class & Module Diagram
+## Class and module diagram
 
-While Python is often functional, `devctl` organizes its logic into logical modules that act as services.
+The tool organizes logic into modules that function as services.
 
 ```mermaid
 classDiagram
@@ -61,9 +64,10 @@ classDiagram
     CLI --> AngularGenerator : delegates
 ```
 
-## Sequence Diagram: `devctl run`
+## Sequence diagram: `devctl run`
 
-The following diagram illustrates the lifecycle of the `run` command, which is the heart of the local orchestration.
+The following diagram illustrates the lifecycle of the `run` command for local
+orchestration.
 
 ```mermaid
 sequenceDiagram
@@ -76,7 +80,7 @@ sequenceDiagram
 
     User->>CLI: devctl run
     CLI->>Scanner: detect_environment(".")
-    Scanner-->>CLI: env_state (Spring, Angular, Docker paths)
+    Scanner-->>CLI: env_state
     CLI->>Runner: launch_dev_environment(env_state)
     
     alt Docker Compose found
@@ -98,9 +102,9 @@ sequenceDiagram
     Runner-->>User: Cleanup finished
 ```
 
-## Sequence Diagram: `devctl add resource`
+## Sequence diagram: `devctl add resource`
 
-The scaffolding command handles generating code across the entire stack.
+The scaffolding command handles cross-stack code generation.
 
 ```mermaid
 sequenceDiagram
@@ -126,27 +130,33 @@ sequenceDiagram
     end
 ```
 
-## Key Concepts & Code Explanations
+## Key concepts
 
-### 1. Intelligent Environment Scanning (`orchestrator/scanner.py`)
-The `Scanner` uses `os.walk` to find signature files:
-- `pom.xml` or `mvnw` -> **Spring Boot**
-- `angular.json` -> **Angular**
-- `vite.config.ts/js` -> **Vue.js**
-- `docker-compose.yml` -> **Docker**
+### 1. Intelligent environment scanning
 
-This allows the CLI to be "context-aware" and run commands relative to the detected project roots, avoiding the need for complex configuration files. It specifically ignores heavy directories like `node_modules` or `.git` to keep the scan instantaneous.
+The `Scanner` searches for signature files such as `pom.xml`, `angular.json`,
+or `docker-compose.yml`. This allows the CLI to be context-aware and run
+commands relative to project roots without complex configuration.
 
-### 2. Parallel Process Management (`orchestrator/runner.py`)
-The `Runner` utilizes `subprocess.Popen` to launch multiple long-running processes (Spring, Angular, Vue) in parallel. It maintains a list of these processes and handles a graceful shutdown sequence upon receiving a `KeyboardInterrupt` (Ctrl+C). It explicitly sends termination signals and waits for the processes to close, ensuring no "zombie" processes are left running, and cleans up Docker volumes if a compose file is present.
+### 2. Parallel process management
 
-### 3. Surgical POM Patching (`generators/spring.py`)
-Instead of overwriting files or using regex string replacement, the `SpringGenerator` uses Python's built-in `xml.etree.ElementTree` to surgically inject dependencies (like JJWT and MapStruct) and annotation processors into the `pom.xml`. This preserves user-made changes while ensuring the necessary libraries for `devctl` scaffolding are present when a new Spring backend is initialized.
+The `Runner` uses `subprocess.Popen` to launch backend and frontend services
+concurrently. It manages a graceful shutdown sequence upon receiving a
+termination signal, ensuring no zombie processes remain.
 
-### 4. Jinja2 Templating
-All code generation (scaffolding) relies on **Jinja2** templates found in `devctl/templates/`. This separation of logic and boilerplate makes it easy to update the generated code structure without touching the Python logic.
+### 3. Surgical POM patching
 
-### 5. Multi-Tier Scaffolding Mapping (`generators/scaffold_*.py`)
-When running `devctl add resource`, the generators parse the provided fields (e.g., `name:string, price:double`). The CLI maintains maps (e.g., `JAVA_TYPE_MAP` and `TS_TYPE_MAP`) to translate simple types into the correct language-specific types (e.g., `string` -> Java `String` and TypeScript `string`; `date` -> Java `LocalDate` and TypeScript `string`). It then generates a full vertical slice:
-- **Spring**: Entity, Repository, Service, ServiceImpl, Controller, DTOs, and Mapper.
-- **Angular**: Components (List/Form), Service, Models, and Routes.
+The `SpringGenerator` uses Python's `xml.etree.ElementTree` to inject
+dependencies and annotation processors into the `pom.xml` file. This preserves
+user changes while ensuring required libraries are present.
+
+### 4. Jinja2 templating
+
+Code generation relies on Jinja2 templates. This separates generation logic
+from boilerplate code, facilitating updates to the generated structure.
+
+### 5. Multi-tier scaffolding mapping
+
+The generators translate simple field definitions into language-specific types.
+The tool then generates a full vertical slice, including backend entities,
+services, and controllers, along with frontend components and models.

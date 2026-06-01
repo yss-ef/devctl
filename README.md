@@ -1,4 +1,4 @@
-# devctl
+# Devctl
 
 `devctl` is a professional command-line interface (CLI) designed to automate and
 orchestrate the development lifecycle for modern full-stack architectures. It
