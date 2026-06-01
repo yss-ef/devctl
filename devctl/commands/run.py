@@ -40,20 +40,19 @@ def run_env(ctx: typer.Context):
     if has_docker:
         check_tool("docker", "running the database environment")
 
-    if has_spring:
-        check_tool("java", "running the Spring Boot backend")
-
-    if has_angular or has_vue:
-        check_tool("npm", "running the frontend project")
+    # Group counts
+    counts = {}
+    for p in projects:
+        counts[p.kind] = counts.get(p.kind, 0) + 1
 
     # Visual summary of detection for the user
     def get_status(condition: bool):
         return typer.style("FOUND", fg=typer.colors.GREEN) if condition else typer.style("MISSING", fg=typer.colors.RED)
 
     typer.echo(f"  - Docker Compose ({len(docker_composes)}) : {get_status(has_docker)}")
-    typer.echo(f"  - Spring Boot ({sum(1 for p in projects if p.kind == 'spring')})    : {get_status(has_spring)}")
-    typer.echo(f"  - Angular Frontend ({sum(1 for p in projects if p.kind == 'angular')}) : {get_status(has_angular)}")
-    typer.echo(f"  - Vue.js Frontend ({sum(1 for p in projects if p.kind == 'vue')})  : {get_status(has_vue)}")
+    
+    for kind in sorted(counts.keys()):
+        typer.echo(f"  - {kind.capitalize()} ({counts[kind]}) : {get_status(True)}")
 
     if not projects and not docker_composes:
         typer.secho("\nError: No valid development environment detected here.", fg=typer.colors.RED)

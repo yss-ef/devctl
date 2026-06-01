@@ -144,6 +144,14 @@ def discover_docker_projects(root_path: Union[str, Path]) -> list[DockerProject]
                     candidates.append(("django", project_path))
             except Exception:
                 pass
+
+        if "manage.py" in filename_set and "requirements.txt" in filename_set:
+            try:
+                reqs = (project_path / "requirements.txt").read_text()
+                if "django" in reqs.lower():
+                    candidates.append(("django", project_path))
+            except Exception:
+                pass
         
         if "go.mod" in filename_set:
             candidates.append(("go", project_path))
