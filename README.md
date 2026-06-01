@@ -89,7 +89,7 @@ devctl add resource "Product" --fields "name:string,price:double,quantity:int"
 
 ### Orchestration
 
-Scan the current directory tree and launch all detected components (Database, Backend, Frontend) in parallel.
+Scan the current directory tree and launch all detected components (Database, Backend, Frontend) in parallel. Supports microservice architectures with log prefixing.
 
 ```bash
 devctl run
@@ -99,21 +99,21 @@ Upon termination (Ctrl+C), `devctl` gracefully stops all processes and performs 
 
 ### Dockerfile Scaffolding
 
-Generate Dockerfiles for all detected Spring Boot, Angular, and Vue/Vite services without building or running containers.
+Generate Dockerfiles for all detected Spring Boot, Angular, and Vue/Vite services.
 
 ```bash
 devctl dockerize
-devctl dockerize ./my-workspace --dry-run
-devctl dockerize --force
 ```
 
-Generated assets are intentionally limited to service-local `Dockerfile` files. Existing Dockerfiles are skipped by default; use `--force` to replace them.
+### Global Deployment
 
-Build an image from a generated Dockerfile with:
+Generate a unified `docker-compose.yml` for the entire project by scanning all subdirectories.
 
 ```bash
-docker build -t my-service ./my-service
+devctl deploy
 ```
+
+This command automatically detects databases from Spring Boot properties and links them to the respective services in a global configuration.
 
 ## License
 

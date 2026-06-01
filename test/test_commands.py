@@ -18,16 +18,14 @@ def test_init_spring_unsupported_db():
 
 def test_run_no_environment():
     """Ensure run command fails when no project is detected."""
-    with patch("devctl.commands.run.detect_environment") as mock_detect:
-        mock_detect.return_value = {
-            "has_docker_compose": False,
-            "has_spring": False,
-            "has_angular": False,
-            "has_vue": False,
-        }
-        result = runner.invoke(app, ["run"])
-        assert result.exit_code == 1
-        assert "No valid development environment detected" in result.stdout
+    with patch("devctl.commands.run.discover_docker_projects") as mock_discover:
+        mock_discover.return_value = []
+        # Also need to mock Path.rglob or something to avoid finding docker-compose.yml
+        with patch("devctl.commands.run.Path.rglob") as mock_rglob:
+            mock_rglob.return_value = []
+            result = runner.invoke(app, ["run"])
+            assert result.exit_code == 1
+            assert "No valid development environment detected" in result.stdout
 
 
 def test_add_resource_no_project():

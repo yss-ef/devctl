@@ -48,58 +48,89 @@ def extract_db_info(project_path: Path) -> Optional[Dict[str, Any]]:
     # Try to refine service name from existing docker-compose if possible
     compose_path = project_path / "docker-compose.yml"
     if compose_path.exists():
-        compose_content = compose_path.read_text(encoding="utf-8", errors="ignore")
-        service_match = re.search(r"services:\s*\n\s+([\w-]+):", compose_content)
-        if service_match:
-            db_dict["service_name"] = service_match.group(1)
+        try:
+            with open(compose_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+                if config and "services" in config:
+                    # Find the first service that looks like a database
+                    for s_name, s_cfg in config["services"].items():
+                        image = str(s_cfg.get("image", ""))
+                        if db_type == "postgresql" and "postgres" in image:
+                            db_dict["service_name"] = s_name
+                            break
+                        if db_type == "mysql" and "mysql" in image:
+                            db_dict["service_name"] = s_name
+                            break
+        except Exception:
+            pass
 
     return db_dict
 
 
 def extract_db_from_compose(compose_path: Path) -> Optional[Dict[str, Any]]:
     """
-    Extract database information from a docker-compose.yml file using regex.
+    Extract database information from a docker-compose.yml file using PyYAML.
     """
     if not compose_path.exists():
         return None
 
-    content = compose_path.read_text(encoding="utf-8", errors="ignore")
-
-    # This is a bit hacky without PyYAML but follows devctl's generated structure
-    # Try to find the first service name under 'services:'
-    service_match = re.search(r"services:\s*\n\s+([\w-]+):", content)
-    original_service_name = service_match.group(1) if service_match else None
-
-    image_match = re.search(r"image:\s+(postgres|mysql)(:[\w.-]+)?", content)
-    if not image_match:
+    try:
+        with open(compose_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+    except Exception:
         return None
 
-    db_type = "postgresql" if image_match.group(1) == "postgres" else "mysql"
+    if not config or "services" not in config:
+        return None
 
-    # Try to find env vars
-    if db_type == "postgresql":
-        user = re.search(r"POSTGRES_USER:\s+([\w-]+)", content)
-        password = re.search(r"POSTGRES_PASSWORD:\s+([\w-]+)", content)
-        db_name = re.search(r"POSTGRES_DB:\s+([\w-]+)", content)
-    else:
-        user = re.search(r"MYSQL_USER:\s+([\w-]+)", content)
-        password = re.search(r"MYSQL_PASSWORD:\s+([\w-]+)", content)
-        db_name = re.search(r"MYSQL_DATABASE:\s+([\w-]+)", content)
+    for service_name, service_cfg in config["services"].items():
+        image = str(service_cfg.get("image", ""))
+        if "postgres" in image or "mysql" in image:
+            db_type = "postgresql" if "postgres" in image else "mysql"
 
-    port_match = re.search(r"\"(\d+):(\d+)\"", content)
+            # Extract environment variables
+            env = service_cfg.get("environment", {})
+            env_dict = {}
+            if isinstance(env, list):
+                for item in env:
+                    if "=" in item:
+                        k, v = item.split("=", 1)
+                        env_dict[k] = v
+                    elif ":" in item:
+                        k, v = item.split(":", 1)
+                        env_dict[k] = v.strip()
+            elif isinstance(env, dict):
+                env_dict = env
 
-    db_dict = _build_db_dict(
-        db_type,
-        port_match.group(1) if port_match else ("5432" if db_type == "postgresql" else "3306"),
-        db_name.group(1) if db_name else "db",
-        user.group(1) if user else "admin",
-        password.group(1) if password else "password",
-    )
+            # Extract info based on db_type
+            if db_type == "postgresql":
+                user = env_dict.get("POSTGRES_USER", "admin")
+                password = env_dict.get("POSTGRES_PASSWORD", "password")
+                db_name = env_dict.get("POSTGRES_DB", "db")
+            else:
+                user = env_dict.get("MYSQL_USER", env_dict.get("MYSQL_ROOT_PASSWORD", "admin"))
+                password = env_dict.get("MYSQL_PASSWORD", env_dict.get("MYSQL_ROOT_PASSWORD", "password"))
+                db_name = env_dict.get("MYSQL_DATABASE", "db")
 
-    if original_service_name:
-        db_dict["service_name"] = original_service_name
+            # Extract port
+            ports = service_cfg.get("ports", [])
+            host_port = None
+            if ports and isinstance(ports, list):
+                first_port = str(ports[0])
+                if ":" in first_port:
+                    host_port = first_port.split(":")[0].strip("'").strip('"')
 
-    return db_dict
+            db_dict = _build_db_dict(
+                db_type,
+                host_port or ("5432" if db_type == "postgresql" else "3306"),
+                db_name,
+                user,
+                password,
+            )
+            db_dict["service_name"] = service_name
+            return db_dict
+
+    return None
 
 
 def _build_db_dict(db_type: str, port: str, name: str, user: str, password: str) -> Dict[str, Any]:
