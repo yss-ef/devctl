@@ -11,6 +11,7 @@ from devctl.generators.angular import generate_angular_boilerplate
 # Spring generator
 from devctl.generators.spring import download_spring_boilerplate
 from devctl.generators.vue import generate_vue_boilerplate
+from devctl.generators.nestjs import generate_nest_boilerplate
 from devctl.orchestrator.config_builder import generate_config
 from devctl.utils.dependencies import check_tool
 
@@ -70,3 +71,17 @@ def init_vue(name: str):
 
     if success:
         typer.secho("\n✨ Vue.js project ready!", fg=typer.colors.GREEN)
+
+
+@app.command("nest")
+def init_nest(name: str):
+    """
+    Initializes a new NestJS backend project.
+    """
+    check_tool("npm", "initializing a NestJS project")
+
+    typer.secho(f"🚀 Initializing NestJS project: '{name}'...", fg=typer.colors.CYAN)
+    success = generate_nest_boilerplate(name)
+
+    if success:
+        typer.secho("\n✨ NestJS project ready!", fg=typer.colors.GREEN)
