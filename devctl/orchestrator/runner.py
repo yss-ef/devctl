@@ -90,6 +90,19 @@ def launch_dev_environment(env_state: dict):
         )
 
         while True:
+            # Monitor process health
+            for name, p in processes:
+                exit_code = p.poll()
+                if exit_code is not None:
+                    typer.secho(
+                        f"\n❌ Critical Error: {name} process terminated unexpectedly "
+                        f"(Exit code: {exit_code}).",
+                        fg=typer.colors.RED,
+                        bold=True,
+                    )
+                    # Trigger shutdown logic
+                    raise KeyboardInterrupt
+
             time.sleep(1)
 
     except KeyboardInterrupt:
