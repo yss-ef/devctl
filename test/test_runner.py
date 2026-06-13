@@ -67,3 +67,39 @@ def test_launch_dev_environment_complex(mock_sleep, mock_run, mock_popen):
 
             # Verify cleanup called
             mock_cleanup.assert_called_once()
+
+
+@patch("subprocess.Popen")
+@patch("time.sleep")
+def test_launch_dev_environment_with_env(mock_sleep, mock_popen, tmp_path):
+    # Setup mocks
+    mock_popen.return_value = MagicMock(poll=lambda: None)
+    mock_sleep.side_effect = Exception("Stop Loop")
+
+    # Create a project with a .env file
+    project_path = tmp_path / "spring-app"
+    project_path.mkdir()
+    (project_path / ".env").write_text("APP_PORT=8081\nSECRET=xyz")
+
+    projects = [
+        DockerProject(
+            kind="spring",
+            path=project_path,
+            name="app",
+            service_name="app",
+            relative_context="./app",
+        )
+    ]
+
+    with patch("devctl.orchestrator.runner.cleanup_and_exit"):
+        try:
+            launch_dev_environment(projects, [])
+        except Exception:
+            pass
+
+        # Verify Popen was called with merged env
+        args, kwargs = mock_popen.call_args
+        env = kwargs.get("env")
+        assert env["APP_PORT"] == "8081"
+        assert env["SECRET"] == "xyz"
+        assert "PATH" in env  # System env preserved
